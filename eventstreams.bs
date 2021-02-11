@@ -1,0 +1,99 @@
+<pre class='metadata'>
+Title: Linked Data Event Streams spec
+Shortname: LDES
+Level: 1
+Status: LS
+Group: TREE community group
+URL: https://semiceu.github.io/ldes/specification
+Markup Shorthands: markdown yes
+Editor: Pieter Colpaert, https://pietercolpaert.be
+Abstract:
+   Data objects that are part of a collection will update in time.
+   The Linked Data Event Streams specification explains how to publish a 
+</pre>
+
+# Defining Linked Data Event Streams # {#introduction}
+
+A Linked Data Event Stream (LDES) is a collection of immutable objects.
+You can only add things to the collection.
+The immutable objects are sets of triples adhering to the same shape.
+
+Immutable objects: difference between object identifiers vs. version identifiers
+
+What’s an authoritative source and what’s a third party indexer?
+
+Changing shapes: The power of LDES lies in the fact that historical data does not need to be fetched again once fetched.
+This also means the shape of the members need to be stable in the collection, and it becomes a different collection from the moment a required property gets added in the SHACL shape.
+
+# Describing a Linked Data Event Stream using TREE# {#tree}
+
+In this specification, Linked Data Event Streams are described and paginated using the [TREE specification](https://treecg.github.io/specification).
+Conformance to other collection designs has already been provided in TREE.
+
+Optionally, a `tree:Node` can be annotated with an `importStream` to find more data
+
+This specification does not indicate any normative text on how an LDES MUST be fragmented.
+
+## Fragmenting on time ## {#fragmentation}
+
+Using a `hydra:search` form with `hydra:property` `tree:timeQuery` you may add a search form to directly address a certain page containing events in a time interval.
+
+# Indicating the completeness of your streams # {#derived}
+
+## Status indication ## {#status}
+
+When processing another 
+
+## Describing preservation policies ## {#preservation}
+
+By default, an LDES MUST keep all data that has been added to the `tree:Collection`.
+
+It MAY add a preservation policy in which data generated before a specific time will be removed from the server.
+Third parties MAY archive these objects.
+
+A preservation policy can be introduced as follows:
+
+```turtle
+<Collection> a ldes:EventStream, tree:Collection ;
+             tree:view <> .
+
+<> ldes:preservationPolicy <P1> .
+
+<P1> a ldes:DurationAgoRelation ;
+     tree:path prov:generatedAtTime ;
+     tree:value "P1Y"^^xsd:duration . # Keep 1 year of data
+```
+
+If a `tree:relation` is set, then this automatically also becomes the preservation strategy of the rest of the nodes.
+
+==> Maybe it’s an idea to generalize this to geospatial as well, and to have a preservation policy able to select a geospatial region?
+
+
+## Version Subsets ## {#vm}
+
+In order to indicate you only keep 1 specific version, e.g., the latest, in your stream, you can do this:
+
+```turtle
+<Collection> a tree:EventStream ;
+             tree:view <> .
+
+<> ldes:versionSubset <P1> .
+
+<P1> a ldes:LatestOnly ;
+     ldes:amount 1 ; #default
+     ldes:vary () ; # sosa:featureOfInterest? when this is a sensor, I want the latest compound measure by a specific sensor
+     ## ????
+      .
+```
+
+Order of importance: first a preservation policy MUST be interpreted, and only then a version subset
+
+
+# Discovering Event Streams # {#event-streams}
+
+You can discover Event Streams using DCAT metadata.
+
+
+# Vocabulary # {#vocabulary}
+
+## ldes:EventStream ## {#ldes:EventStream}
