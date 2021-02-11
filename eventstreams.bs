@@ -56,38 +56,83 @@ Note: in Example 1, we consider the Observation object ot be an immutable object
 
 <!--What’s an authoritative source and what’s a third party indexer?-->
 
-# Describing a Linked Data Event Stream using TREE# {#tree}
+# Fragmenting and pagination # {#tree}
 
-In this specification, Linked Data Event Streams are described and paginated using the [TREE specification](https://treecg.github.io/specification).
+The goal of an LDES is to allow clients to replicate the history of a dataset as well as synchronize with its latest changes.
+Linked Data Event Streams MAY be fragmented when their size becomes too big for 1 HTTP response.
+Fragmentations MUST be described using the features in the [TREE specification](https://treecg.github.io/specification).
+All relation types from the TREE specification MAY be used.
 
-Optionally, a `tree:Node` can be annotated with an `importStream` to find more data
+<div class="example">
+```turtle
+<C1> a ldes:EventStream ;
+     tree:shape <shape1.shacl> ; # this shacl shape for as long as this collection exists will need to be backwards compatible.
+     tree:member <Obervation1>, ... ;
+     tree:view <?page=1> .
 
-This specification does not indicate any normative text on how an LDES MUST be fragmented.
+<?page=1> a tree:Node ;
+    tree:relation [
+        a tree:GreaterThanOrEqualToRelation ;
+        tree:path sosa:resultTime ;
+        tree:node <?page=2> ;
+        tree:value "2020-12-24T12:00:00Z"^^xsd:dateTime
+     ] .
+```
+</div>
 
-## Fragmenting on time ## {#fragmentation}
+Note: Also according to the TREE specification, one can optionally annotate a `tree:Node` with an `importStream` to find more data.
 
-Using a `hydra:search` form with `hydra:property` `tree:timeQuery` you may add a search form to directly address a certain page containing events in a time interval.
+Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be polled for updates.
 
-# Indicating the completeness of your streams # {#derived}
+<div class="example">
+```turtle
+<C1> a ldes:EventStream ;
+     tree:shape <shape1.shacl> ; # this shacl shape for as long as this collection exists will need to be backwards compatible.
+     tree:member <Obervation1>, ... ;
+     tree:view <?page=1> .
+
+<?page=1> a tree:Node ;
+          tree:search [
+             a hydra:IriTemplate ;
+             hydra:template "objects{?since}" ;
+             hydra:variableRepresentation hydra:BasicRepresentation;
+             hydra:mapping [
+                 a hydra:IriTemplateMapping ;
+                 hydra:variable "since";
+                 hydra:property tree:timeQuery ;
+                 tree:path sosa:resultTime ;
+                 hydra:required false
+             ]
+          ] .
+```
+</div>
+
+Note: Cfr. Example 4, also a search form can make a one dimensional feed of immutable objects more searchable.
+
+# Derived Event Streams # {#derived}
+
+TODO: PAV ontology?
+
+# Indicating the completeness of your streams # {#completeness}
 
 ## Status indication ## {#status}
 
-When processing another 
+When replicating a stream on your own system when, for example, building other `tree:view`s on top of them with different fragmetnations, you might want to track the progress of how much elements from the original stream are processed into your own system. This is done using: TODO.
 
-## Describing preservation policies ## {#preservation}
+## Describing retention policies ## {#retention}
 
 By default, an LDES MUST keep all data that has been added to the `tree:Collection`.
 
-It MAY add a preservation policy in which data generated before a specific time will be removed from the server.
+It MAY add a retention policy in which data generated before a specific time will be removed from the server.
 Third parties MAY archive these objects.
 
-A preservation policy can be introduced as follows:
+A retention policy can be introduced as follows:
 
 ```turtle
-<Collection> a ldes:EventStream, tree:Collection ;
+<Collection> a ldes:EventStream ;
              tree:view <> .
 
-<> ldes:preservationPolicy <P1> .
+<> ldes:retentionPolicy <P1> .
 
 <P1> a ldes:DurationAgoRelation ;
      tree:path prov:generatedAtTime ;
@@ -96,10 +141,10 @@ A preservation policy can be introduced as follows:
 
 If a `tree:relation` is set, then this automatically also becomes the preservation strategy of the rest of the nodes.
 
-==> Maybe it’s an idea to generalize this to geospatial as well, and to have a preservation policy able to select a geospatial region?
+Issue: Maybe it’s an idea to generalize this to geospatial as well, and to have a retention policy able to select a geospatial region?
 
 
-## Version Subsets ## {#vm}
+## Version Subsets ## {#version-subsets}
 
 In order to indicate you only keep 1 specific version, e.g., the latest, in your stream, you can do this:
 
@@ -116,7 +161,10 @@ In order to indicate you only keep 1 specific version, e.g., the latest, in your
       .
 ```
 
-Order of importance: first a preservation policy MUST be interpreted, and only then a version subset
+Retention policies and version subsets MAY be used together.
+A member can however only be deleted from the server when both conditions are met (e.g., when there is still at least 1 item of this thing, and when the duration has not yet passed).
+<!--Order of importance: first a preservation policy MUST be interpreted, and only then a version subset-->
+
 
 
 # Discovering Event Streams # {#event-streams}
