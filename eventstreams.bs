@@ -7,28 +7,58 @@ Group: TREE community group
 URL: https://semiceu.github.io/ldes/specification
 Markup Shorthands: markdown yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
-Abstract:
-   Data objects that are part of a collection will update in time.
-   The Linked Data Event Streams specification explains how to publish a 
+Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representation). Each object is described in RDF. The objective of a Linked Data Event Stream is to allow consumers to replicate all of its items and to stay in sync when items are added.
 </pre>
 
-# Defining Linked Data Event Streams # {#introduction}
+# Introduction # {#introduction}
 
-A Linked Data Event Stream (LDES) is a collection of immutable objects.
-You can only add things to the collection.
-The immutable objects are sets of triples adhering to the same shape.
+A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
 
-Immutable objects: difference between object identifiers vs. version identifiers
+This specification uses [TREE](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.github.io/specification/spec).
 
-What’s an authoritative source and what’s a third party indexer?
+We define `ldes:EventStream rdfs:subClassOf tree:Collection`.
+It extends the `tree:Collection` class by saying all of its members are immutable, and you can thus only add members to the collection.
 
-Changing shapes: The power of LDES lies in the fact that historical data does not need to be fetched again once fetched.
-This also means the shape of the members need to be stable in the collection, and it becomes a different collection from the moment a required property gets added in the SHACL shape.
+Note: A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs, and only emit new ones. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
+
+<div class="example" highlight="turtle">
+```turtle
+<C1> a ldes:EventStream ;
+     tree:shape <shape1.shacl> ;
+     tree:member <Obervation1> .
+
+<Observation1> a sosa:Observation ;
+               sosa:resultTime "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+               sosa:hasSimpleResult "..." .
+```
+</div>
+
+<div class="example">
+```turtle
+<C2> a ldes:EventStream ;
+     tree:shape <shape2.shacl> ;
+     tree:member <AddressRecord1/version1> .
+
+<AddressRecord1/version1> dcterms:created "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+                          adms:versionNotes "First version of this address" ;
+                          dcterms:isVersionOf <AddressRecord1> ;
+                          dcterms:title "Streetname X, ZIP Municipality, Country" .
+```
+</div>
+
+A `tree:shape` MUST be set on top of an LDES. The shape of the collection is a contract and identifies this particular collection: it tells clients all old and new members of the stream have been and will be validated by that shape. While this shape MAY evolve, it MUST always be backwards compatible to the earlier version.
+
+Note: Clients can use the shape for their source selection.
+
+Note: Mind that this shape for as long as this collection exists will need to be backwards compatible with the older non-immutable objects. When due to functional requirements you need to change an earlier version of an `ldes:EventStream`, there are two options: create a new version of the object with a new shape that is backward compatible, or replicate and transform the entire collection into a new collection.
+
+Note: in Example 1, we consider the Observation object ot be an immutable object and we can use the existing identifiers. In Example 2 however, we still had to create version IRIs in order to be able to link to immutable objects.
+
+<!--What’s an authoritative source and what’s a third party indexer?-->
 
 # Describing a Linked Data Event Stream using TREE# {#tree}
 
 In this specification, Linked Data Event Streams are described and paginated using the [TREE specification](https://treecg.github.io/specification).
-Conformance to other collection designs has already been provided in TREE.
 
 Optionally, a `tree:Node` can be annotated with an `importStream` to find more data
 
