@@ -1,0 +1,47 @@
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+@prefix locn: <http://www.w3.org/ns/locn#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix voaf: <http://purl.org/vocommons/voaf#> .
+@prefix vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix wdrs: <http://www.w3.org/2007/05/powder-s#> .
+@prefix xhtm: <http://www.w3.org/1999/xhtml> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix hydra: <http://www.w3.org/ns/hydra/core#>.
+
+ldes: a foaf:Document ;
+      foaf:primaryTopic ldes:Vocabulary ;
+      cc:license <http://creativecommons.org/licenses/by/4.0/>;
+      dct:creator <https://pietercolpaert.be/#me> .
+
+<https://pietercolpaert.be/#me> foaf:name "Pieter Colpaert"; foaf:mbox "pieter.colpaert@ugent.be".
+
+ldes:Vocabulary a owl:Ontology ;
+                rdfs:label "The Linked Data Event Streams specification"@en;
+                rdfs:comment "A hypermedia specification for maintaining a collection with immutable members."@en.
+
+ldes:EventStream a rdfs:Class ;
+                 rdfs:subClassOf tree:Collection ;
+                 rdfs:label "Event Stream"@en;
+                 rdfs:comment "An Event Stream is a tree:Collection containing immutable members."@en .
+
+
+ldes:retentionPolicy a rdf:Property ;
+                     rdfs:label "has retention policy"@en;
+                     rdfs:comment "Links to a retention policy."@en ;
+                     rdfs:domain tree:Node.
+
+ldes:versionSubset a rdf:Property ;
+                     rdfs:label "has version subset"@en;
+                     rdfs:comment "Links to a version subset."@en ;
+                     rdfs:domain tree:Node.

@@ -4,10 +4,10 @@ Shortname: LDES
 Level: 1
 Status: LS
 Group: TREE community group
-URL: https://semiceu.github.io/ldes/specification
+URL: https://w3id.org/ldes/specification
 Markup Shorthands: markdown yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
-Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representation). Each object is described in RDF. The objective of a Linked Data Event Stream is to allow consumers to replicate all of its items and to stay in sync when items are added.
+Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representations). Each object is described in RDF.
 </pre>
 
 # Introduction # {#introduction}
@@ -80,7 +80,7 @@ All relation types from the TREE specification MAY be used.
 ```
 </div>
 
-Note: Also according to the TREE specification, one can optionally annotate a `tree:Node` with an `importStream` to find more data.
+Note: Also according to the TREE specification, one can optionally annotate a `tree:Node` with a `tree:importStream` to find more data.
 
 Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be polled for updates.
 
@@ -108,10 +108,6 @@ Note: A 1-dimensional fragmentation based on creation time of the immutable obje
 </div>
 
 Note: Cfr. Example 4, also a search form can make a one dimensional feed of immutable objects more searchable.
-
-# Derived Event Streams # {#derived}
-
-TODO: PAV ontology?
 
 # Indicating the completeness of your streams # {#completeness}
 
@@ -165,9 +161,17 @@ Retention policies and version subsets MAY be used together.
 A member can however only be deleted from the server when both conditions are met (e.g., when there is still at least 1 item of this thing, and when the duration has not yet passed).
 <!--Order of importance: first a preservation policy MUST be interpreted, and only then a version subset-->
 
+# Derived Event Streams # {#derived}
+
+## Derived views
 
 
-# Discovering Event Streams # {#event-streams}
+## Derived collections
+
+TODO: PAV ontology?
+
+
+# Discovering Linked Data Event Streams, views and derived collections # {#event-streams}
 
 You can discover Event Streams using DCAT metadata.
 
