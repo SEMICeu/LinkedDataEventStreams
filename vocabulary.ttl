@@ -42,6 +42,6 @@ ldes:retentionPolicy a rdf:Property ;
                      rdfs:domain tree:Node.
 
 ldes:versionSubset a rdf:Property ;
-                     rdfs:label "has version subject"@en;
+                     rdfs:label "has version subset"@en;
                      rdfs:comment "Links to a version subset."@en ;
                      rdfs:domain tree:Node.

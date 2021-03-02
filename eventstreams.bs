@@ -4,10 +4,10 @@ Shortname: LDES
 Level: 1
 Status: LS
 Group: TREE community group
-URL: https://semiceu.github.io/ldes/specification
+URL: https://w3id.org/ldes/specification
 Markup Shorthands: markdown yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
-Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representations). Each object is described in RDF. The objective of a Linked Data Event Stream is to allow consumers to replicate all of its items and to stay in sync when items are added.
+Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representations). Each object is described in RDF.
 </pre>
 
 # Introduction # {#introduction}
