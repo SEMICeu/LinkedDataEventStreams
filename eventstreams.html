@@ -1222,8 +1222,8 @@ Possible extra rowspan handling
 	}
 </style>
   <meta content="Bikeshed version a1fcaa3b, updated Fri Jul 17 17:22:25 2020 -0700" name="generator">
-  <link href="https://semiceu.github.io/ldes/specification" rel="canonical">
-  <meta content="57a5f7376adc093f80a9aec066df31646ff5275e" name="document-revision">
+  <link href="https://w3id.org/ldes/specification" rel="canonical">
+  <meta content="ae71ff73282d0e0ce7d69f4fa542998068c05ef4" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1433,11 +1433,11 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams spec</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-02-11">11 February 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-02">2 March 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://semiceu.github.io/ldes/specification">https://semiceu.github.io/ldes/specification</a>
+     <dd><a class="u-url" href="https://w3id.org/ldes/specification">https://w3id.org/ldes/specification</a>
      <dt>Issue Tracking:
      <dd><a href="#issues-index">Inline In Spec</a>
      <dt class="editor">Editor:
@@ -1447,7 +1447,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 11 February 2021,
+In addition, as of 2 March 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1455,7 +1455,7 @@ Parts of this work may be from another specification document.  If so, those par
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representation). Each object is described in RDF. The objective of a Linked Data Event Stream is to allow consumers to replicate all of its items and to stay in sync when items are added.</p>
+   <p>A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representations). Each object is described in RDF.</p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -1463,15 +1463,20 @@ Parts of this work may be from another specification document.  If so, those par
    <ol class="toc" role="directory">
     <li><a href="#introduction"><span class="secno">1</span> <span class="content">Introduction</span></a>
     <li><a href="#tree"><span class="secno">2</span> <span class="content">Fragmenting and pagination</span></a>
-    <li><a href="#derived"><span class="secno">3</span> <span class="content">Derived Event Streams</span></a>
     <li>
-     <a href="#completeness"><span class="secno">4</span> <span class="content">Indicating the completeness of your streams</span></a>
+     <a href="#completeness"><span class="secno">3</span> <span class="content">Indicating the completeness of your streams</span></a>
      <ol class="toc">
-      <li><a href="#status"><span class="secno">4.1</span> <span class="content">Status indication</span></a>
-      <li><a href="#retention"><span class="secno">4.2</span> <span class="content">Describing retention policies</span></a>
-      <li><a href="#version-subsets"><span class="secno">4.3</span> <span class="content">Version Subsets</span></a>
+      <li><a href="#status"><span class="secno">3.1</span> <span class="content">Status indication</span></a>
+      <li><a href="#retention"><span class="secno">3.2</span> <span class="content">Describing retention policies</span></a>
+      <li><a href="#version-subsets"><span class="secno">3.3</span> <span class="content">Version Subsets</span></a>
      </ol>
-    <li><a href="#event-streams"><span class="secno">5</span> <span class="content">Discovering Event Streams</span></a>
+    <li>
+     <a href="#derived"><span class="secno">4</span> <span class="content">Derived Event Streams</span></a>
+     <ol class="toc">
+      <li><a href="#derived-views"><span class="secno">4.1</span> <span class="content">Derived views</span></a>
+      <li><a href="#derived-collections"><span class="secno">4.2</span> <span class="content">Derived collections</span></a>
+     </ol>
+    <li><a href="#event-streams"><span class="secno">5</span> <span class="content">Discovering Linked Data Event Streams, views and derived collections</span></a>
     <li>
      <a href="#vocabulary"><span class="secno">6</span> <span class="content">Vocabulary</span></a>
      <ol class="toc">
@@ -1541,7 +1546,7 @@ All relation types from the TREE specification MAY be used.</p>
      <c- p>]</c-> <c- p>.</c->
 </pre>
    </div>
-   <p class="note" role="note"><span>Note:</span> Also according to the TREE specification, one can optionally annotate a <code>tree:Node</code> with an <code>importStream</code> to find more data.</p>
+   <p class="note" role="note"><span>Note:</span> Also according to the TREE specification, one can optionally annotate a <code>tree:Node</code> with a <code>tree:importStream</code> to find more data.</p>
    <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be polled for updates.</p>
    <div class="example" id="example-4709d189">
     <a class="self-link" href="#example-4709d189"></a> 
@@ -1566,12 +1571,10 @@ All relation types from the TREE specification MAY be used.</p>
 </pre>
    </div>
    <p class="note" role="note"><span>Note:</span> Cfr. Example 4, also a search form can make a one dimensional feed of immutable objects more searchable.</p>
-   <h2 class="heading settled" data-level="3" id="derived"><span class="secno">3. </span><span class="content">Derived Event Streams</span><a class="self-link" href="#derived"></a></h2>
-   <p>TODO: PAV ontology?</p>
-   <h2 class="heading settled" data-level="4" id="completeness"><span class="secno">4. </span><span class="content">Indicating the completeness of your streams</span><a class="self-link" href="#completeness"></a></h2>
-   <h3 class="heading settled" data-level="4.1" id="status"><span class="secno">4.1. </span><span class="content">Status indication</span><a class="self-link" href="#status"></a></h3>
+   <h2 class="heading settled" data-level="3" id="completeness"><span class="secno">3. </span><span class="content">Indicating the completeness of your streams</span><a class="self-link" href="#completeness"></a></h2>
+   <h3 class="heading settled" data-level="3.1" id="status"><span class="secno">3.1. </span><span class="content">Status indication</span><a class="self-link" href="#status"></a></h3>
    <p>When replicating a stream on your own system when, for example, building other <code>tree:view</code>s on top of them with different fragmetnations, you might want to track the progress of how much elements from the original stream are processed into your own system. This is done using: TODO.</p>
-   <h3 class="heading settled" data-level="4.2" id="retention"><span class="secno">4.2. </span><span class="content">Describing retention policies</span><a class="self-link" href="#retention"></a></h3>
+   <h3 class="heading settled" data-level="3.2" id="retention"><span class="secno">3.2. </span><span class="content">Describing retention policies</span><a class="self-link" href="#retention"></a></h3>
    <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code>.</p>
    <p>It MAY add a retention policy in which data generated before a specific time will be removed from the server.
 Third parties MAY archive these objects.</p>
@@ -1587,7 +1590,7 @@ Third parties MAY archive these objects.</p>
 </pre>
    <p>If a <code>tree:relation</code> is set, then this automatically also becomes the preservation strategy of the rest of the nodes.</p>
    <p class="issue" id="issue-238a8a94"><a class="self-link" href="#issue-238a8a94"></a> Maybe it’s an idea to generalize this to geospatial as well, and to have a retention policy able to select a geospatial region?</p>
-   <h3 class="heading settled" data-level="4.3" id="version-subsets"><span class="secno">4.3. </span><span class="content">Version Subsets</span><a class="self-link" href="#version-subsets"></a></h3>
+   <h3 class="heading settled" data-level="3.3" id="version-subsets"><span class="secno">3.3. </span><span class="content">Version Subsets</span><a class="self-link" href="#version-subsets"></a></h3>
    <p>In order to indicate you only keep 1 specific version, e.g., the latest, in your stream, you can do this:</p>
 <pre class="language-turtle highlight"><c- g>&lt;Collection></c-> <c- b>a</c-> <c- nn>tree:</c-><c- f>EventStream</c-> <c- p>;</c->
              <c- nn>tree:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
@@ -1602,7 +1605,11 @@ Third parties MAY archive these objects.</p>
 </pre>
    <p>Retention policies and version subsets MAY be used together.
 A member can however only be deleted from the server when both conditions are met (e.g., when there is still at least 1 item of this thing, and when the duration has not yet passed).</p>
-   <h2 class="heading settled" data-level="5" id="event-streams"><span class="secno">5. </span><span class="content">Discovering Event Streams</span><a class="self-link" href="#event-streams"></a></h2>
+   <h2 class="heading settled" data-level="4" id="derived"><span class="secno">4. </span><span class="content">Derived Event Streams</span><a class="self-link" href="#derived"></a></h2>
+   <h3 class="heading settled" data-level="4.1" id="derived-views"><span class="secno">4.1. </span><span class="content">Derived views</span><a class="self-link" href="#derived-views"></a></h3>
+   <h3 class="heading settled" data-level="4.2" id="derived-collections"><span class="secno">4.2. </span><span class="content">Derived collections</span><a class="self-link" href="#derived-collections"></a></h3>
+   <p>TODO: PAV ontology?</p>
+   <h2 class="heading settled" data-level="5" id="event-streams"><span class="secno">5. </span><span class="content">Discovering Linked Data Event Streams, views and derived collections</span><a class="self-link" href="#event-streams"></a></h2>
    <p>You can discover Event Streams using DCAT metadata.</p>
    <h2 class="heading settled" data-level="6" id="vocabulary"><span class="secno">6. </span><span class="content">Vocabulary</span><a class="self-link" href="#vocabulary"></a></h2>
    <h3 class="heading settled" data-level="6.1" id="ldes:EventStream"><span class="secno">6.1. </span><span class="content">ldes:EventStream</span><a class="self-link" href="#ldes:EventStream"></a></h3>
