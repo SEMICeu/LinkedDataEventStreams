@@ -22,6 +22,8 @@ It extends the `tree:Collection` class by saying all of its members are immutabl
 
 Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
 
+The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`.
+
 <div class="example" highlight="turtle">
 ```turtle
 <C1> a ldes:EventStream ;
