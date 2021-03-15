@@ -1,7 +1,7 @@
 <!doctype html><html lang="en">
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-  <title>Linked Data Event Streams spec</title>
+  <title>Linked Data Event Streams</title>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
@@ -1223,7 +1223,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version a1fcaa3b, updated Fri Jul 17 17:22:25 2020 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="ae71ff73282d0e0ce7d69f4fa542998068c05ef4" name="document-revision">
+  <meta content="fac8ebc51e5b329ed8f4fdf7ba4d5f72cedaee75" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1432,14 +1432,14 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">Linked Data Event Streams spec</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-02">2 March 2021</time></span></h2>
+   <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-15">15 March 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
      <dd><a class="u-url" href="https://w3id.org/ldes/specification">https://w3id.org/ldes/specification</a>
      <dt>Issue Tracking:
-     <dd><a href="#issues-index">Inline In Spec</a>
+     <dd><a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/">GitHub</a>
      <dt class="editor">Editor:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="https://pietercolpaert.be">Pieter Colpaert</a>
     </dl>
@@ -1447,7 +1447,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 2 March 2021,
+In addition, as of 15 March 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1464,23 +1464,10 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#introduction"><span class="secno">1</span> <span class="content">Introduction</span></a>
     <li><a href="#tree"><span class="secno">2</span> <span class="content">Fragmenting and pagination</span></a>
     <li>
-     <a href="#completeness"><span class="secno">3</span> <span class="content">Indicating the completeness of your streams</span></a>
+     <a href="#retention"><span class="secno">3</span> <span class="content">Retention policies</span></a>
      <ol class="toc">
-      <li><a href="#status"><span class="secno">3.1</span> <span class="content">Status indication</span></a>
-      <li><a href="#retention"><span class="secno">3.2</span> <span class="content">Describing retention policies</span></a>
-      <li><a href="#version-subsets"><span class="secno">3.3</span> <span class="content">Version Subsets</span></a>
-     </ol>
-    <li>
-     <a href="#derived"><span class="secno">4</span> <span class="content">Derived Event Streams</span></a>
-     <ol class="toc">
-      <li><a href="#derived-views"><span class="secno">4.1</span> <span class="content">Derived views</span></a>
-      <li><a href="#derived-collections"><span class="secno">4.2</span> <span class="content">Derived collections</span></a>
-     </ol>
-    <li><a href="#event-streams"><span class="secno">5</span> <span class="content">Discovering Linked Data Event Streams, views and derived collections</span></a>
-    <li>
-     <a href="#vocabulary"><span class="secno">6</span> <span class="content">Vocabulary</span></a>
-     <ol class="toc">
-      <li><a href="#ldes:EventStream"><span class="secno">6.1</span> <span class="content">ldes:EventStream</span></a>
+      <li><a href="#time-based-retention"><span class="secno">3.1</span> <span class="content">Time-based retention policies</span></a>
+      <li><a href="#version-subsets"><span class="secno">3.2</span> <span class="content">Version-based retention policies</span></a>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -1488,16 +1475,15 @@ Parts of this work may be from another specification document.  If so, those par
      <ol class="toc">
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
      </ol>
-    <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
    </ol>
   </nav>
   <main>
    <h2 class="heading settled" data-level="1" id="introduction"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection of immutable objects, each object being described using a set of RDF triples (<a data-link-type="biblio" href="#biblio-rdf-primer">[rdf-primer]</a>).</p>
-   <p>This specification uses <a href="https://treecg.github.io/specification">TREE</a> for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as <a data-link-type="biblio" href="#biblio-activitystreams-core">[activitystreams-core]</a>, <a data-link-type="biblio" href="#biblio-vocab-dcat-2">[VOCAB-DCAT-2]</a>, <a data-link-type="biblio" href="#biblio-ldp">[LDP]</a> or <a href="https://shapetrees.github.io/specification/spec">Shape Trees</a>.</p>
-   <p>We define <code>ldes:EventStream rdfs:subClassOf tree:Collection</code>.
+   <p>This specification uses the <a href="https://treecg.github.io/specification">TREE specification</a> for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as <a data-link-type="biblio" href="#biblio-activitystreams-core">[activitystreams-core]</a>, <a data-link-type="biblio" href="#biblio-vocab-dcat-2">[VOCAB-DCAT-2]</a>, <a data-link-type="biblio" href="#biblio-ldp">[LDP]</a> or <a href="https://shapetrees.github.io/specification/spec">Shape Trees</a>. For the specific compatibility rules, read the <a href="https://treecg.github.io/specification">TREE specification</a>.</p>
+   <p>An <code>ldes:EventStream</code> is an <code>rdfs:subClassOf</code> the <code>tree:Collection</code> class.
 It extends the <code>tree:Collection</code> class by saying all of its members are immutable, and you can thus only add members to the collection.</p>
-   <p class="note" role="note"><span>Note:</span> A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs, and only emit new ones. A reference implementation of a client is available as part of the Comunica framework on <a href="https://github.com/treecg/event-stream-client">NPM and Github</a>.</p>
+   <p class="note" role="note"><span>Note:</span> When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on <a href="https://github.com/treecg/event-stream-client">NPM and Github</a>.</p>
    <div class="example" id="example-80e06dc0">
     <a class="self-link" href="#example-80e06dc0"></a> 
 <pre class="language-turtle highlight"><c- g>&lt;C1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>EventStream</c-> <c- p>;</c->
@@ -1509,6 +1495,9 @@ It extends the <code>tree:Collection</code> class by saying all of its members a
                <c- nn>sosa:</c-><c- f>hasSimpleResult</c-> <c- s>"..."</c-> <c- p>.</c->
 </pre>
    </div>
+   <p>A <code>tree:shape</code> SHOULD be defined with the <code>ldes:EventStream</code> instance as its subject. The shape of the collection defines its members: it tells clients all old and new members of the stream have been and will be validated by that shape. As a consequence of the immutability of the members, this shape MAY evolve, but it MUST always be backwards compatible to the earlier version.</p>
+   <p>Clients MAY use the shape of the <code>ldes:EventStream</code> for prioritizing its source selection.</p>
+   <p class="note" role="note"><span>Note:</span> When you need to change an earlier version of an <code>ldes:EventStream</code>, there are two options: create a new version of the object with a new shape that is backward compatible, and add the new version of that object again as a member on the stream, or replicate and transform the entire collection into a new <code>ldes:EventStream</code>. You can indicate that the new <code>ldes:EventStream</code> is derived from</p>
    <div class="example" id="example-ef88ebae">
     <a class="self-link" href="#example-ef88ebae"></a> 
 <pre class="language-turtle highlight"><c- g>&lt;C2></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>EventStream</c-> <c- p>;</c->
@@ -1521,12 +1510,9 @@ It extends the <code>tree:Collection</code> class by saying all of its members a
                           <c- nn>dcterms:</c-><c- f>title</c-> <c- s>"Streetname X, ZIP Municipality, Country"</c-> <c- p>.</c->
 </pre>
    </div>
-   <p>A <code>tree:shape</code> MUST be set on top of an LDES. The shape of the collection is a contract and identifies this particular collection: it tells clients all old and new members of the stream have been and will be validated by that shape. While this shape MAY evolve, it MUST always be backwards compatible to the earlier version.</p>
-   <p class="note" role="note"><span>Note:</span> Clients can use the shape for their source selection.</p>
-   <p class="note" role="note"><span>Note:</span> Mind that this shape for as long as this collection exists will need to be backwards compatible with the older non-immutable objects. When due to functional requirements you need to change an earlier version of an <code>ldes:EventStream</code>, there are two options: create a new version of the object with a new shape that is backward compatible, or replicate and transform the entire collection into a new collection.</p>
    <p class="note" role="note"><span>Note:</span> in Example 1, we consider the Observation object ot be an immutable object and we can use the existing identifiers. In Example 2 however, we still had to create version IRIs in order to be able to link to immutable objects.</p>
    <h2 class="heading settled" data-level="2" id="tree"><span class="secno">2. </span><span class="content">Fragmenting and pagination</span><a class="self-link" href="#tree"></a></h2>
-   <p>The goal of an LDES is to allow clients to replicate the history of a dataset as well as synchronize with its latest changes.
+   <p>The foces of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
 Linked Data Event Streams MAY be fragmented when their size becomes too big for 1 HTTP response.
 Fragmentations MUST be described using the features in the <a href="https://treecg.github.io/specification">TREE specification</a>.
 All relation types from the TREE specification MAY be used.</p>
@@ -1546,73 +1532,67 @@ All relation types from the TREE specification MAY be used.</p>
      <c- p>]</c-> <c- p>.</c->
 </pre>
    </div>
-   <p class="note" role="note"><span>Note:</span> Also according to the TREE specification, one can optionally annotate a <code>tree:Node</code> with a <code>tree:importStream</code> to find more data.</p>
-   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be polled for updates.</p>
-   <div class="example" id="example-4709d189">
-    <a class="self-link" href="#example-4709d189"></a> 
-<pre class="language-turtle highlight"><c- g>&lt;C1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>EventStream</c-> <c- p>;</c->
-     <c- nn>tree:</c-><c- f>shape</c-> <c- g>&lt;shape1.shacl></c-> <c- p>;</c-> <c- c># this shacl shape for as long as this collection exists will need to be backwards compatible.</c->
-     <c- nn>tree:</c-><c- f>member</c-> <c- g>&lt;Obervation1></c-><c- p>,</c-> <c- p>...</c-> <c- p>;</c->
-     <c- nn>tree:</c-><c- f>view</c-> <c- g>&lt;?page=1></c-> <c- p>.</c->
-
-<c- g>&lt;?page=1></c-> <c- b>a</c-> <c- nn>tree:</c-><c- f>Node</c-> <c- p>;</c->
-          <c- nn>tree:</c-><c- f>search</c-> <c- p>[</c->
-             <c- b>a</c-> <c- nn>hydra:</c-><c- f>IriTemplate</c-> <c- p>;</c->
-             <c- nn>hydra:</c-><c- f>template</c-> <c- s>"objects{?since}"</c-> <c- p>;</c->
-             <c- nn>hydra:</c-><c- f>variableRepresentation</c-> <c- nn>hydra:</c-><c- f>BasicRepresentation</c-><c- p>;</c->
-             <c- nn>hydra:</c-><c- f>mapping</c-> <c- p>[</c->
-                 <c- b>a</c-> <c- nn>hydra:</c-><c- f>IriTemplateMapping</c-> <c- p>;</c->
-                 <c- nn>hydra:</c-><c- f>variable</c-> <c- s>"since"</c-><c- p>;</c->
-                 <c- nn>hydra:</c-><c- f>property</c-> <c- nn>tree:</c-><c- f>timeQuery</c-> <c- p>;</c->
-                 <c- nn>tree:</c-><c- f>path</c-> <c- nn>sosa:</c-><c- f>resultTime</c-> <c- p>;</c->
-                 <c- nn>hydra:</c-><c- f>required</c-> <c- l>false</c->
-             <c- p>]</c->
-          <c- p>]</c-> <c- p>.</c->
-</pre>
-   </div>
-   <p class="note" role="note"><span>Note:</span> Cfr. Example 4, also a search form can make a one dimensional feed of immutable objects more searchable.</p>
-   <h2 class="heading settled" data-level="3" id="completeness"><span class="secno">3. </span><span class="content">Indicating the completeness of your streams</span><a class="self-link" href="#completeness"></a></h2>
-   <h3 class="heading settled" data-level="3.1" id="status"><span class="secno">3.1. </span><span class="content">Status indication</span><a class="self-link" href="#status"></a></h3>
-   <p>When replicating a stream on your own system when, for example, building other <code>tree:view</code>s on top of them with different fragmetnations, you might want to track the progress of how much elements from the original stream are processed into your own system. This is done using: TODO.</p>
-   <h3 class="heading settled" data-level="3.2" id="retention"><span class="secno">3.2. </span><span class="content">Describing retention policies</span><a class="self-link" href="#retention"></a></h3>
-   <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code>.</p>
-   <p>It MAY add a retention policy in which data generated before a specific time will be removed from the server.
-Third parties MAY archive these objects.</p>
-   <p>A retention policy can be introduced as follows:</p>
+   <p>An <code>tree:importStream</code> MAY be used to describe a publish-subscribe interface to subscribe to new members in the LDES.</p>
+   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. However, this may not always be the case: sometimes the back-end of an LDES server cannot guarantee that objects will be published chronologically. In that case, in the spirit of an LDES’ goal, the publisher should make sure as many pages as possible can be given an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header, and expose another kind of pagination.</p>
+   <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on “searching through a list of objects ordered in time”</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
+   <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
+   <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
+It MAY add a retention policy in which the server indicates data will be removed from the server.
+Third parties SHOULD read retention policies to understand what subset of the data is available in this <code>tree:View</code>, and MAY archive these member.</p>
+   <p>In the LDES specification, two types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code> with an instance of a <code>tree:View</code> as its subject:</p>
+   <ol>
+    <li data-md>
+     <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specific time is removed</p>
+    <li data-md>
+     <p><code>ldes:LatestVersionSubset</code>: a version subset based on the latest versions of an entity in the stream</p>
+   </ol>
+   <p>Different retention policies MAY be combined.
+When policies are used together, a server MUST store the members as long they are not all matched.</p>
+   <h3 class="heading settled" data-level="3.1" id="time-based-retention"><span class="secno">3.1. </span><span class="content">Time-based retention policies</span><a class="self-link" href="#time-based-retention"></a></h3>
+   <p>A time-based retention policy can be introduced as follows:</p>
+   <div class="example" id="example-38f79346">
+    <a class="self-link" href="#example-38f79346"></a> 
 <pre class="language-turtle highlight"><c- g>&lt;Collection></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>EventStream</c-> <c- p>;</c->
              <c- nn>tree:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
 
 <c- g>&lt;></c-> <c- nn>ldes:</c-><c- f>retentionPolicy</c-> <c- g>&lt;P1></c-> <c- p>.</c->
 
-<c- g>&lt;P1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>DurationAgoRelation</c-> <c- p>;</c->
+<c- g>&lt;P1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>DurationAgoPolicy</c-> <c- p>;</c->
      <c- nn>tree:</c-><c- f>path</c-> <c- nn>prov:</c-><c- f>generatedAtTime</c-> <c- p>;</c->
      <c- nn>tree:</c-><c- f>value</c-> <c- s>"P1Y"</c-><c- o>^^</c->xsd:duration <c- p>.</c-> <c- c># Keep 1 year of data</c->
 </pre>
-   <p>If a <code>tree:relation</code> is set, then this automatically also becomes the preservation strategy of the rest of the nodes.</p>
-   <p class="issue" id="issue-238a8a94"><a class="self-link" href="#issue-238a8a94"></a> Maybe it’s an idea to generalize this to geospatial as well, and to have a retention policy able to select a geospatial region?</p>
-   <h3 class="heading settled" data-level="3.3" id="version-subsets"><span class="secno">3.3. </span><span class="content">Version Subsets</span><a class="self-link" href="#version-subsets"></a></h3>
-   <p>In order to indicate you only keep 1 specific version, e.g., the latest, in your stream, you can do this:</p>
+   </div>
+   <p>A <code>ldes:DurationAgoPolicy</code> uses a <code>tree:value</code> with an <code>xsd:duration</code>-typed literal to indicate how long ago the timestamp, indicated by the <code>tree:path</code>, of the members that can be found via a <code>tree:View</code> can be compared to the current time on the server.</p>
+   <h3 class="heading settled" data-level="3.2" id="version-subsets"><span class="secno">3.2. </span><span class="content">Version-based retention policies</span><a class="self-link" href="#version-subsets"></a></h3>
+   <div class="example" id="example-1f882a0a">
+    <a class="self-link" href="#example-1f882a0a"></a> In order to indicate you only keep 2 versions of an object referred to using <code>dcterms:isVersionOf</code>: 
 <pre class="language-turtle highlight"><c- g>&lt;Collection></c-> <c- b>a</c-> <c- nn>tree:</c-><c- f>EventStream</c-> <c- p>;</c->
              <c- nn>tree:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
 
-<c- g>&lt;></c-> <c- nn>ldes:</c-><c- f>versionSubset</c-> <c- g>&lt;P1></c-> <c- p>.</c->
+<c- g>&lt;></c-> <c- nn>ldes:</c-><c- f>retentionPolicy</c-> <c- g>&lt;P1></c-> <c- p>.</c->
 
-<c- g>&lt;P1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>LatestOnly</c-> <c- p>;</c->
-     <c- nn>ldes:</c-><c- f>amount</c-> <c- mi>1</c-> <c- p>;</c-> <c- c>#default</c->
-     <c- nn>ldes:</c-><c- f>vary</c-> <c- p>()</c-> <c- p>;</c-> <c- c># sosa:featureOfInterest? when this is a sensor, I want the latest compound measure by a specific sensor</c->
-     <c- c>## ????</c->
-      <c- p>.</c->
+<c- g>&lt;P1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>LatestVersionSubset</c-><c- p>;</c->
+     <c- nn>ldes:</c-><c- f>amount</c-> <c- mi>2</c-> <c- p>;</c-> 
+     <c- nn>ldes:</c-><c- f>versionKey</c-> <c- p>(</c-> <c- nn>dcterms:</c-><c- f>isVersionOf</c-> <c- p>)</c->
+     <c- p>.</c->
 </pre>
-   <p>Retention policies and version subsets MAY be used together.
-A member can however only be deleted from the server when both conditions are met (e.g., when there is still at least 1 item of this thing, and when the duration has not yet passed).</p>
-   <h2 class="heading settled" data-level="4" id="derived"><span class="secno">4. </span><span class="content">Derived Event Streams</span><a class="self-link" href="#derived"></a></h2>
-   <h3 class="heading settled" data-level="4.1" id="derived-views"><span class="secno">4.1. </span><span class="content">Derived views</span><a class="self-link" href="#derived-views"></a></h3>
-   <h3 class="heading settled" data-level="4.2" id="derived-collections"><span class="secno">4.2. </span><span class="content">Derived collections</span><a class="self-link" href="#derived-collections"></a></h3>
-   <p>TODO: PAV ontology?</p>
-   <h2 class="heading settled" data-level="5" id="event-streams"><span class="secno">5. </span><span class="content">Discovering Linked Data Event Streams, views and derived collections</span><a class="self-link" href="#event-streams"></a></h2>
-   <p>You can discover Event Streams using DCAT metadata.</p>
-   <h2 class="heading settled" data-level="6" id="vocabulary"><span class="secno">6. </span><span class="content">Vocabulary</span><a class="self-link" href="#vocabulary"></a></h2>
-   <h3 class="heading settled" data-level="6.1" id="ldes:EventStream"><span class="secno">6.1. </span><span class="content">ldes:EventStream</span><a class="self-link" href="#ldes:EventStream"></a></h3>
+   </div>
+   <p>A <code>ldes:LatestVersionSubset</code> SHOULD use two predicated: <code>ldes:amount</code> and the <code>ldes:versionKey</code>.
+The <code>ldes:amount</code> has a <code>xsd:nonNegativeInteger</code> datatype and indicated how many to keep that defaults to 1.
+The <code>ldes:versionKey</code> is an <code>rdf:List</code> of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
+When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and all members MUST be seen as a version of the same thing.</p>
+   <div class="example" id="example-09fb6bd5">
+    <a class="self-link" href="#example-09fb6bd5"></a> For sensor datasets the version key may get more complex, grouping observations by both the observed property as the sensor that made the observation. 
+<pre class="language-turtle highlight"><c- g>&lt;Collection></c-> <c- b>a</c-> <c- nn>tree:</c-><c- f>EventStream</c-> <c- p>;</c->
+             <c- nn>tree:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
+
+<c- g>&lt;></c-> <c- nn>ldes:</c-><c- f>retentionPolicy</c-> <c- g>&lt;P1></c-> <c- p>.</c->
+
+<c- g>&lt;P1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>LatestVersionSubset</c-><c- p>;</c->
+     <c- nn>ldes:</c-><c- f>amount</c-> <c- mi>2</c-> <c- p>;</c-> 
+     <c- nn>ldes:</c-><c- f>versionKey</c-> <c- p>(</c-> <c- p>(</c-> <c- nn>sosa:</c-><c- f>observedProperty</c-> <c- p>)</c-> <c- p>(</c-> <c- nn>sosa:</c-><c- f>madeBySensor</c-> <c- p>)</c-> <c- p>)</c-> <c- p>.</c->
+</pre>
+   </div>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -1774,7 +1754,3 @@ A member can however only be deleted from the server when both conditions are me
    <dt id="biblio-vocab-dcat-2">[VOCAB-DCAT-2]
    <dd>Riccardo Albertoni; et al. <a href="https://www.w3.org/TR/vocab-dcat-2/">Data Catalog Vocabulary (DCAT) - Version 2</a>. 28 May 2019. WD. URL: <a href="https://www.w3.org/TR/vocab-dcat-2/">https://www.w3.org/TR/vocab-dcat-2/</a>
   </dl>
-  <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
-  <div style="counter-reset:issue">
-   <div class="issue"> Maybe it’s an idea to generalize this to geospatial as well, and to have a retention policy able to select a geospatial region?<a href="#issue-238a8a94"> ↵ </a></div>
-  </div>
