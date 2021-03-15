@@ -1223,7 +1223,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version a1fcaa3b, updated Fri Jul 17 17:22:25 2020 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="fac8ebc51e5b329ed8f4fdf7ba4d5f72cedaee75" name="document-revision">
+  <meta content="559a0f374ca0bce242bcfd3a998fc6b0631d1f49" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1484,6 +1484,7 @@ Parts of this work may be from another specification document.  If so, those par
    <p>An <code>ldes:EventStream</code> is an <code>rdfs:subClassOf</code> the <code>tree:Collection</code> class.
 It extends the <code>tree:Collection</code> class by saying all of its members are immutable, and you can thus only add members to the collection.</p>
    <p class="note" role="note"><span>Note:</span> When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on <a href="https://github.com/treecg/event-stream-client">NPM and Github</a>.</p>
+   <p>The base URI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>.</p>
    <div class="example" id="example-80e06dc0">
     <a class="self-link" href="#example-80e06dc0"></a> 
 <pre class="language-turtle highlight"><c- g>&lt;C1></c-> <c- b>a</c-> <c- nn>ldes:</c-><c- f>EventStream</c-> <c- p>;</c->
