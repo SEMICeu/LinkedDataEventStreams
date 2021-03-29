@@ -1223,7 +1223,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version a1fcaa3b, updated Fri Jul 17 17:22:25 2020 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="559a0f374ca0bce242bcfd3a998fc6b0631d1f49" name="document-revision">
+  <meta content="c068f89e0360c42c7d295d3bb96f99b41c224864" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1433,7 +1433,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-15">15 March 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-29">29 March 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1447,7 +1447,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 15 March 2021,
+In addition, as of 29 March 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1513,7 +1513,7 @@ It extends the <code>tree:Collection</code> class by saying all of its members a
    </div>
    <p class="note" role="note"><span>Note:</span> in Example 1, we consider the Observation object ot be an immutable object and we can use the existing identifiers. In Example 2 however, we still had to create version IRIs in order to be able to link to immutable objects.</p>
    <h2 class="heading settled" data-level="2" id="tree"><span class="secno">2. </span><span class="content">Fragmenting and pagination</span><a class="self-link" href="#tree"></a></h2>
-   <p>The foces of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
+   <p>The focus of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
 Linked Data Event Streams MAY be fragmented when their size becomes too big for 1 HTTP response.
 Fragmentations MUST be described using the features in the <a href="https://treecg.github.io/specification">TREE specification</a>.
 All relation types from the TREE specification MAY be used.</p>
@@ -1578,7 +1578,7 @@ When policies are used together, a server MUST store the members as long they ar
      <c- p>.</c->
 </pre>
    </div>
-   <p>A <code>ldes:LatestVersionSubset</code> SHOULD use two predicated: <code>ldes:amount</code> and the <code>ldes:versionKey</code>.
+   <p>A <code>ldes:LatestVersionSubset</code> SHOULD use two predicates: <code>ldes:amount</code> and the <code>ldes:versionKey</code>.
 The <code>ldes:amount</code> has a <code>xsd:nonNegativeInteger</code> datatype and indicated how many to keep that defaults to 1.
 The <code>ldes:versionKey</code> is an <code>rdf:List</code> of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
 When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and all members MUST be seen as a version of the same thing.</p>
