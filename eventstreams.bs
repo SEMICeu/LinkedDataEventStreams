@@ -62,7 +62,7 @@ Note: in Example 1, we consider the Observation object ot be an immutable object
 
 # Fragmenting and pagination # {#tree}
 
-The foces of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
+The focus of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
 Linked Data Event Streams MAY be fragmented when their size becomes too big for 1 HTTP response.
 Fragmentations MUST be described using the features in the [TREE specification](https://treecg.github.io/specification).
 All relation types from the TREE specification MAY be used.
@@ -141,7 +141,7 @@ In order to indicate you only keep 2 versions of an object referred to using `dc
 ```
 </div>
 
-A `ldes:LatestVersionSubset` SHOULD use two predicated: `ldes:amount` and the `ldes:versionKey`.
+A `ldes:LatestVersionSubset` SHOULD use two predicates: `ldes:amount` and the `ldes:versionKey`.
 The `ldes:amount` has a `xsd:nonNegativeInteger` datatype and indicated how many to keep that defaults to 1.
 The `ldes:versionKey` is an `rdf:List` of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
 When the `ldes:versionKey` is not set or empty, the key is empty, and all members MUST be seen as a version of the same thing.
