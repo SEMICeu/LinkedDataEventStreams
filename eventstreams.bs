@@ -86,7 +86,10 @@ All relation types from the TREE specification MAY be used.
 
 An `tree:importStream` MAY be used to describe a publish-subscribe interface to subscribe to new members in the LDES.
 
-Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. However, this may not always be the case: sometimes the back-end of an LDES server cannot guarantee that objects will be published chronologically. In that case, in the spirit of an LDES’ goal, the publisher should make sure as many pages as possible can be given an HTTP `Cache-Control: public, max-age=604800, immutable` header, and expose another kind of pagination.
+Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. 
+However, it may happen that a time-based fragmentation cannot be applied. For example: the backend system on which the LDES has been built does not receive the events at the time they were created, due to human errors (forgetting to indicate that a change was made), 
+external systems or just latency. Applying a time-based fragmentation in that situation will result in losing caching, due to the ever-changing pages. Instead, in the spirit of an LDES’s goal, the publisher should publish the events in the order they were received
+by the backend system (that order is never changing), trying to gave as many pages as possible an HTTP `Cache-Control: public, max-age=604800, immutable` header
 
 Note: Cfr. [the example in the TREE specification on “searching through a list of objects ordered in time”](https://treecg.github.io/specification/#timesearch), also a search form can optionally make a one dimensional feed of immutable objects more searchable.
 
