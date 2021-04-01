@@ -1223,7 +1223,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version a1fcaa3b, updated Fri Jul 17 17:22:25 2020 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="c068f89e0360c42c7d295d3bb96f99b41c224864" name="document-revision">
+  <meta content="02eafeff78ffd9471bab147134174f0302590806" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1433,7 +1433,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-03-29">29 March 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-04-01">1 April 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1447,7 +1447,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 29 March 2021,
+In addition, as of 1 April 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1534,7 +1534,10 @@ All relation types from the TREE specification MAY be used.</p>
 </pre>
    </div>
    <p>An <code>tree:importStream</code> MAY be used to describe a publish-subscribe interface to subscribe to new members in the LDES.</p>
-   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. However, this may not always be the case: sometimes the back-end of an LDES server cannot guarantee that objects will be published chronologically. In that case, in the spirit of an LDES’ goal, the publisher should make sure as many pages as possible can be given an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header, and expose another kind of pagination.</p>
+   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates.
+However, it may happen that a time-based fragmentation cannot be applied. For example: the backend system on which the LDES has been built does not receive the events at the time they were created, due to human errors (forgetting to indicate that a change was made), 
+external systems or just latency. Applying a time-based fragmentation in that situation will result in losing caching, due to the ever-changing pages. Instead, in the spirit of an LDES’s goal, the publisher should publish the events in the order they were received
+by the backend system (that order is never changing), trying to gave as many pages as possible an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header</p>
    <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on “searching through a list of objects ordered in time”</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
    <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
    <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
