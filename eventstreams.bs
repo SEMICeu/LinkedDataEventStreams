@@ -28,7 +28,7 @@ The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `
 ```turtle
 <C1> a ldes:EventStream ;
      tree:shape <shape1.shacl> ;
-     tree:member <Obervation1> .
+     tree:member <Observation1> .
 
 <Observation1> a sosa:Observation ;
                sosa:resultTime "2021-01-01T00:00:00Z"^^xsd:dateTime ;
