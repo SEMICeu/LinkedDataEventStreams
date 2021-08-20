@@ -66,3 +66,24 @@ ldes:versionKey a rdf:Property ;
                 rdfs:comment "A list of SHACL property paths to compose a version key."@en ;
                 rdfs:range rdf:List ;
                 rdfs:domain ldes:LastVersionSubset .
+
+ldes:versionOfPath a rdf:Property ;
+                   rdfs:label "versionOf Path"@en;
+                   rdfs:comment "SHACL property path to the non-versioned identifier of the entity."@en .
+
+
+ldes:timestampPath a rdf:Property ;
+                   rdfs:label "Timestamp Path"@en;
+                   rdfs:comment "SHACL property path to the timestamp when the version object entered the event stream."@en .
+
+ldes:versionMaterializationOf a rdf:Property ;
+                   rdfs:label "Version Materialization Of"@en;
+                   rdfs:comment "Links to the original LDES"@en ;
+                   rdfs:range ldes:EventStream ;
+                   rdfs:domain tree:Collection .
+
+ldes:versionMaterializationUntil a rdf:Property ;
+                   rdfs:label "Version Materialization Until"@en;
+                   rdfs:comment "Timestamp until versions were processed"@en ;
+                   rdfs:range xsd:dateTime ;
+                   rdfs:domain tree:Collection .
