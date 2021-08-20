@@ -13,48 +13,51 @@ Abstract: A Linked Data Event Stream is a collection of immutable objects (such 
 
 # Introduction # {#introduction}
 
-A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
+A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection (`rdfs:subClassOf tree:Collection`) of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
 
 This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.github.io/specification/spec). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
 
-An `ldes:EventStream` is an `rdfs:subClassOf` the `tree:Collection` class.
-It extends the `tree:Collection` class by saying all of its members are immutable, and you can thus only add members to the collection.
-
-Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list (or cache) of already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
+Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
 
 The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`.
 
 <div class="example" highlight="turtle">
 ```turtle
-<C1> a ldes:EventStream ;
-     tree:shape <shape1.shacl> ;
-     tree:member <Observation1> .
+ex:C1 a ldes:EventStream ;
+      ldes:timestampPath sosa:resultTime ;
+      tree:shape ex:shape1.shacl ;
+      tree:member ex:Observation1 .
 
-<Observation1> a sosa:Observation ;
-               sosa:resultTime "2021-01-01T00:00:00Z"^^xsd:dateTime ;
-               sosa:hasSimpleResult "..." .
+ex:Observation1 a sosa:Observation ;
+                sosa:resultTime "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+                sosa:hasSimpleResult "..." .
 ```
 </div>
 
+The `ldes:EventStream` instance SHOULD have these properties:
+ * `tree:shape`: the shape of the collection defines its members. It tells clients all old and new members of the stream have been and will be validated by that shape. As a consequence of the immutability of the members, this shape MAY evolve, but it MUST always be backwards compatible to the earlier version.
+ * `tree:member` indicating the members of the collection.
 
-A `tree:shape` SHOULD be defined with the `ldes:EventStream` instance as its subject. The shape of the collection defines its members: it tells clients all old and new members of the stream have been and will be validated by that shape. As a consequence of the immutability of the members, this shape MAY evolve, but it MUST always be backwards compatible to the earlier version.
-
-Clients MAY use the shape of the `ldes:EventStream` for prioritizing its source selection.
-
-Note: When you need to change an earlier version of an `ldes:EventStream`, there are two options: create a new version of the object with a new shape that is backward compatible, and add the new version of that object again as a member on the stream, or replicate and transform the entire collection into a new `ldes:EventStream`. You can indicate that the new `ldes:EventStream` is derived from 
+The `ldes:EventStream` instance MAY have these properties:
+ * `ldes:timestampPath` indicating how you can understand using a timestamp (`xsd:dateTime`) a member precedes another member in the LDES
+ * `ldes:versionOfPath` indicating the non-version object (see example bellow).
 
 <div class="example">
 ```turtle
-<C2> a ldes:EventStream ;
-     tree:shape <shape2.shacl> ;
-     tree:member <AddressRecord1/version1> .
+ex:C2 a ldes:EventStream ;
+      ldes:timestampPath dcterms:created ;
+      ldes:versionOfPath dcterms:isVersionOf ;
+      tree:shape ex:shape2.shacl ;
+      tree:member ex:AddressRecord1-version1 .
 
-<AddressRecord1/version1> dcterms:created "2021-01-01T00:00:00Z"^^xsd:dateTime ;
-                          adms:versionNotes "First version of this address" ;
-                          dcterms:isVersionOf <AddressRecord1> ;
-                          dcterms:title "Streetname X, ZIP Municipality, Country" .
+ex:AddressRecord1-version1 dcterms:created "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+                           adms:versionNotes "First version of this address" ;
+                           dcterms:isVersionOf ex:AddressRecord1 ;
+                           dcterms:title "Streetname X, ZIP Municipality, Country" .
 ```
 </div>
+
+Note: When you need to change an earlier version of an `ldes:EventStream`, there are two options: create a new version of the object with a new shape that is backward compatible, and add the new version of that object again as a member on the stream, or replicate and transform the entire collection into a new `ldes:EventStream`. You can indicate that the new `ldes:EventStream` is derived from 
 
 Note: in Example 1, we consider the Observation object to be an immutable object and we can use the existing identifiers. In Example 2 however, we still had to create version IRIs in order to be able to link to immutable objects.
 
@@ -69,18 +72,19 @@ All relation types from the TREE specification MAY be used.
 
 <div class="example">
 ```turtle
-<C1> a ldes:EventStream ;
-     tree:shape <shape1.shacl> ; # this shacl shape for as long as this collection exists will need to be backwards compatible.
-     tree:member <Obervation1>, ... ;
-     tree:view <?page=1> .
+ex:C1 a ldes:EventStream ;
+      ldes:timestampPath sosa:resultTime ;
+      tree:shape ex:shape1.shacl ;
+      tree:member ex:Obervation1, ... ;
+      tree:view <?page=1> .
 
 <?page=1> a tree:Node ;
-    tree:relation [
-        a tree:GreaterThanOrEqualToRelation ;
-        tree:path sosa:resultTime ;
-        tree:node <?page=2> ;
-        tree:value "2020-12-24T12:00:00Z"^^xsd:dateTime
-     ] .
+          tree:relation [
+              a tree:GreaterThanOrEqualToRelation ;
+              tree:path sosa:resultTime ;
+              tree:node <?page=2> ;
+              tree:value "2020-12-24T12:00:00Z"^^xsd:dateTime
+          ] .
 ```
 </div>
 
@@ -113,18 +117,18 @@ A time-based retention policy can be introduced as follows:
 
 <div class="example">
 ```turtle
-<Collection> a ldes:EventStream ;
-             tree:view <> .
+ex:C3 a ldes:EventStream ;
+      ldes:timestampPath prov:generatedAtTime ;
+      tree:view <> .
 
-<> ldes:retentionPolicy <P1> .
+<> ldes:retentionPolicy ex:P1 .
 
-<P1> a ldes:DurationAgoPolicy ;
-     tree:path prov:generatedAtTime ;
-     tree:value "P1Y"^^xsd:duration . # Keep 1 year of data
+ex:P1 a ldes:DurationAgoPolicy ;
+      tree:value "P1Y"^^xsd:duration . # Keep 1 year of data
 ```
 </div>
 
-A `ldes:DurationAgoPolicy` uses a `tree:value` with an `xsd:duration`-typed literal to indicate how long ago the timestamp, indicated by the `tree:path`, of the members that can be found via a `tree:View` can be compared to the current time on the server.
+A `ldes:DurationAgoPolicy` uses a `tree:value` with an `xsd:duration`-typed literal to indicate how long ago the timestamp, indicated by the `ldes:timestampPath` that MAY be redefined in the policy itself.
 
 ## Version-based retention policies ## {#version-subsets}
 
@@ -132,36 +136,84 @@ A `ldes:DurationAgoPolicy` uses a `tree:value` with an `xsd:duration`-typed lite
 In order to indicate you only keep 2 versions of an object referred to using `dcterms:isVersionOf`:
 
 ```turtle
-<Collection> a tree:EventStream ;
-             tree:view <> .
+ex:C2 a ldes:EventStream ;
+      ldes:timestampPath dcterms:created ;
+      ldes:versionOfPath dcterms:isVersionOf ;
+      tree:view <> .
 
-<> ldes:retentionPolicy <P1> .
+<> ldes:retentionPolicy ex:P2 .
 
-<P1> a ldes:LatestVersionSubset;
-     ldes:amount 2 ; 
-     ldes:versionKey ( dcterms:isVersionOf )
-     .
+ex:P2 a ldes:LatestVersionSubset;
+      ldes:amount 2 ;
+      #If different from the Event Stream, this can optionally be overwritten here
+      ldes:timestampPath dcterms:created ;
+      ldes:versionOfPath dcterms:isVersionOf .
 ```
 </div>
 
-A `ldes:LatestVersionSubset` SHOULD use two predicates: `ldes:amount` and the `ldes:versionKey`.
+A `ldes:LatestVersionSubset` MUST define the predicate `ldes:amount` and MAY redefine the ldes:timestampPath and/or ldes:versionOfPath. It MAY also define a compound version key using `ldes:versionKey` (see example below) instead of the more `ldes:versionOfPath`.
 The `ldes:amount` has a `xsd:nonNegativeInteger` datatype and indicated how many to keep that defaults to 1.
 The `ldes:versionKey` is an `rdf:List` of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
-When the `ldes:versionKey` is not set or empty, the key is empty, and all members MUST be seen as a version of the same thing.
+When the `ldes:versionKey` is set to an empty path `()`, all members MUST be seen as a version of the same thing.
 
 
 <div class="example">
 For sensor datasets the version key may get more complex, grouping observations by both the observed property as the sensor that made the observation.
 
 ```turtle
-<Collection> a tree:EventStream ;
-             tree:view <> .
+ex:C1 a ldes:EventStream ;
+      tree:view <> .
 
-<> ldes:retentionPolicy <P1> .
+<> ldes:retentionPolicy ex:P3 .
 
-<P1> a ldes:LatestVersionSubset;
-     ldes:amount 2 ; 
-     ldes:versionKey ( ( sosa:observedProperty ) ( sosa:madeBySensor ) ) .
+ex:P3 a ldes:LatestVersionSubset;
+      ldes:amount 2 ; 
+      ldes:versionKey ( ( sosa:observedProperty ) ( sosa:madeBySensor ) ) .
 ```
 </div>
 
+# Derived collections # {#derived}
+
+We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.
+
+## Version Materializations ## {#version-materializations}
+
+A version materialization can be defined only if the original LDES defines both `ldes:versionOfPath` and `ldes:timestampPath`.
+
+A version materialization replaces the subject of a member with its `ldes:versionOfPath` IRI, and selects a certain version of this object.
+It also translated `created` style timestamp predicates to `modified`-style predicates.
+
+<div class="example">
+In this example an event stream with 2 versions of the same object got materialized until `2020-10-05T12:00:00Z`
+
+```turtle
+ex:ES1 a ldes:EventStream
+       tree:member [
+           dcterms:isVersionOf <A> ;
+           dcterms:created "2020-10-05T11:00:00Z"
+           owl:versionInfo "v0.0.1";
+           rdfs:label "A v0.0.1"
+       ], [
+           dcterms:isVersionOf <A> ;
+           dcterms:created "2020-10-06T13:00:00Z";
+           owl:versionInfo "v0.0.2";
+           rdfs:label "A v0.0.2"
+       ].
+```
+towards
+```turtle
+ex:ES1v1 a tree:Collection ; # the members are no longer immutable
+         ldes:versionMaterializationOf ex:ES1 ;
+         ldes:versionMaterializationUntil "2020-10-05T12:00:00Z"^^xsd:dateTime ;
+         tree:member <A> .
+
+<A> rdfs:label "A v0.0.1" ;
+    dcterms:modified "2020-10-05T11:00:00Z" .
+```
+</div>
+
+A version materialization is thus a `tree:Collection` instance that has two predicates set:
+ * `ldes:versionMaterializationOf`: points to the orginal LDES
+ * `ldes:versionMaterializationUntil`: optionally gives a timestamp (`xsd:dateTime`) until when the materialization was made.
+
+Note: We see `versionMaterializationUntil` mainly useful for historical and static datasets that deliberately will not be updated to the latest state of the LDES.
