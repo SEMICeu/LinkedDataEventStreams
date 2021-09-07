@@ -1,0 +1,38 @@
+@prefix tree: <https://w3id.org/tree#> .
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix schema: <https://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<https://semiceu.github.io/linkeddataeventstreams/example.ttl#eventstream>
+  a ldes:EventStream ; 
+  rdfs:label "Example LDES with 2 marine regions objects" ;
+  ldes:timestampPath dct:created ;
+  tree:shape [
+    a sh:NodeShape ;
+    sh:nodeKind sh:IRI ;
+    sh:property [
+      sh:datatype xsd:dateTime ;
+      sh:minCount 1 ;
+      sh:path dct:created
+    ], [
+      sh:minCount 1 ;
+      sh:nodeKind sh:IRI ;
+      sh:path dct:isVersionOf
+    ]
+  ] ;
+  tree:view <http://marineregions.org/feed?page=2021-09-07T09%3A00%3A00Z%2F2021-09-07T10%3A00%3A00Z> ;
+  tree:member <http://marineregions.org/mrgid/58739?t=1631005686>, <http://marineregions.org/mrgid/35127?t=1631005686> .
+
+<http://marineregions.org/mrgid/58739?t=1631005686>
+  dct:isVersionOf <http://marineregions.org/mrgid/58739> ;
+  dct:created "2021-09-07T09:08:06Z"^^xsd:dateTime .
+
+<http://marineregions.org/mrgid/35127?t=1631005686>
+  dct:isVersionOf <http://marineregions.org/mrgid/35127> ;
+  dct:created "2021-09-07T09:08:06Z"^^xsd:dateTime .
