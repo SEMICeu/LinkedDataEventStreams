@@ -15,7 +15,7 @@ Abstract: A Linked Data Event Stream is a collection of immutable objects (such 
 
 A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection (`rdfs:subClassOf tree:Collection`) of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
 
-This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.github.io/specification/spec). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
+This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.org/TR/specification/). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
 
 Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
 
