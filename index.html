@@ -1269,7 +1269,7 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span:not(.dfn-paneled) {
+		ul.index li a + span {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 4f053d00e, updated Tue Aug 10 14:13:32 2021 -0700" name="generator">
+  <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
 <style>/* style-autolinks */
 
@@ -1689,6 +1689,16 @@ figcaption {
 figcaption:not(.no-marker)::before {
     content: "Figure " counter(figure) " ";
 }</style>
+<style>/* style-issues */
+
+a[href].issue-return {
+    float: right;
+    float: inline-end;
+    color: var(--issueheading-text);
+    font-weight: bold;
+    text-decoration: none;
+}
+</style>
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1725,6 +1735,14 @@ a.self-link:hover {
 }
 .heading > a.self-link {
     font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
 }
 li > a.self-link {
     left: calc(-1 * (3.5rem - 26px) - 2em);
@@ -1998,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-08-20">20 August 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-03-28">28 March 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2012,7 +2030,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 20 August 2021,
+In addition, as of 28 March 2023,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2037,7 +2055,8 @@ Parts of this work may be from another specification document.  If so, those par
     <li>
      <a href="#derived"><span class="secno">4</span> <span class="content">Derived collections</span></a>
      <ol class="toc">
-      <li><a href="#version-materializations"><span class="secno">4.1</span> <span class="content">Version Materializations</span></a>
+      <li><a href="#versioning"><span class="secno">4.1</span> <span class="content">Versioning</span></a>
+      <li><a href="#version-materializations"><span class="secno">4.2</span> <span class="content">Version Materializations</span></a>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -2050,7 +2069,7 @@ Parts of this work may be from another specification document.  If so, those par
   <main>
    <h2 class="heading settled" data-level="1" id="introduction"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection (<code>rdfs:subClassOf tree:Collection</code>) of immutable objects, each object being described using a set of RDF triples (<a data-link-type="biblio" href="#biblio-rdf-primer">[rdf-primer]</a>).</p>
-   <p>This specification uses the <a href="https://treecg.github.io/specification">TREE specification</a> for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as <a data-link-type="biblio" href="#biblio-activitystreams-core">[activitystreams-core]</a>, <a data-link-type="biblio" href="#biblio-vocab-dcat-2">[VOCAB-DCAT-2]</a>, <a data-link-type="biblio" href="#biblio-ldp">[LDP]</a> or <a href="https://shapetrees.github.io/specification/spec">Shape Trees</a>. For the specific compatibility rules, read the <a href="https://treecg.github.io/specification">TREE specification</a>.</p>
+   <p>This specification uses the <a href="https://treecg.github.io/specification">TREE specification</a> for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as <a data-link-type="biblio" href="#biblio-activitystreams-core">[activitystreams-core]</a>, <a data-link-type="biblio" href="#biblio-vocab-dcat-2">[VOCAB-DCAT-2]</a>, <a data-link-type="biblio" href="#biblio-ldp">[LDP]</a> or <a href="https://shapetrees.org/TR/specification/">Shape Trees</a>. For the specific compatibility rules, read the <a href="https://treecg.github.io/specification">TREE specification</a>.</p>
    <p class="note" role="note"><span>Note:</span> When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on <a href="https://github.com/treecg/event-stream-client">NPM and Github</a>.</p>
    <p>The base URI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>.</p>
    <div class="example" id="example-2c0a4024">
@@ -2186,13 +2205,63 @@ When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, a
    </div>
    <h2 class="heading settled" data-level="4" id="derived"><span class="secno">4. </span><span class="content">Derived collections</span><a class="self-link" href="#derived"></a></h2>
    <p>We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.</p>
-   <h3 class="heading settled" data-level="4.1" id="version-materializations"><span class="secno">4.1. </span><span class="content">Version Materializations</span><a class="self-link" href="#version-materializations"></a></h3>
+   <p>First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in a <code>ldes:EvenStream</code>, while maintaining the history of events.
+It is achieved by defining change in an <code>ldes:EventStream</code> through new <code>tree:member</code> in the <code>ldes:EventStream</code> through added metadata for both the <code>ldes:EvenStream</code> and each <code>tree:member</code>.</p>
+   <p>Secondly, version materializations are defined that use a versioned LDES as a basis.
+This technique allows to create <strong>snapshots</strong> in time of a versioned LDES.
+Here we define a <strong>snapshot</strong> as <code>tree:Collection</code> of the most recent versions of all objects in the versioned LDES.</p>
+   <h3 class="heading settled" data-level="4.1" id="versioning"><span class="secno">4.1. </span><span class="content">Versioning</span><a class="self-link" href="#versioning"></a></h3>
+   <p>A versioned LDES is defined with two properties: <code>ldes:versionOfPath</code> and <code>ldes:timestampPath</code>.</p>
+   <ul>
+    <li data-md>
+     <p><code>ldes:versionOfPath</code>: declares the <strong>property</strong> that is used to define that a <code>tree:member</code> of an <code>ldes:EventStream</code> is a version.</p>
+    <li data-md>
+     <p><code>ldes:timestampPath</code>: declares the property that is used to define the DateTime of a <code>tree:member</code>.</p>
+   </ul>
+   <div class="example" id="ldes-versioning-1">
+    <a class="self-link" href="#ldes-versioning-1"></a> A <b>versioned</b> LDES with one member.<br> 
+    <p><code class="highlight"><c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-></code> is used as property for <code class="highlight"><c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-></code>, which indicates that <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> is a version of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-></code>.<br></p>
+    <p><code class="highlight"><c- nn>dct</c-><c- p>:</c-><c- f>issued</c-></code> is used as property for <code class="highlight"><c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-></code>, which indicates that <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> was issued in the ldes at "2021-12-15T10:00:00.000Z".</p>
+<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-><c- p>;</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-><c- p>;</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-><c- p>;</c->
+    <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-><c- p>.</c->
+
+<c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"First version of the title"</c-><c- p>.</c->
+</pre>
+   </div>
+   <div class="example" id="ldes-versioning-2">
+    <a class="self-link" href="#ldes-versioning-2"></a> A <b>versioned</b> LDES with two members which are both versions of the same object. 
+<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-><c- p>;</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-><c- p>;</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-><c- p>;</c->
+    <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-><c- p>,</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1v1</c-><c- p>.</c->
+    
+<c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"First version of the title"</c-><c- p>.</c->
+    
+<c- nn>ex</c-><c- p>:</c-><c- f>resource1v1</c-> 
+    <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T12:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"Title has been updated once"</c-><c- p>.</c->
+</pre>
+    2 hours after <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> was created, the title of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-></code> was changed. 
+This change can be seen by the creation of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v1</c-></code>, which is the newest version of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-></code>. 
+   </div>
+   <h3 class="heading settled" data-level="4.2" id="version-materializations"><span class="secno">4.2. </span><span class="content">Version Materializations</span><a class="self-link" href="#version-materializations"></a></h3>
    <p>A version materialization can be defined only if the original LDES defines both <code>ldes:versionOfPath</code> and <code>ldes:timestampPath</code>.</p>
    <p>A version materialization replaces the subject of a member with its <code>ldes:versionOfPath</code> IRI, and selects a certain version of this object.
 It also translated <code>created</code> style timestamp predicates to <code>modified</code>-style predicates.</p>
-   <div class="example" id="example-a8c27031">
-    <a class="self-link" href="#example-a8c27031"></a> In this example an event stream with 2 versions of the same object got materialized until <code>2020-10-05T12:00:00Z</code> 
+   <div class="example" id="example-7d671c40">
+    <a class="self-link" href="#example-7d671c40"></a> In this example an event stream with 2 versions of the same object got materialized until <code>2020-10-05T12:00:00Z</code> 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES1</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-><c- p>;</c->
+    <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>created</c-><c- p>;</c->
        <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- p>[</c->
            <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- g>&lt;A></c-> <c- p>;</c->
            <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- s>"2020-10-05T11:00:00Z"</c->
@@ -2205,7 +2274,7 @@ It also translated <code>created</code> style timestamp predicates to <code>modi
            <c- nn>rdfs</c-><c- p>:</c-><c- f>label</c-> <c- s>"A v0.0.2"</c->
        <c- p>].</c->
 </pre>
-    towards 
+    towards the snapshot below 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES1v1</c-> <c- b>a</c-> <c- nn>tree</c-><c- p>:</c-><c- f>Collection</c-> <c- p>;</c-> <c- c># the members are no longer immutable</c->
          <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>ES1</c-> <c- p>;</c->
          <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationUntil</c-> <c- s>"2020-10-05T12:00:00Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-> <c- p>;</c->
@@ -2239,7 +2308,7 @@ It also translated <code>created</code> style timestamp predicates to <code>modi
    <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
    <p> Informative notes begin with the word “Note”
             and are set apart from the normative text with <code>class="note"</code>, like this: </p>
-   <p class="note" role="note"> Note, this is an informative note. </p>
+   <p class="note" role="note"> Note, this is an informative note.</p>
   </div>
 <script>
 (function() {
@@ -2374,13 +2443,13 @@ It also translated <code>created</code> style timestamp predicates to <code>modi
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-activitystreams-core">[ACTIVITYSTREAMS-CORE]
-   <dd>James Snell; Evan Prodromou. <a href="https://www.w3.org/TR/activitystreams-core/"><cite>Activity Streams 2.0</cite></a>. 23 May 2017. REC. URL: <a href="https://www.w3.org/TR/activitystreams-core/">https://www.w3.org/TR/activitystreams-core/</a>
+   <dd>James Snell; Evan Prodromou. <a href="https://w3c.github.io/activitystreams/core/"><cite>Activity Streams 2.0</cite></a>. URL: <a href="https://w3c.github.io/activitystreams/core/">https://w3c.github.io/activitystreams/core/</a>
    <dt id="biblio-ldp">[LDP]
-   <dd>Steve Speicher; John Arwe; Ashok Malhotra. <a href="https://www.w3.org/TR/ldp/"><cite>Linked Data Platform 1.0</cite></a>. 26 February 2015. REC. URL: <a href="https://www.w3.org/TR/ldp/">https://www.w3.org/TR/ldp/</a>
+   <dd>Steve Speicher; John Arwe; Ashok Malhotra. <a href="https://www.w3.org/2012/ldp/hg/ldp.html"><cite>Linked Data Platform 1.0</cite></a>. URL: <a href="https://www.w3.org/2012/ldp/hg/ldp.html">https://www.w3.org/2012/ldp/hg/ldp.html</a>
    <dt id="biblio-rdf-primer">[RDF-PRIMER]
    <dd>Frank Manola; Eric Miller. <a href="https://www.w3.org/TR/rdf-primer/"><cite>RDF Primer</cite></a>. 10 February 2004. REC. URL: <a href="https://www.w3.org/TR/rdf-primer/">https://www.w3.org/TR/rdf-primer/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-vocab-dcat-2">[VOCAB-DCAT-2]
-   <dd>Riccardo Albertoni; et al. <a href="https://www.w3.org/TR/vocab-dcat-2/"><cite>Data Catalog Vocabulary (DCAT) - Version 2</cite></a>. 4 February 2020. REC. URL: <a href="https://www.w3.org/TR/vocab-dcat-2/">https://www.w3.org/TR/vocab-dcat-2/</a>
+   <dd>Riccardo Albertoni; et al. <a href="https://w3c.github.io/dxwg/dcat/"><cite>Data Catalog Vocabulary (DCAT) - Version 2</cite></a>. URL: <a href="https://w3c.github.io/dxwg/dcat/">https://w3c.github.io/dxwg/dcat/</a>
   </dl>

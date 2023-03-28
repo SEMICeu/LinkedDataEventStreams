@@ -15,7 +15,7 @@ Abstract: A Linked Data Event Stream is a collection of immutable objects (such 
 
 A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection (`rdfs:subClassOf tree:Collection`) of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
 
-This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.github.io/specification/spec). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
+This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.org/TR/specification/). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
 
 Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
 
@@ -176,6 +176,64 @@ ex:P3 a ldes:LatestVersionSubset;
 
 We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.
 
+First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in a `ldes:EvenStream`, while maintaining the history of events.
+It is achieved by defining change in an `ldes:EventStream` through new `tree:member` in the `ldes:EventStream` through added metadata for both the `ldes:EvenStream` and each `tree:member`.
+
+Secondly, version materializations are defined that use a versioned LDES as a basis.
+This technique allows to create **snapshots** in time of a versioned LDES.
+Here we define a **snapshot** as `tree:Collection` of the most recent versions of all objects in the versioned LDES.
+
+## Versioning ## {#versioning}
+
+A versioned LDES is defined with two properties: `ldes:versionOfPath` and `ldes:timestampPath`. 
+
+* `ldes:versionOfPath`: declares the **property** that is used to define that a `tree:member` of an `ldes:EventStream` is a version.
+* `ldes:timestampPath`: declares the property that is used to define the DateTime of a `tree:member`.
+
+<div class="example"  highlight="turtle" id="ldes-versioning-1">
+A <b>versioned</b> LDES with one member.<br>
+
+`dct:isVersionOf` is used as property for `ldes:versionOfPath`, which indicates that `ex:resource1v0` is a version of `ex:resource1`.<br>
+
+`dct:issued` is used as property for `ldes:timestampPath`, which indicates that `ex:resource1v0` was issued in the ldes at "2021-12-15T10:00:00.000Z".
+
+```turtle
+ex:ES a ldes:EventStream;
+    ldes:versionOfPath dct:isVersionOf;
+    ldes:timestampPath dct:issued;
+    tree:member ex:resource1v0.
+
+ex:resource1v0
+    dct:isVersionOf ex:resource1;
+    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime.
+    dct:title "First version of the title".
+```
+</div>
+
+<div class="example"  highlight="turtle" id="ldes-versioning-2">
+A <b>versioned</b> LDES with two members which are both versions of the same object.
+
+```turtle
+ex:ES a ldes:EventStream;
+    ldes:versionOfPath dct:isVersionOf;
+    ldes:timestampPath dct:issued;
+    tree:member ex:resource1v0, ex:resource1v1.
+    
+ex:resource1v0
+    dct:isVersionOf ex:resource1;
+    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime.
+    dct:title "First version of the title".
+    
+ex:resource1v1 
+    dct:isVersionOf ex:resource1;
+    dct:issued "2021-12-15T12:00:00.000Z"^^xsd:dateTime.
+    dct:title "Title has been updated once".
+```
+2 hours after `ex:resource1v0` was created, the title of `ex:resource1` was changed. 
+This change can be seen by the creation of `ex:resource1v1`, which is the newest version of `ex:resource1`.
+
+</div>
+
 ## Version Materializations ## {#version-materializations}
 
 A version materialization can be defined only if the original LDES defines both `ldes:versionOfPath` and `ldes:timestampPath`.
@@ -188,6 +246,8 @@ In this example an event stream with 2 versions of the same object got materiali
 
 ```turtle
 ex:ES1 a ldes:EventStream
+    ldes:versionOfPath dct:isVersionOf;
+    ldes:timestampPath dct:created;
        tree:member [
            dcterms:isVersionOf <A> ;
            dcterms:created "2020-10-05T11:00:00Z"
@@ -200,7 +260,7 @@ ex:ES1 a ldes:EventStream
            rdfs:label "A v0.0.2"
        ].
 ```
-towards
+towards the snapshot below
 ```turtle
 ex:ES1v1 a tree:Collection ; # the members are no longer immutable
          ldes:versionMaterializationOf ex:ES1 ;
