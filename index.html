@@ -2016,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-03-28">28 March 2023</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-04-12">12 April 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2030,7 +2030,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 28 March 2023,
+In addition, as of 12 April 2023,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2071,7 +2071,7 @@ Parts of this work may be from another specification document.  If so, those par
    <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection (<code>rdfs:subClassOf tree:Collection</code>) of immutable objects, each object being described using a set of RDF triples (<a data-link-type="biblio" href="#biblio-rdf-primer">[rdf-primer]</a>).</p>
    <p>This specification uses the <a href="https://treecg.github.io/specification">TREE specification</a> for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as <a data-link-type="biblio" href="#biblio-activitystreams-core">[activitystreams-core]</a>, <a data-link-type="biblio" href="#biblio-vocab-dcat-2">[VOCAB-DCAT-2]</a>, <a data-link-type="biblio" href="#biblio-ldp">[LDP]</a> or <a href="https://shapetrees.org/TR/specification/">Shape Trees</a>. For the specific compatibility rules, read the <a href="https://treecg.github.io/specification">TREE specification</a>.</p>
    <p class="note" role="note"><span>Note:</span> When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on <a href="https://github.com/treecg/event-stream-client">NPM and Github</a>.</p>
-   <p>The base URI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>.</p>
+   <p>The base URI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>. Other prefixes are used following <a href="https://prefix.cc/sosa">prefix.cc</a>.</p>
    <div class="example" id="example-2c0a4024">
     <a class="self-link" href="#example-2c0a4024"></a> 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C1</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->

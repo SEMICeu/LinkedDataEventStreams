@@ -19,7 +19,7 @@ This specification uses the [TREE specification](https://treecg.github.io/specif
 
 Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
 
-The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`.
+The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`. Other prefixes are used following [prefix.cc](https://prefix.cc/sosa).
 
 <div class="example" highlight="turtle">
 ```turtle
