@@ -104,9 +104,10 @@ By default, an LDES MUST keep all data that has been added to the `tree:Collecti
 It MAY add a retention policy in which the server indicates data will be removed from the server.
 Third parties SHOULD read retention policies to understand what subset of the data is available in this `tree:View`, and MAY archive these member.
 
-In the LDES specification, two types of retention policies are defined which can be used with a `ldes:retentionPolicy` with an instance of a `tree:View` as its subject:
- 1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specific time is removed
+In the LDES specification, three types of retention policies are defined which can be used with a `ldes:retentionPolicy` with an instance of a `tree:View` as its subject:
+ 1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is removed
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream
+ 3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is removed
 
 Different retention policies MAY be combined.
 When policies are used together, a server MUST store the members as long they are not all matched.
@@ -171,6 +172,25 @@ ex:P3 a ldes:LatestVersionSubset;
       ldes:versionKey ( ( sosa:observedProperty ) ( sosa:madeBySensor ) ) .
 ```
 </div>
+
+## Point-in-time retention policies ## {#point-in-time}
+
+A point-in-time retention policy can be introduced as follows:
+
+<div class="example">
+```turtle
+ex:C4 a ldes:EventStream ;
+      ldes:timestampPath prov:generatedAtTime ;
+      tree:view <> .
+
+<> ldes:retentionPolicy ex:P4 .
+
+ex:P4 a ldes:PointInTimePolicy ;
+      ldes:pointInTime "2023-04-12T00:00:00"^^xsd:dateTime . # Keep data after April 12th, 2023
+```
+</div>
+
+A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time after which data is kept.
 
 # Derived collections # {#derived}
 
