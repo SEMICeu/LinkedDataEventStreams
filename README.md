@@ -20,6 +20,12 @@ Install [bikeshed](https://tabatkins.github.io/bikeshed/) and then run `bikeshed
  * Gather community input, either by asking input from the editors via email, either via the github issue, either via the [Matrix chat channel](https://matrix.to/#/#ldes:chat.semantic.works)
  * Open a pull request extending the specification
 
+## Changelog
+
+ * 2023-04-28 - Point in Time retention policy has been added
+ * 2022-07-01 - tree:ViewDescription was introduced as a concept
+
+
 ## Acknowledgements
 
 This work is financed by the [Interoperable Europe (SEMIC) programme](https://joinup.ec.europa.eu/interoperable-europe) of the European Commission
