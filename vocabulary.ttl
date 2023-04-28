@@ -51,6 +51,10 @@ ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;
                        rdfs:label "Time-based Retention Policy"@en ;
                        rdfs:comment "Retention policy based on a member’s timestamp and a duration."@en .
 
+ldes:PointInTimePolicy rdfs:subClassOf ldes:RetentionPolicy ;
+                       rdfs:label "Point in Time Retention Policy"@en ;
+                       rdfs:comment "Retention policy based on a member’s timestamp and a given point in time."@en .
+
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
                      rdfs:comment "Links to a retention policy."@en ;
@@ -63,6 +67,11 @@ ldes:amount a rdf:Property ;
             rdfs:range xsd:nonNegativeInteger ;
             rdfs:domain ldes:LastVersionSubset .
 
+ldes:pointInTime a rdf:Property ;
+                 rdfs:label "point in time"@en;
+                 rdfs:comment "After this point in time members are kept."@en ;
+                 rdfs:range xsd:dateTime ;
+                 rdfs:domain ldes:PointInTimePolicy .
 
 ldes:versionKey a rdf:Property ;
                 rdfs:label "version key"@en;

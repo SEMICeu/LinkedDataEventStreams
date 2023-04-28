@@ -2016,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-04-12">12 April 2023</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-04-28">28 April 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2030,7 +2030,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 12 April 2023,
+In addition, as of 28 April 2023,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2051,6 +2051,7 @@ Parts of this work may be from another specification document.  If so, those par
      <ol class="toc">
       <li><a href="#time-based-retention"><span class="secno">3.1</span> <span class="content">Time-based retention policies</span></a>
       <li><a href="#version-subsets"><span class="secno">3.2</span> <span class="content">Version-based retention policies</span></a>
+      <li><a href="#point-in-time"><span class="secno">3.3</span> <span class="content">Point-in-time retention policies</span></a>
      </ol>
     <li>
      <a href="#derived"><span class="secno">4</span> <span class="content">Derived collections</span></a>
@@ -2146,12 +2147,14 @@ by the backend system (that order is never changing), trying to gave as many pag
    <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
 Third parties SHOULD read retention policies to understand what subset of the data is available in this <code>tree:View</code>, and MAY archive these member.</p>
-   <p>In the LDES specification, two types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code> with an instance of a <code>tree:View</code> as its subject:</p>
+   <p>In the LDES specification, three types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code> with an instance of a <code>tree:View</code> as its subject:</p>
    <ol>
     <li data-md>
-     <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specific time is removed</p>
+     <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specified duration is removed</p>
     <li data-md>
      <p><code>ldes:LatestVersionSubset</code>: a version subset based on the latest versions of an entity in the stream</p>
+    <li data-md>
+     <p><code>ldes:PointInTimePolicy</code>: a point-in-time retention policy in which data generated before a specific time is removed</p>
    </ol>
    <p>Different retention policies MAY be combined.
 When policies are used together, a server MUST store the members as long they are not all matched.</p>
@@ -2203,6 +2206,21 @@ When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, a
       <c- nn>ldes</c-><c- p>:</c-><c- f>versionKey</c-> <c- p>(</c-> <c- p>(</c-> <c- nn>sosa</c-><c- p>:</c-><c- f>observedProperty</c-> <c- p>)</c-> <c- p>(</c-> <c- nn>sosa</c-><c- p>:</c-><c- f>madeBySensor</c-> <c- p>)</c-> <c- p>)</c-> <c- p>.</c->
 </pre>
    </div>
+   <h3 class="heading settled" data-level="3.3" id="point-in-time"><span class="secno">3.3. </span><span class="content">Point-in-time retention policies</span><a class="self-link" href="#point-in-time"></a></h3>
+   <p>A point-in-time retention policy can be introduced as follows:</p>
+   <div class="example" id="example-9479e096">
+    <a class="self-link" href="#example-9479e096"></a> 
+<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C4</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
+      <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>prov</c-><c- p>:</c-><c- f>generatedAtTime</c-> <c- p>;</c->
+      <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
+
+<c- g>&lt;></c-> <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- nn>ex</c-><c- p>:</c-><c- f>P4</c-> <c- p>.</c->
+
+<c- nn>ex</c-><c- p>:</c-><c- f>P4</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>PointInTimePolicy</c-> <c- p>;</c->
+      <c- nn>ldes</c-><c- p>:</c-><c- f>pointInTime</c-> <c- s>"2023-04-12T00:00:00"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-> <c- p>.</c-> <c- c># Keep data after April 12th, 2023</c->
+</pre>
+   </div>
+   <p>A <code>ldes:PointInTimePolicy</code> uses a <code>ldes:pointInTime</code> with an <code>xsd:dateTime</code>-typed literal to indicate the point in time after which data is kept.</p>
    <h2 class="heading settled" data-level="4" id="derived"><span class="secno">4. </span><span class="content">Derived collections</span><a class="self-link" href="#derived"></a></h2>
    <p>We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.</p>
    <p>First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in a <code>ldes:EvenStream</code>, while maintaining the history of events.
