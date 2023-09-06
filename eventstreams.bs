@@ -93,7 +93,7 @@ An `tree:importStream` MAY be used to describe a publish-subscribe interface to 
 Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. 
 However, it may happen that a time-based fragmentation cannot be applied. For example: the backend system on which the LDES has been built does not receive the events at the time they were created, due to human errors (forgetting to indicate that a change was made), 
 external systems or just latency. Applying a time-based fragmentation in that situation will result in losing caching, due to the ever-changing pages. Instead, in the spirit of an LDES’s goal, the publisher should publish the events in the order they were received
-by the backend system (that order is never changing), trying to gave as many pages as possible an HTTP `Cache-Control: public, max-age=604800, immutable` header
+by the backend system (that order is never changing), trying to give as many pages as possible an HTTP `Cache-Control: public, max-age=604800, immutable` header.
 
 Note: Cfr. [the example in the TREE specification on “searching through a list of objects ordered in time”](https://treecg.github.io/specification/#timesearch), also a search form can optionally make a one dimensional feed of immutable objects more searchable.
 
@@ -102,7 +102,7 @@ Note: Cfr. [the example in the TREE specification on “searching through a list
 
 By default, an LDES MUST keep all data that has been added to the `tree:Collection` (or `ldes:EventStream`) as defined by the TREE specification.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
-Third parties SHOULD read retention policies to understand what subset of the data is available in this `tree:View`, and MAY archive these member.
+Third parties SHOULD read retention policies to understand what subset of the data is available in this `tree:View`, and MAY archive these members.
 
 In the LDES specification, three types of retention policies are defined which can be used with a `ldes:retentionPolicy` with an instance of a `tree:View` as its subject:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is removed
@@ -196,7 +196,7 @@ A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-type
 
 We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.
 
-First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in a `ldes:EvenStream`, while maintaining the history of events.
+First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in an `ldes:EvenStream`, while maintaining the history of events.
 It is achieved by defining change in an `ldes:EventStream` through new `tree:member` in the `ldes:EventStream` through added metadata for both the `ldes:EvenStream` and each `tree:member`.
 
 Secondly, version materializations are defined that use a versioned LDES as a basis.
@@ -215,7 +215,7 @@ A <b>versioned</b> LDES with one member.<br>
 
 `dct:isVersionOf` is used as property for `ldes:versionOfPath`, which indicates that `ex:resource1v0` is a version of `ex:resource1`.<br>
 
-`dct:issued` is used as property for `ldes:timestampPath`, which indicates that `ex:resource1v0` was issued in the ldes at "2021-12-15T10:00:00.000Z".
+`dct:issued` is used as property for `ldes:timestampPath`, which indicates that `ex:resource1v0` was issued in the LDES at "2021-12-15T10:00:00.000Z".
 
 ```turtle
 ex:ES a ldes:EventStream;
@@ -225,7 +225,7 @@ ex:ES a ldes:EventStream;
 
 ex:resource1v0
     dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime.
+    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime;
     dct:title "First version of the title".
 ```
 </div>
@@ -241,12 +241,12 @@ ex:ES a ldes:EventStream;
     
 ex:resource1v0
     dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime.
+    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime;
     dct:title "First version of the title".
     
 ex:resource1v1 
     dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T12:00:00.000Z"^^xsd:dateTime.
+    dct:issued "2021-12-15T12:00:00.000Z"^^xsd:dateTime;
     dct:title "Title has been updated once".
 ```
 2 hours after `ex:resource1v0` was created, the title of `ex:resource1` was changed. 
@@ -259,7 +259,7 @@ This change can be seen by the creation of `ex:resource1v1`, which is the newest
 A version materialization can be defined only if the original LDES defines both `ldes:versionOfPath` and `ldes:timestampPath`.
 
 A version materialization replaces the subject of a member with its `ldes:versionOfPath` IRI, and selects a certain version of this object.
-It also translated `created` style timestamp predicates to `modified`-style predicates.
+It also translates `created` style timestamp predicates to `modified`-style predicates.
 
 <div class="example">
 In this example an event stream with 2 versions of the same object got materialized until `2020-10-05T12:00:00Z`
@@ -269,8 +269,8 @@ ex:ES1 a ldes:EventStream
     ldes:versionOfPath dct:isVersionOf;
     ldes:timestampPath dct:created;
        tree:member [
-           dcterms:isVersionOf <A> ;
-           dcterms:created "2020-10-05T11:00:00Z"
+           dcterms:isVersionOf <A>;
+           dcterms:created "2020-10-05T11:00:00Z";
            owl:versionInfo "v0.0.1";
            rdfs:label "A v0.0.1"
        ], [
@@ -283,12 +283,12 @@ ex:ES1 a ldes:EventStream
 towards the snapshot below
 ```turtle
 ex:ES1v1 a tree:Collection ; # the members are no longer immutable
-         ldes:versionMaterializationOf ex:ES1 ;
-         ldes:versionMaterializationUntil "2020-10-05T12:00:00Z"^^xsd:dateTime ;
-         tree:member <A> .
+         ldes:versionMaterializationOf ex:ES1;
+         ldes:versionMaterializationUntil "2020-10-05T12:00:00Z"^^xsd:dateTime;
+         tree:member <A>.
 
-<A> rdfs:label "A v0.0.1" ;
-    dcterms:modified "2020-10-05T11:00:00Z" .
+<A> rdfs:label "A v0.0.1";
+    dcterms:modified "2020-10-05T11:00:00Z".
 ```
 </div>
 

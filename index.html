@@ -2016,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-04-28">28 April 2023</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-09-06">6 September 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2030,7 +2030,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 28 April 2023,
+In addition, as of 6 September 2023,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2141,12 +2141,12 @@ All relation types from the TREE specification MAY be used.</p>
    <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates.
 However, it may happen that a time-based fragmentation cannot be applied. For example: the backend system on which the LDES has been built does not receive the events at the time they were created, due to human errors (forgetting to indicate that a change was made), 
 external systems or just latency. Applying a time-based fragmentation in that situation will result in losing caching, due to the ever-changing pages. Instead, in the spirit of an LDES’s goal, the publisher should publish the events in the order they were received
-by the backend system (that order is never changing), trying to gave as many pages as possible an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header</p>
+by the backend system (that order is never changing), trying to give as many pages as possible an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header.</p>
    <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on “searching through a list of objects ordered in time”</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
    <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
    <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
-Third parties SHOULD read retention policies to understand what subset of the data is available in this <code>tree:View</code>, and MAY archive these member.</p>
+Third parties SHOULD read retention policies to understand what subset of the data is available in this <code>tree:View</code>, and MAY archive these members.</p>
    <p>In the LDES specification, three types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code> with an instance of a <code>tree:View</code> as its subject:</p>
    <ol>
     <li data-md>
@@ -2223,7 +2223,7 @@ When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, a
    <p>A <code>ldes:PointInTimePolicy</code> uses a <code>ldes:pointInTime</code> with an <code>xsd:dateTime</code>-typed literal to indicate the point in time after which data is kept.</p>
    <h2 class="heading settled" data-level="4" id="derived"><span class="secno">4. </span><span class="content">Derived collections</span><a class="self-link" href="#derived"></a></h2>
    <p>We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.</p>
-   <p>First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in a <code>ldes:EvenStream</code>, while maintaining the history of events.
+   <p>First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in an <code>ldes:EvenStream</code>, while maintaining the history of events.
 It is achieved by defining change in an <code>ldes:EventStream</code> through new <code>tree:member</code> in the <code>ldes:EventStream</code> through added metadata for both the <code>ldes:EvenStream</code> and each <code>tree:member</code>.</p>
    <p>Secondly, version materializations are defined that use a versioned LDES as a basis.
 This technique allows to create <strong>snapshots</strong> in time of a versioned LDES.
@@ -2239,7 +2239,7 @@ Here we define a <strong>snapshot</strong> as <code>tree:Collection</code> of th
    <div class="example" id="ldes-versioning-1">
     <a class="self-link" href="#ldes-versioning-1"></a> A <b>versioned</b> LDES with one member.<br> 
     <p><code class="highlight"><c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-></code> is used as property for <code class="highlight"><c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-></code>, which indicates that <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> is a version of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-></code>.<br></p>
-    <p><code class="highlight"><c- nn>dct</c-><c- p>:</c-><c- f>issued</c-></code> is used as property for <code class="highlight"><c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-></code>, which indicates that <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> was issued in the ldes at "2021-12-15T10:00:00.000Z".</p>
+    <p><code class="highlight"><c- nn>dct</c-><c- p>:</c-><c- f>issued</c-></code> is used as property for <code class="highlight"><c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-></code>, which indicates that <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> was issued in the LDES at "2021-12-15T10:00:00.000Z".</p>
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-><c- p>;</c->
     <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-><c- p>;</c->
     <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-><c- p>;</c->
@@ -2247,7 +2247,7 @@ Here we define a <strong>snapshot</strong> as <code>tree:Collection</code> of th
 
 <c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c->
     <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
-    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>;</c->
     <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"First version of the title"</c-><c- p>.</c->
 </pre>
    </div>
@@ -2260,12 +2260,12 @@ Here we define a <strong>snapshot</strong> as <code>tree:Collection</code> of th
     
 <c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c->
     <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
-    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T10:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>;</c->
     <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"First version of the title"</c-><c- p>.</c->
     
 <c- nn>ex</c-><c- p>:</c-><c- f>resource1v1</c-> 
     <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-><c- p>;</c->
-    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T12:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>.</c->
+    <c- nn>dct</c-><c- p>:</c-><c- f>issued</c-> <c- s>"2021-12-15T12:00:00.000Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>;</c->
     <c- nn>dct</c-><c- p>:</c-><c- f>title</c-> <c- s>"Title has been updated once"</c-><c- p>.</c->
 </pre>
     2 hours after <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1v0</c-></code> was created, the title of <code class="highlight"><c- nn>ex</c-><c- p>:</c-><c- f>resource1</c-></code> was changed. 
@@ -2274,15 +2274,15 @@ This change can be seen by the creation of <code class="highlight"><c- nn>ex</c-
    <h3 class="heading settled" data-level="4.2" id="version-materializations"><span class="secno">4.2. </span><span class="content">Version Materializations</span><a class="self-link" href="#version-materializations"></a></h3>
    <p>A version materialization can be defined only if the original LDES defines both <code>ldes:versionOfPath</code> and <code>ldes:timestampPath</code>.</p>
    <p>A version materialization replaces the subject of a member with its <code>ldes:versionOfPath</code> IRI, and selects a certain version of this object.
-It also translated <code>created</code> style timestamp predicates to <code>modified</code>-style predicates.</p>
-   <div class="example" id="example-7d671c40">
-    <a class="self-link" href="#example-7d671c40"></a> In this example an event stream with 2 versions of the same object got materialized until <code>2020-10-05T12:00:00Z</code> 
+It also translates <code>created</code> style timestamp predicates to <code>modified</code>-style predicates.</p>
+   <div class="example" id="example-fe6ebb5b">
+    <a class="self-link" href="#example-fe6ebb5b"></a> In this example an event stream with 2 versions of the same object got materialized until <code>2020-10-05T12:00:00Z</code> 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES1</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c->
     <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>isVersionOf</c-><c- p>;</c->
     <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dct</c-><c- p>:</c-><c- f>created</c-><c- p>;</c->
        <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- p>[</c->
-           <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- g>&lt;A></c-> <c- p>;</c->
-           <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- s>"2020-10-05T11:00:00Z"</c->
+           <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- g>&lt;A></c-><c- p>;</c->
+           <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- s>"2020-10-05T11:00:00Z"</c-><c- p>;</c->
            <c- nn>owl</c-><c- p>:</c-><c- f>versionInfo</c-> <c- s>"v0.0.1"</c-><c- p>;</c->
            <c- nn>rdfs</c-><c- p>:</c-><c- f>label</c-> <c- s>"A v0.0.1"</c->
        <c- p>],</c-> <c- p>[</c->
@@ -2294,12 +2294,12 @@ It also translated <code>created</code> style timestamp predicates to <code>modi
 </pre>
     towards the snapshot below 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>ES1v1</c-> <c- b>a</c-> <c- nn>tree</c-><c- p>:</c-><c- f>Collection</c-> <c- p>;</c-> <c- c># the members are no longer immutable</c->
-         <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>ES1</c-> <c- p>;</c->
-         <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationUntil</c-> <c- s>"2020-10-05T12:00:00Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-> <c- p>;</c->
-         <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- g>&lt;A></c-> <c- p>.</c->
+         <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>ES1</c-><c- p>;</c->
+         <c- nn>ldes</c-><c- p>:</c-><c- f>versionMaterializationUntil</c-> <c- s>"2020-10-05T12:00:00Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-><c- p>;</c->
+         <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- g>&lt;A></c-><c- p>.</c->
 
-<c- g>&lt;A></c-> <c- nn>rdfs</c-><c- p>:</c-><c- f>label</c-> <c- s>"A v0.0.1"</c-> <c- p>;</c->
-    <c- nn>dcterms</c-><c- p>:</c-><c- f>modified</c-> <c- s>"2020-10-05T11:00:00Z"</c-> <c- p>.</c->
+<c- g>&lt;A></c-> <c- nn>rdfs</c-><c- p>:</c-><c- f>label</c-> <c- s>"A v0.0.1"</c-><c- p>;</c->
+    <c- nn>dcterms</c-><c- p>:</c-><c- f>modified</c-> <c- s>"2020-10-05T11:00:00Z"</c-><c- p>.</c->
 </pre>
    </div>
    <p>A version materialization is thus a <code>tree:Collection</code> instance that has two predicates set:</p>
