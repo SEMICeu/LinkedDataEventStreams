@@ -39,7 +39,7 @@ ldes:EventSource rdfs:subClassOf tree:ViewDescription ;
                  rdfs:label "Event Source"@en ;
                  rdfs:comment "A data service that provides the source other views should synchronize with"@en .
 
-ldes:RetentionPolicy a rdf:Class ;
+ldes:RetentionPolicy a rdfs:Class ;
                      rdfs:label "Retention Policy"@en ;
                      rdfs:comment "The abstract concept of a retention policy."@en .
 
