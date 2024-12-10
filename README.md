@@ -6,6 +6,8 @@ The objective of a Linked Data Event Stream is to allow consumers to replicate a
 
 The HTML specification can be accessed from [here](https://w3id.org/ldes/specification).
 
+The JSON-LD context can be accessed from [here](https://w3id.org/ldes/context).
+
 This specification uses [TREE](https://w3id.org/tree/specification) for its collection and fragmentation features, which in its turn is compatible to other specifications such as Activity Streams, DCAT-AP, LDP or Shape Trees.
 
 If you are new to the concept of Linked Data Event Stream or Linked Data, [this short training](https://academy.europa.eu/courses/publishing-data-with-linked-data-event-streams-why-and-how) introduces the main concepts.
