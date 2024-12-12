@@ -9,7 +9,7 @@
       "RetentionPolicy": "ldes:RetentionPolicy",
       "LatestVersionSubset": "ldes:LatestVersionSubset",
       "DurationAgoPolicy": "ldes:DurationAgoPolicy",
-      "PointInTimePolicy": "PointInTimePolicy",
+      "PointInTimePolicy": "ldes:PointInTimePolicy",
       "node": {"@type": "@id", "@id": "tree:node"},
       "members": {"@type": "@id", "@id": "tree:member", "@container":"@list"},
       "relations": {"@id": "tree:relation"},
