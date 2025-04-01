@@ -153,7 +153,7 @@ ex:P2 a ldes:LatestVersionSubset;
 </div>
 
 A `ldes:LatestVersionSubset` MUST define the predicate `ldes:amount` and MAY redefine the ldes:timestampPath and/or ldes:versionOfPath. It MAY also define a compound version key using `ldes:versionKey` (see example below) instead of the more `ldes:versionOfPath`.
-The `ldes:amount` has a `xsd:nonNegativeInteger` datatype and indicated how many to keep that defaults to 1.
+The `ldes:amount` has a `xsd:positiveInteger` datatype and indicated how many to keep that defaults to 1.
 The `ldes:versionKey` is an `rdf:List` of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
 When the `ldes:versionKey` is set to an empty path `()`, all members MUST be seen as a version of the same thing.
 
