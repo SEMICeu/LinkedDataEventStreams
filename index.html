@@ -2144,7 +2144,7 @@ external systems or just latency. Applying a time-based fragmentation in that si
 by the backend system (that order is never changing), trying to give as many pages as possible an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header.</p>
    <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on “searching through a list of objects ordered in time”</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
    <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
-   <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
+   <p>By default, an LDES MUST keep all members that has been added to the <code>ldes:EventStream</code>.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
 Third parties SHOULD read retention policies to understand what subset of the data is available in this <code>tree:View</code>, and MAY archive these members.</p>
    <p>In the LDES specification, three types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code> with an instance of a <code>tree:View</code> as its subject:</p>
