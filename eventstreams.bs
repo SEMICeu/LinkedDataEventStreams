@@ -190,7 +190,7 @@ ex:P4 a ldes:PointInTimePolicy ;
 ```
 </div>
 
-A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time after which data is kept.
+A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member's timestamp, indicated by the `ldes:timestampPath` that MAY be redefined in the policy itself.
 
 # Derived collections # {#derived}
 
