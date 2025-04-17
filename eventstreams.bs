@@ -100,7 +100,7 @@ Note: Cfr. [the example in the TREE specification on “searching through a list
 
 # Retention policies # {#retention}
 
-By default, an LDES MUST keep all data that has been added to the `tree:Collection` (or `ldes:EventStream`) as defined by the TREE specification.
+By default, an LDES MUST keep all members that has been added to the `ldes:EventStream`.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
 Third parties SHOULD read retention policies to understand what subset of the data is available in this `tree:View`, and MAY archive these members.
 
