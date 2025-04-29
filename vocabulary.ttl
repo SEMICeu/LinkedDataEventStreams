@@ -35,7 +35,7 @@ ldes:EventStream a rdfs:Class ;
                  rdfs:label "Event Stream"@en;
                  rdfs:comment "An Event Stream is a tree:Collection containing immutable members."@en .
 
-ldes:EventSource rdfs:subClassOf tree:ViewDescription ;
+ldes:EventSource a rdfs:Class;
                  rdfs:label "Event Source"@en ;
                  rdfs:comment "A data service that provides the source other views should synchronize with"@en .
 
@@ -58,7 +58,6 @@ ldes:PointInTimePolicy rdfs:subClassOf ldes:RetentionPolicy ;
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
                      rdfs:comment "Links to a retention policy."@en ;
-                     rdfs:domain tree:ViewDescription ;
                      rdfs:range ldes:RetentionPolicy .
 
 ldes:amount a rdf:Property ;
@@ -82,7 +81,6 @@ ldes:versionKey a rdf:Property ;
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
                    rdfs:comment "SHACL property path to the non-versioned identifier of the entity."@en .
-
 
 ldes:timestampPath a rdf:Property ;
                    rdfs:label "Timestamp Path"@en;
