@@ -80,11 +80,11 @@ ldes:versionKey a rdf:Property ;
 
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
-                   rdfs:comment "SHACL property path to the non-versioned identifier of the entity."@en .
+                   rdfs:comment "SHACL property path to the non-versioned IRI of the entity."@en .
 
 ldes:timestampPath a rdf:Property ;
                    rdfs:label "Timestamp Path"@en;
-                   rdfs:comment "SHACL property path to the timestamp when the version object entered the event stream."@en .
+                   rdfs:comment "SHACL property path to the xsd:dateTime literal in each member that defines the order of the event stream."@en .
 
 ldes:versionMaterializationOf a rdf:Property ;
                    rdfs:label "Version Materialization Of"@en;
