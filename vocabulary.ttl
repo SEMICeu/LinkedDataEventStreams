@@ -45,7 +45,7 @@ ldes:RetentionPolicy a rdfs:Class ;
 
 ldes:LatestVersionSubset rdfs:subClassOf ldes:RetentionPolicy ;   
                          rdfs:label "Latest Version Subset Policy"@en ;
-                         rdfs:comment "The latest version of the element."@en .
+                         rdfs:comment "Only a certain amount (defaults to 1) versions of the members are kept."@en .
                          
 ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;   
                        rdfs:label "Time-based Retention Policy"@en ;
@@ -53,7 +53,7 @@ ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;
 
 ldes:PointInTimePolicy rdfs:subClassOf ldes:RetentionPolicy ;
                        rdfs:label "Point in Time Retention Policy"@en ;
-                       rdfs:comment "Retention policy based on a member’s timestamp and a given point in time."@en .
+                       rdfs:comment "Only members starting a certain point in time are kept."@en .
 
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
@@ -64,11 +64,11 @@ ldes:amount a rdf:Property ;
             rdfs:label "amount"@en;
             rdfs:comment "Amount of versions to keep."@en ;
             rdfs:range xsd:nonNegativeInteger ;
-            rdfs:domain ldes:LastVersionSubset .
+            rdfs:domain ldes:LatestVersionSubset .
 
 ldes:pointInTime a rdf:Property ;
                  rdfs:label "point in time"@en;
-                 rdfs:comment "After this point in time members are kept."@en ;
+                 rdfs:comment "Only after this point in time, members are kept."@en ;
                  rdfs:range xsd:dateTime ;
                  rdfs:domain ldes:PointInTimePolicy .
 
@@ -76,7 +76,7 @@ ldes:versionKey a rdf:Property ;
                 rdfs:label "version key"@en;
                 rdfs:comment "A list of SHACL property paths to compose a version key."@en ;
                 rdfs:range rdf:List ;
-                rdfs:domain ldes:LastVersionSubset .
+                rdfs:domain ldes:LatestVersionSubset .
 
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
