@@ -108,7 +108,7 @@ This can help a consumer in the discovery phase to pick the right LDES, or help 
 When no retention policy is provided in the root node, the consumer MUST assume that all members, that have once been added to the `ldes:EventStream`, are still available from this root node.
 When a retention policy is provided however, a consumer MUST assume it will not be able to find members outside of the retention policy.
 
-<img height="400" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
+<img width="100%" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
 
 <div class="example" highlight="turtle">
 An example retention policy combining the features
@@ -188,7 +188,7 @@ The search tree only keeps members starting a certain timestamp.
 
 **Range:** `xsd:dateTime` with a timezone
 
-### ldes:versionDuration ### {voc-versionduration}
+### ldes:versionDuration ### {#voc-versionduration}
 
 The search tree only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. 
 
@@ -196,7 +196,7 @@ The search tree only keeps its versions, for which an `ldes:versionAmount` MUST 
 
 **Range:** `xsd:duration`
 
-### ldes:versionAmount ### {voc-versionamount}
+### ldes:versionAmount ### {#voc-versionamount}
 
 The amount of versions to keep.
 
@@ -204,7 +204,7 @@ The amount of versions to keep.
 
 **Range:** `xsd:integer` > 0
 
-### ldes:versionDeleteDuration ### {voc-versiondeleteduration}
+### ldes:versionDeleteDuration ### {#voc-versiondeleteduration}
 
 The search tree only keeps its deletions for a certain duration.
 
@@ -212,7 +212,7 @@ The search tree only keeps its deletions for a certain duration.
 
 **Range:** `xsd:duration`
 
-### ldes:fullLogDuration ### {voc-fulllogduration}
+### ldes:fullLogDuration ### {#voc-fulllogduration}
 
 The search tree keeps its full log for a certain duration.
 
