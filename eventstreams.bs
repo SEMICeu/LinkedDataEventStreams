@@ -39,12 +39,10 @@ When more resources are used, these pages, or `tree:Node`s will be structured ac
 Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
 
 In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
- * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the order in which members of the event stream are published. When `ldes:timestampPath` is set, no member may be added to the LDES with a timestamp earlier than the latest published member.
- * `ldes:versionOfPath`: when your entities are versioned, this property points at the object tells you what is is a version of (e.g., `dcterms:isVersionOf`).
- * `tree:shape`: a [[!SHACL]] shape that can be used for source selection, as well as to validate the members in the event stream.
+ * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the order in which members of the event stream are published. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what is is a version of (e.g., `dcterms:isVersionOf`).
+ * `tree:shape`: a [[!SHACL]] shape that can be used for selection a search tree in the discovery phase, as well as to validate the members in the event stream.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
-
-Note: When `ldes:timestampPath` is set, a provider MUST add new members in this order and cannot provide out-of-order members.
 
 In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
  * `ldes:retentionPolicy`: indicates 0 or more retention policies (see next chapter).
@@ -55,7 +53,7 @@ The client MUST implement the [initialization of the TREE specification](https:/
 In any `tree:Node` – root node or subsequent node – the client expects to find 0 or more members of the `ldes:EventStream` using the `tree:member` property.
 The subject is the event stream instance, and the object is the root focus node of a member.
 An LDES client MUST implement the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of the member.
-In an`ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
+In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
 An example record from a sensor observation dataset in the [[!turtle]] format:
@@ -65,7 +63,7 @@ ex:Observations a ldes:EventStream ;
                 tree:shape ex:shape1.shacl ;
                 tree:view <> ;
                 tree:member ex:Observation1 .
-        
+
 ex:Observation1 a sosa:Observation ;
                 sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime ;
                 sosa:hasSimpleResult "..." .
@@ -236,7 +234,7 @@ An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timesta
 
 Links to one or more retention policies.
 
-**Domain:** Preferably the root node, or any type of entity that is linked from the root node using `tree:viewDescription`.
+**Domain:** Preferably the root node. Alternatively it can occur on any type of entity that is linked from the root node using `tree:viewDescription`.
 
 **Range:** `ldes:RetentionPolicy`
 
@@ -250,7 +248,7 @@ A retention policy that uses an `xsd:duration` literal to document a sliding win
 
 ## ldes:LatestVersionSubset ## {#voc-latestversionsubset}
 
-A retention policy that select an amount of version based on the versionOfPath, or a more advanced version key that can be configured.
+A retention policy that select an amount of versions based on the versionOfPath, or a more advanced version key that can be configured.
 
 ### ldes:versionKey ### {#voc-versionkey}
 
@@ -262,7 +260,7 @@ An advanced property for setting a compound key for defining the latest version 
 
 ### ldes:amount ### {#voc-amount}
 
-The number of versions to keep. This will be a number greater than 0.
+The number of versions to keep. This MUST be a number greater than 0.
 
 **Domain:** `ldes:LatestVersionSubset`
 
@@ -270,11 +268,11 @@ The number of versions to keep. This will be a number greater than 0.
 
 ## ldes:PointInTimePolicy ## {#voc-pointintimepolicy}
 
-A retention policy that indicates members are kept starting a certain point in time.
+A retention policy that indicates members are kept starting on a certain point in time.
 
 ### ldes:pointInTime ### {#voc-pointintime}
 
-The point in time from which members will be available starting this root node.
+The point in time from which members will be available starting from this root node.
 
 **Domain:** `ldes:PointInTimePolicy`
 
