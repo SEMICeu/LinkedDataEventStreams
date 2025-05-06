@@ -16,12 +16,6 @@ An **LDES client** is a piece of software used by a *consumer* that accepts the 
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 
 The client does this by extending upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
-The *subset* is that an LDES client MUST implement these chapters from the TREE specification:
- 1. [Initialization](https://w3id.org/tree/specification#init)
- 2. [The member extraction algorithm](https://w3id.org/tree/specification#member-extraction-algorithm)
- 3. [Traversing the search tree](https://w3id.org/tree/specification#traversing)
- 4. [Pruning branches](https://w3id.org/tree/specification#relationsubclasses): but only for those comparator relations related to `xsd:dateTime` values.
-
 The *extension* is that the Linked Data Event Streams specification introduces specialized terms for dealing with append-only collections, or *event streams*.
 For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
 
@@ -91,16 +85,16 @@ ex:AddressRecord1-activity1 dcterms:created "2026-01-01T00:00:00Z"^^xsd:dateTime
 </div>
 
 In any `tree:Node`, root node or subsequent node, the client expects to find zero or more `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
-A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing) and [pruning branches](https://w3id.org/tree/specification#relationsubclasses).
-A client MUST keep a *state* in which it documents the timestamp of the last member it processed, and keeps a list of `tree:Node`s it needs to refetch at a certain time, including the members that were already processed from these pages.
+A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
+A client MUST keep its own *state* to know when to refetch certain `tree:Node`s.
 
-Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1.
+Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
 
 Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
 # Retention policies # {#retention}
 
-The goal of the retention policies is to indicate that, when a client would start from this root node, it will not encounter all members, but only a certain amount of members according to one or more retention policies.
+The goal of the retention policies is to indicate that, a client should not rely on finding members that fall outside the retention policies.
 This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.
 
 <img height="400" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
