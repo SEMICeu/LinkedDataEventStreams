@@ -92,7 +92,32 @@ Issue: We should refer here to a new next chapter on how to gracefully iterate o
 
 Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
-# Retention policies # {#retention}
+# Context information # {#context-information}
+
+A client MUST have a way to make available context information to processors further down the pipeline set up by a consumer.
+
+## Versions and transactions ## {#versions-transactions}
+
+When the members of your LDES contain version representations, it can work as follows:
+
+ * `ldes:versionOfPath`
+ * `ldes:versionDeleteObject`
+ * `ldes:versionCreateObject`
+ * `ldes:versionUpdateObject`
+ * `ldes:versionDeletePath`
+ * `ldes:versionCreatePath`
+ * `ldes:versionUpdatePath`
+
+You can also indicate to a consumer that it SHOULD only commit a series of members once a transaction has been finalized using:
+ * `ldes:transactionPath`
+ * `ldes:transactionFinalizedPath`
+ * `ldes:transactionFinalizedObject`
+
+When a processor wants to understand from the member what the envelope is, and what the payload is, it MUST apply the following logic:
+
+Issue: This algorithm is still to be done and will depend on the results of [revisiting the Member Extraction Algorithm in the TREE CG meetings](https://github.com/TREEcg/specification/issues/139).
+
+## Retention policies ## {#retention}
 
 The goal of a retention policy is to indicate that, a client cannot rely on finding members that fall outside the retention policies.
 This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.
@@ -107,9 +132,9 @@ An example retention policy combining the features
 ```turtle
 ex:LDES a ldes:EventStream ;
         ldes:timestampPath as:updated ;
-		ldes:transactionPath ex:transactionId ;
-		ldes:transactionFinalizedPath ex:transactionEnded ;
-		ldes:transactionFinalizedObject true ;
+        ldes:transactionPath ex:transactionId ;
+        ldes:transactionFinalizedPath ex:transactionEnded ;
+        ldes:transactionFinalizedObject true ;
         ldes:versionOfPath as:object ;
         ldes:versionDeleteObject as:Delete ;
         ldes:versionCreateObject as:Create ;
@@ -118,7 +143,6 @@ ex:LDES a ldes:EventStream ;
 
 <> a ldes:EventSource ;
      ldes:retentionPolicy [
-     ldes:startingFrom "t_pointInTime"^^xsd:dateTime ;
      ldes:fullLogDuration "P1Y"^^xsd:duration ;
      ldes:versionAmount 1 ;
      ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
@@ -126,7 +150,7 @@ ex:LDES a ldes:EventStream ;
 ```
 </div>
 
-TODO: explain how a consumer MUST interpret the retention policy.
+Issue: explain how a consumer MUST interpret the retention policy and include more examples here, building up the logic cfr. in the presentation in workshop 1.
 
 # Vocabulary # {#vocabulary}
 
@@ -211,3 +235,5 @@ The search tree keeps its full log for a certain duration.
 **Domain:** `ldes:RetentionPolicy`
 
 **Range:** `xsd:duration`
+
+Issue: We still need to include the terms for versioning and transactions here.
