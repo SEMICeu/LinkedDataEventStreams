@@ -33,8 +33,8 @@ When more resources are used, these pages, or `tree:Node`s will be structured ac
 Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
 
 In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
- * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the order in which members of the event stream are published. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
- * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what is is a version of (e.g., `dcterms:isVersionOf`).
+ * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you the entity is a version of (e.g., `dcterms:isVersionOf`).
  * `tree:shape`: a [[!SHACL]] shape that can be used for selection a search tree in the discovery phase, as well as to validate the members in the event stream.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
@@ -65,7 +65,7 @@ ex:Observation1 a sosa:Observation ;
 </div>
 
 <div class="example" highlight="turtle">
-An example record from a base registry of addresses in the [[!turtle]] format:
+An example record from a base registry of addresses in the [[!trig]] format:
 ```turtle
 ex:AddressRecords a ldes:EventStream ;
                   ldes:timestampPath dcterms:created ;
