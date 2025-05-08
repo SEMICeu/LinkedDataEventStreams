@@ -35,7 +35,7 @@ ldes:EventStream a rdfs:Class ;
                  rdfs:label "Event Stream"@en;
                  rdfs:comment "An Event Stream is a tree:Collection containing immutable members."@en .
 
-ldes:EventSource rdfs:subClassOf tree:ViewDescription ;
+ldes:EventSource a rdfs:Class;
                  rdfs:label "Event Source"@en ;
                  rdfs:comment "A data service that provides the source other views should synchronize with"@en .
 
@@ -45,7 +45,7 @@ ldes:RetentionPolicy a rdfs:Class ;
 
 ldes:LatestVersionSubset rdfs:subClassOf ldes:RetentionPolicy ;   
                          rdfs:label "Latest Version Subset Policy"@en ;
-                         rdfs:comment "The latest version of the element."@en .
+                         rdfs:comment "Only a certain amount (defaults to 1) versions of the members are kept."@en .
                          
 ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;   
                        rdfs:label "Time-based Retention Policy"@en ;
@@ -53,23 +53,22 @@ ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;
 
 ldes:PointInTimePolicy rdfs:subClassOf ldes:RetentionPolicy ;
                        rdfs:label "Point in Time Retention Policy"@en ;
-                       rdfs:comment "Retention policy based on a member’s timestamp and a given point in time."@en .
+                       rdfs:comment "Only members starting a certain point in time are kept."@en .
 
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
                      rdfs:comment "Links to a retention policy."@en ;
-                     rdfs:domain tree:ViewDescription ;
                      rdfs:range ldes:RetentionPolicy .
 
 ldes:amount a rdf:Property ;
             rdfs:label "amount"@en;
             rdfs:comment "Amount of versions to keep."@en ;
             rdfs:range xsd:nonNegativeInteger ;
-            rdfs:domain ldes:LastVersionSubset .
+            rdfs:domain ldes:LatestVersionSubset .
 
 ldes:pointInTime a rdf:Property ;
                  rdfs:label "point in time"@en;
-                 rdfs:comment "After this point in time members are kept."@en ;
+                 rdfs:comment "Only after this point in time, members are kept."@en ;
                  rdfs:range xsd:dateTime ;
                  rdfs:domain ldes:PointInTimePolicy .
 
@@ -77,16 +76,15 @@ ldes:versionKey a rdf:Property ;
                 rdfs:label "version key"@en;
                 rdfs:comment "A list of SHACL property paths to compose a version key."@en ;
                 rdfs:range rdf:List ;
-                rdfs:domain ldes:LastVersionSubset .
+                rdfs:domain ldes:LatestVersionSubset .
 
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
-                   rdfs:comment "SHACL property path to the non-versioned identifier of the entity."@en .
-
+                   rdfs:comment "SHACL property path to the non-versioned IRI of the entity."@en .
 
 ldes:timestampPath a rdf:Property ;
                    rdfs:label "Timestamp Path"@en;
-                   rdfs:comment "SHACL property path to the timestamp when the version object entered the event stream."@en .
+                   rdfs:comment "SHACL property path to the xsd:dateTime literal in each member that defines the order of the event stream."@en .
 
 ldes:versionMaterializationOf a rdf:Property ;
                    rdfs:label "Version Materialization Of"@en;

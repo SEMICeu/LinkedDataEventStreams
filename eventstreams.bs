@@ -3,120 +3,120 @@ Title: Linked Data Event Streams
 Shortname: LDES
 Level: 1
 Status: LS
-Group: TREE community group
 URL: https://w3id.org/ldes/specification
 Markup Shorthands: markdown yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
-Abstract: A Linked Data Event Stream is a collection of immutable objects (such as version objects, sensor observations or archived representations). Each object is described in RDF.
+Abstract: A Linked Data Event Stream (LDES) is an append-only collection of members described using the Resource Description Framework (RDF). The specification explains how a client can replicate the history of an event stream, and how it can then remain synchronized as new members are published.
 </pre>
 
 # Introduction # {#introduction}
 
-A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection (`rdfs:subClassOf tree:Collection`) of immutable objects, each object being described using a set of RDF triples ([[!rdf-primer]]).
+An **LDES client** is a piece of software used by a *consumer* that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
+The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 
-This specification uses the [TREE specification](https://treecg.github.io/specification) for its collection and fragmentation (or pagination) features, which in its turn is compatible to other specifications such as [[!activitystreams-core]], [[!VOCAB-DCAT-2]], [[!LDP]] or [Shape Trees](https://shapetrees.org/TR/specification/). For the specific compatibility rules, read the [TREE specification](https://treecg.github.io/specification).
+The client does this by extending upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
+The *extension* is that the Linked Data Event Streams specification introduces specialized terms for dealing with append-only collections, or *event streams*.
+For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
 
-Note: When a client once processed a member, it should never have to process it again. A Linked Data Event Stream client can thus keep a list of (or cache) already processed member IRIs. A reference implementation of a client is available as part of the Comunica framework on [NPM and Github](https://github.com/treecg/event-stream-client).
+Issue: More extensions should be specified w.r.t. [HTTP status codes](https://github.com/SEMICeu/LinkedDataEventStreams/issues/69), or [keeping state](https://github.com/SEMICeu/LinkedDataEventStreams/issues/31). This should be further detailled in a chapter after the overview.
 
-The base URI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`. Other prefixes are used following [prefix.cc](https://prefix.cc/sosa).
+# Overview # {#overview}
+
+<img height="500" src="overview.svg" alt="An overview of the LDES specification.">
+
+A Linked Data Event Stream (LDES) (`ldes:EventStream`) is a collection (`rdfs:subClassOf tree:Collection`) of members that cannot be updated or removed once they are published, with each member being a set of RDF quads ([[!rdf-primer]]).
+This way, the collection of members becomes an append-only log or *event stream*.
+
+Following the [TREE specification](https://w3id.org/tree/specification), this event stream is published using one or more HTTP resources.
+When more resources are used, these pages, or `tree:Node`s will be structured according to a search tree.
+Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
+
+In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
+ * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you the entity is a version of (e.g., `dcterms:isVersionOf`).
+ * `tree:shape`: a [[!SHACL]] shape that can be used for selection a search tree in the discovery phase, as well as to validate the members in the event stream.
+ * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
+
+In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
+ * `ldes:retentionPolicy`: indicates 0 or more retention policies (see next chapter).
+ * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. By default, the `tree:viewDescription` points at the root node.
+
+The client MUST implement the [initialization of the TREE specification](https://w3id.org/tree/specification#init), although it is not required to extract the `tree:search` form.
+
+In any `tree:Node` – root node or subsequent node – the client expects to find 0 or more members of the `ldes:EventStream` using the `tree:member` property.
+The subject is the event stream instance, and the object is the root focus node of a member.
+An LDES client MUST implement the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of the member.
+In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
+An example record from a sensor observation dataset in the [[!turtle]] format:
 ```turtle
-ex:C1 a ldes:EventStream ;
-      ldes:timestampPath sosa:resultTime ;
-      tree:shape ex:shape1.shacl ;
-      tree:member ex:Observation1 .
+ex:Observations a ldes:EventStream ;
+                ldes:timestampPath sosa:resultTime ;
+                tree:shape ex:shape1.shacl ;
+                tree:view <> ;
+                tree:member ex:Observation1 .
 
 ex:Observation1 a sosa:Observation ;
-                sosa:resultTime "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+                sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime ;
                 sosa:hasSimpleResult "..." .
 ```
 </div>
 
-The `ldes:EventStream` instance SHOULD have these properties:
- * `tree:shape`: the shape of the collection defines its members. It tells clients all old and new members of the stream have been and will be validated by that shape. As a consequence of the immutability of the members, this shape MAY evolve, but it MUST always be backwards compatible to the earlier version.
- * `tree:member` indicating the members of the collection.
-
-The `ldes:EventStream` instance MAY have these properties:
- * `ldes:timestampPath` indicating how you can understand using a timestamp (`xsd:dateTime`) a member precedes another member in the LDES
- * `ldes:versionOfPath` indicating the non-version object (see example bellow).
-
-<div class="example">
+<div class="example" highlight="turtle">
+An example record from a base registry of addresses in the [[!trig]] format:
 ```turtle
-ex:C2 a ldes:EventStream ;
-      ldes:timestampPath dcterms:created ;
-      ldes:versionOfPath dcterms:isVersionOf ;
-      tree:shape ex:shape2.shacl ;
-      tree:member ex:AddressRecord1-version1 .
+ex:AddressRecords a ldes:EventStream ;
+                  ldes:timestampPath dcterms:created ;
+                  ldes:versionOfPath dcterms:isVersionOf ;
+                  tree:shape ex:shape2.shacl ;
+                  tree:view <> ;
+                  tree:member ex:AddressRecord1-activity1 .
 
-ex:AddressRecord1-version1 dcterms:created "2021-01-01T00:00:00Z"^^xsd:dateTime ;
+ex:AddressRecord1-activity1 dcterms:created "2026-01-01T00:00:00Z"^^xsd:dateTime ;
                            adms:versionNotes "First version of this address" ;
-                           dcterms:isVersionOf ex:AddressRecord1 ;
-                           dcterms:title "Streetname X, ZIP Municipality, Country" .
+                           dcterms:isVersionOf ex:AddressRecord1 .
+                           
+ ex:AddressRecord1-activity1 {
+    ex:AddressRecord1 dcterms:title "Streetname X, ZIP Municipality, Country" .
+}
 ```
 </div>
 
-Note: When you need to change an earlier version of an `ldes:EventStream`, there are two options: create a new version of the object with a new shape that is backward compatible, and add the new version of that object again as a member on the stream, or replicate and transform the entire collection into a new `ldes:EventStream`. You can indicate that the new `ldes:EventStream` is derived from another ldes:EventStream.
+In any `tree:Node`, root node or subsequent node, the client expects to find zero or more `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
+A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
+A client MUST keep its own *state* to know when to refetch certain `tree:Node`s.
 
-Note: in Example 1, we consider the Observation object to be an immutable object and we can use the existing identifiers. In Example 2 however, we still had to create version IRIs in order to be able to link to immutable objects.
+Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
 
-<!--What’s an authoritative source and what’s a third party indexer?-->
-
-# Fragmenting and pagination # {#tree}
-
-The focus of an LDES is to allow clients to replicate the history of a dataset and efficiently synchronize with its latest changes.
-Linked Data Event Streams MAY be fragmented when their size becomes too big for 1 HTTP response.
-Fragmentations MUST be described using the features in the [TREE specification](https://treecg.github.io/specification).
-All relation types from the TREE specification MAY be used.
-
-<div class="example">
-```turtle
-ex:C1 a ldes:EventStream ;
-      ldes:timestampPath sosa:resultTime ;
-      tree:shape ex:shape1.shacl ;
-      tree:member ex:Obervation1, ... ;
-      tree:view <?page=1> .
-
-<?page=1> a tree:Node ;
-          tree:relation [
-              a tree:GreaterThanOrEqualToRelation ;
-              tree:path sosa:resultTime ;
-              tree:node <?page=2> ;
-              tree:value "2020-12-24T12:00:00Z"^^xsd:dateTime
-          ] .
-```
-</div>
-
-An `tree:importStream` MAY be used to describe a publish-subscribe interface to subscribe to new members in the LDES.
-
-Note: A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. 
-However, it may happen that a time-based fragmentation cannot be applied. For example: the backend system on which the LDES has been built does not receive the events at the time they were created, due to human errors (forgetting to indicate that a change was made), 
-external systems or just latency. Applying a time-based fragmentation in that situation will result in losing caching, due to the ever-changing pages. Instead, in the spirit of an LDES’s goal, the publisher should publish the events in the order they were received
-by the backend system (that order is never changing), trying to give as many pages as possible an HTTP `Cache-Control: public, max-age=604800, immutable` header.
-
-Note: Cfr. [the example in the TREE specification on “searching through a list of objects ordered in time”](https://treecg.github.io/specification/#timesearch), also a search form can optionally make a one dimensional feed of immutable objects more searchable.
-
+Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
 # Retention policies # {#retention}
 
-By default, an LDES MUST keep all members that has been added to the `ldes:EventStream`.
-It MAY add a retention policy in which the server indicates data will be removed from the server.
-Third parties SHOULD read retention policies to understand what subset of the data is available in this `tree:View`, and MAY archive these members.
+The goal of the retention policies is to indicate that, a client should not rely on finding members that fall outside the retention policies.
+This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.
 
-In the LDES specification, three types of retention policies are defined which can be used with a `ldes:retentionPolicy` with an instance of a `tree:View` as its subject:
+<img height="400" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
+
+When no retention policy is provided in the root node, the client MUST assume all members that have been added to the `ldes:EventStream` are still available from this root node.
+When one or more retention policies are provided, a client MUST assume it will not be able to find members outside of the retention policy, or outside of the union of the retention policies when multiple are provided.
+
+In the LDES specification, four types of retention policies are defined which can be used with a `ldes:retentionPolicy`:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is removed
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream
  3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is removed
 
-Different retention policies MAY be combined.
-When policies are used together, a server MUST store the members as long they are not all matched.
+A consumer MUST interpret the retention policies to understand whether the goal of the client can be reached.
+For example, an LDES client can work with a configured polling interval, or can be executed on a schedule.
+This polling interval, or interval between executions, cannot be longer than the retention policy of the data in the LDES.
+Or, when an LDES client is asked for a full replication, it MUST check the retention policy and whether this is possible.
 
 ## Time-based retention policies ## {#time-based-retention}
 
 A time-based retention policy can be introduced as follows:
 
-<div class="example">
+<div class="example" highlight="turtle">
 ```turtle
 ex:C3 a ldes:EventStream ;
       ldes:timestampPath prov:generatedAtTime ;
@@ -129,13 +129,14 @@ ex:P1 a ldes:DurationAgoPolicy ;
 ```
 </div>
 
-A `ldes:DurationAgoPolicy` uses a `tree:value` with an `xsd:duration`-typed literal to indicate how long ago the timestamp, indicated by the `ldes:timestampPath` that MAY be redefined in the policy itself.
+A `ldes:DurationAgoPolicy` uses a `tree:value` with an `xsd:duration`-typed literal to indicate how long ago the timestamp.
+When the `ldes:timestampPath` is redefined on the policy itself, a client MUST interpret the retention policy on this path instead.
 
 ## Version-based retention policies ## {#version-subsets}
 
-<div class="example">
 In order to indicate you only keep 2 versions of an object referred to using `dcterms:isVersionOf`:
 
+<div class="example" highlight="turtle">
 ```turtle
 ex:C2 a ldes:EventStream ;
       ldes:timestampPath dcterms:created ;
@@ -152,13 +153,12 @@ ex:P2 a ldes:LatestVersionSubset;
 ```
 </div>
 
-A `ldes:LatestVersionSubset` MUST define the predicate `ldes:amount` and MAY redefine the ldes:timestampPath and/or ldes:versionOfPath. It MAY also define a compound version key using `ldes:versionKey` (see example below) instead of the more `ldes:versionOfPath`.
-The `ldes:amount` has a `xsd:nonNegativeInteger` datatype and indicated how many to keep that defaults to 1.
-The `ldes:versionKey` is an `rdf:List` of SHACL property paths indicating objects that MUST be concatenated together to find the key on which versions are matched.
+A `ldes:LatestVersionSubset` has the property `ldes:amount` and MAY redefine the `ldes:timestampPath` and/or `ldes:versionOfPath`. It MAY also define a compound version key using `ldes:versionKey` (see example below) instead of `ldes:versionOfPath`.
+The `ldes:amount` has a `xsd:integer` datatype and indicated how many to keep that defaults to 1.
+The `ldes:versionKey` is an `rdf:List` of [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)s indicating objects that MUST be concatenated together to find the key on which versions are matched.
 When the `ldes:versionKey` is set to an empty path `()`, all members MUST be seen as a version of the same thing.
 
-
-<div class="example">
+<div class="example" highlight="turtle">
 For sensor datasets the version key may get more complex, grouping observations by both the observed property as the sensor that made the observation.
 
 ```turtle
@@ -177,7 +177,7 @@ ex:P3 a ldes:LatestVersionSubset;
 
 A point-in-time retention policy can be introduced as follows:
 
-<div class="example">
+<div class="example" highlight="turtle">
 ```turtle
 ex:C4 a ldes:EventStream ;
       ldes:timestampPath prov:generatedAtTime ;
@@ -186,114 +186,88 @@ ex:C4 a ldes:EventStream ;
 <> ldes:retentionPolicy ex:P4 .
 
 ex:P4 a ldes:PointInTimePolicy ;
-      ldes:pointInTime "2023-04-12T00:00:00"^^xsd:dateTime . # Keep data after April 12th, 2023
+      ldes:pointInTime "2026-04-12T00:00:00Z"^^xsd:dateTime . # Keep data after April 12th, 2026 according to the default timezone
 ```
 </div>
 
 A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member's timestamp, indicated by the `ldes:timestampPath` that MAY be redefined in the policy itself.
 
-# Derived collections # {#derived}
+# Vocabulary # {#vocabulary}
 
-We will extend the spec with multiple best practices on how to annotate that your newly published collection is derived from an LDES.
+Next to re-using terms from the `tree:` vocabulary, the `ldes:` namespace introduced in this document provides a couple of new terms.
+The base IRI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`.
+There is a Turtle version available at [https://w3id.org/ldes#Vocabulary](https://w3id.org/ldes)
 
-First we talk about a versioned LDES.  Versioned LDESes allow for changing an object in an `ldes:EvenStream`, while maintaining the history of events.
-It is achieved by defining change in an `ldes:EventStream` through new `tree:member` in the `ldes:EventStream` through added metadata for both the `ldes:EvenStream` and each `tree:member`.
+## ldes:EventStream ## {#voc-eventstream}
 
-Secondly, version materializations are defined that use a versioned LDES as a basis.
-This technique allows to create **snapshots** in time of a versioned LDES.
-Here we define a **snapshot** as `tree:Collection` of the most recent versions of all objects in the versioned LDES.
+The class `ldes:EventStream` is a subclass of `tree:Collection`. The specialization being that all members are immutable, and thus that this `tree:Collection` is append-only.
 
-## Versioning ## {#versioning}
+## ldes:timestampPath ## {#voc-timestamppath}
 
-A versioned LDES is defined with two properties: `ldes:versionOfPath` and `ldes:timestampPath`. 
+The path to the `xsd:dateTime` literal in each member that defines the order of the event stream.
 
-* `ldes:versionOfPath`: declares the **property** that is used to define that a `tree:member` of an `ldes:EventStream` is a version.
-* `ldes:timestampPath`: declares the property that is used to define the DateTime of a `tree:member`.
+**Domain:** `ldes:EventStream` or `ldes:RetentionPolicy`
 
-<div class="example"  highlight="turtle" id="ldes-versioning-1">
-A <b>versioned</b> LDES with one member.<br>
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
-`dct:isVersionOf` is used as property for `ldes:versionOfPath`, which indicates that `ex:resource1v0` is a version of `ex:resource1`.<br>
+## ldes:versionOfPath ## {#voc-versionofpath}
 
-`dct:issued` is used as property for `ldes:timestampPath`, which indicates that `ex:resource1v0` was issued in the LDES at "2021-12-15T10:00:00.000Z".
+The path to the IRI in each member that defines the entity of which this member is a version.
 
-```turtle
-ex:ES a ldes:EventStream;
-    ldes:versionOfPath dct:isVersionOf;
-    ldes:timestampPath dct:issued;
-    tree:member ex:resource1v0.
+**Domain:** `ldes:EventStream` or `ldes:RetentionPolicy`
 
-ex:resource1v0
-    dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime;
-    dct:title "First version of the title".
-```
-</div>
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
-<div class="example"  highlight="turtle" id="ldes-versioning-2">
-A <b>versioned</b> LDES with two members which are both versions of the same object.
+## ldes:EventSource ## {#voc-eventsource}
 
-```turtle
-ex:ES a ldes:EventStream;
-    ldes:versionOfPath dct:isVersionOf;
-    ldes:timestampPath dct:issued;
-    tree:member ex:resource1v0, ex:resource1v1.
-    
-ex:resource1v0
-    dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T10:00:00.000Z"^^xsd:dateTime;
-    dct:title "First version of the title".
-    
-ex:resource1v1 
-    dct:isVersionOf ex:resource1;
-    dct:issued "2021-12-15T12:00:00.000Z"^^xsd:dateTime;
-    dct:title "Title has been updated once".
-```
-2 hours after `ex:resource1v0` was created, the title of `ex:resource1` was changed. 
-This change can be seen by the creation of `ex:resource1v1`, which is the newest version of `ex:resource1`.
+The class `ldes:EventSource` is a subclass of `dcat:Distribution`, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.
 
-</div>
+An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in order.
 
-## Version Materializations ## {#version-materializations}
+## ldes:retentionPolicy ## {#voc-retentionpolicyproperty}
 
-A version materialization can be defined only if the original LDES defines both `ldes:versionOfPath` and `ldes:timestampPath`.
+Links to one or more retention policies.
 
-A version materialization replaces the subject of a member with its `ldes:versionOfPath` IRI, and selects a certain version of this object.
-It also translates `created` style timestamp predicates to `modified`-style predicates.
+**Domain:** Preferably the root node. Alternatively it can occur on any type of entity that is linked from the root node using `tree:viewDescription`.
 
-<div class="example">
-In this example an event stream with 2 versions of the same object got materialized until `2020-10-05T12:00:00Z`
+**Range:** `ldes:RetentionPolicy`
 
-```turtle
-ex:ES1 a ldes:EventStream
-    ldes:versionOfPath dct:isVersionOf;
-    ldes:timestampPath dct:created;
-       tree:member [
-           dcterms:isVersionOf <A>;
-           dcterms:created "2020-10-05T11:00:00Z";
-           owl:versionInfo "v0.0.1";
-           rdfs:label "A v0.0.1"
-       ], [
-           dcterms:isVersionOf <A> ;
-           dcterms:created "2020-10-06T13:00:00Z";
-           owl:versionInfo "v0.0.2";
-           rdfs:label "A v0.0.2"
-       ].
-```
-towards the snapshot below
-```turtle
-ex:ES1v1 a tree:Collection ; # the members are no longer immutable
-         ldes:versionMaterializationOf ex:ES1;
-         ldes:versionMaterializationUntil "2020-10-05T12:00:00Z"^^xsd:dateTime;
-         tree:member <A>.
+## ldes:RetentionPolicy ## {#voc-retentionpolicy}
 
-<A> rdfs:label "A v0.0.1";
-    dcterms:modified "2020-10-05T11:00:00Z".
-```
-</div>
+An abstract class for a retention policy.
 
-A version materialization is thus a `tree:Collection` instance that has two predicates set:
- * `ldes:versionMaterializationOf`: points to the orginal LDES
- * `ldes:versionMaterializationUntil`: optionally gives a timestamp (`xsd:dateTime`) until when the materialization was made.
+## ldes:DurationAgoPolicy ## {#voc-durationagopolicy}
 
-Note: We see `versionMaterializationUntil` mainly useful for historical and static datasets that deliberately will not be updated to the latest state of the LDES.
+A retention policy that uses an `xsd:duration` literal to document a sliding window of data.
+
+## ldes:LatestVersionSubset ## {#voc-latestversionsubset}
+
+A retention policy that select an amount of versions based on the versionOfPath, or a more advanced version key that can be configured.
+
+### ldes:versionKey ### {#voc-versionkey}
+
+An advanced property for setting a compound key for defining the latest version of an entity.
+
+**Domain:** `ldes:LatestVersionSubset`
+
+**Range:** an `rdf:List`, with each item of the list a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths).
+
+### ldes:amount ### {#voc-amount}
+
+The number of versions to keep. This MUST be a number greater than 0.
+
+**Domain:** `ldes:LatestVersionSubset`
+
+**Range:** `xsd:integer`
+
+## ldes:PointInTimePolicy ## {#voc-pointintimepolicy}
+
+A retention policy that indicates members are kept starting on a certain point in time.
+
+### ldes:pointInTime ### {#voc-pointintime}
+
+The point in time from which members will be available starting from this root node.
+
+**Domain:** `ldes:PointInTimePolicy`
+
+**Range:** `xsd:dateTime` including an explicit timezone
