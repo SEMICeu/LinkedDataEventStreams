@@ -41,42 +41,42 @@ ldes:EventSource a rdfs:Class;
 
 ldes:RetentionPolicy a rdfs:Class ;
                      rdfs:label "Retention Policy"@en ;
-                     rdfs:comment "The abstract concept of a retention policy."@en .
-
-ldes:LatestVersionSubset rdfs:subClassOf ldes:RetentionPolicy ;   
-                         rdfs:label "Latest Version Subset Policy"@en ;
-                         rdfs:comment "Only a certain amount (defaults to 1) versions of the members are kept."@en .
-                         
-ldes:DurationAgoPolicy rdfs:subClassOf ldes:RetentionPolicy ;   
-                       rdfs:label "Time-based Retention Policy"@en ;
-                       rdfs:comment "Retention policy based on a member’s timestamp and a duration."@en .
-
-ldes:PointInTimePolicy rdfs:subClassOf ldes:RetentionPolicy ;
-                       rdfs:label "Point in Time Retention Policy"@en ;
-                       rdfs:comment "Only members starting a certain point in time are kept."@en .
+                     rdfs:comment "Documents what data to keep"@en .
 
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
                      rdfs:comment "Links to a retention policy."@en ;
                      rdfs:range ldes:RetentionPolicy .
 
-ldes:amount a rdf:Property ;
-            rdfs:label "amount"@en;
-            rdfs:comment "Amount of versions to keep."@en ;
-            rdfs:range xsd:nonNegativeInteger ;
-            rdfs:domain ldes:LatestVersionSubset .
+ldes:startingFrom a rdf:Property ;
+                     rdfs:label "Starting from"@en;
+                     rdfs:comment "The search tree only keeps members starting a certain timestamp."@en ;
+                     rdfs:range xsd:dateTime ;
+		     rdfs:domain ldes:RetentionPolicy .
 
-ldes:pointInTime a rdf:Property ;
-                 rdfs:label "point in time"@en;
-                 rdfs:comment "Only after this point in time, members are kept."@en ;
-                 rdfs:range xsd:dateTime ;
-                 rdfs:domain ldes:PointInTimePolicy .
+ldes:versionDuration a rdf:Property ;
+                     rdfs:label "Version duration"@en;
+                     rdfs:comment "The search tree only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. "@en ;
+                     rdfs:range xsd:duration ;
+		     rdfs:domain ldes:RetentionPolicy .
 
-ldes:versionKey a rdf:Property ;
-                rdfs:label "version key"@en;
-                rdfs:comment "A list of SHACL property paths to compose a version key."@en ;
-                rdfs:range rdf:List ;
-                rdfs:domain ldes:LatestVersionSubset .
+ldes:versionAmount a rdf:Property ;
+                     rdfs:label "Version amount"@en;
+                     rdfs:comment "The amount of versions to keep."@en;
+		     rdfs:range xsd:integer ;
+		     rdfs:domain ldes:RetentionPolicy .
+
+ldes:versionDeleteDuration a rdf:Property ;
+                     rdfs:label "Version Delete Duration"@en;
+                     rdfs:comment "The search tree only keeps its deletions for a certain duration."@en;
+		     rdfs:range xsd:duration ;
+		     rdfs:domain ldes:RetentionPolicy .
+
+ldes:fullLogDuration a rdf:Property ;
+                     rdfs:label "Full Log Duration"@en ;
+                     rdfs:comment "The search tree keeps its full log for a certain duration."@en ;
+		     rdfs:range xsd:duration ;
+		     rdfs:domain ldes:RetentionPolicy .
 
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
@@ -97,3 +97,48 @@ ldes:versionMaterializationUntil a rdf:Property ;
                    rdfs:comment "Timestamp until versions were processed"@en ;
                    rdfs:range xsd:dateTime ;
                    rdfs:domain tree:Collection .
+
+ldes:versionCreatePath a rdf:Property ;
+                       rdfs:label "Version Create Path"@en ;
+		       rdfs:comment "Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:versionUpdatePath a rdf:Property ;
+                       rdfs:label "Version Update Path"@en ;
+		       rdfs:comment "Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:versionDeletePath a rdf:Property ;
+                       rdfs:label "Version Delete Path"@en ;
+		       rdfs:comment "Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:versionCreateObject a rdf:Property ;
+                       rdfs:label "Version Create Object"@en ;
+		       rdfs:comment "If the RDF object matches the object in the version create path, the member represents a create."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:versionUpdateObject a rdf:Property ;
+                       rdfs:label "Version Update Object"@en ;
+		       rdfs:comment "If the RDF object matches the object in the version update path, the member represents an update."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:versionDeleteObject a rdf:Property ;
+                       rdfs:label "Version Delete Object"@en ;
+		       rdfs:comment "If the RDF object matches the object in the version delete path, the member represents a delete."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:transactionPath a rdf:Property ;
+                       rdfs:label "Transaction Path"@en ;
+		       rdfs:comment "Path indicating how a member indicates whether it is part of a transaction."@en ;
+		       rdfs:domain ldes:EventStream .
+
+ldes:transactionFinalizedPath a rdf:Property ;
+                              rdfs:label "Transaction Finalized Path"@en ;
+			      rdfs:comment "Path indicating whether the transaction has been finalized."@en ;
+			      rdfs:domain ldes:EventStream .
+
+ldes:transactionFinalizedObject a rdf:Property ;
+                              rdfs:label "Transaction Finalized Object"@en ;
+			      rdfs:comment "If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized."@en ;
+			      rdfs:domain ldes:EventStream .
