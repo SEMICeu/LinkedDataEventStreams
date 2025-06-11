@@ -143,14 +143,25 @@ ex:LDES a ldes:EventStream ;
 
 <> a ldes:EventSource ;
      ldes:retentionPolicy [
-     ldes:fullLogDuration "P1Y"^^xsd:duration ;
-     ldes:versionAmount 1 ;
-     ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
-] .
+         ldes:fullLogDuration "P1Y"^^xsd:duration ;
+         ldes:versionAmount 1 ;
+         ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
+     ] .
 ```
 </div>
 
 Issue: explain how a consumer MUST interpret the retention policy and include more examples here, building up the logic cfr. in the presentation in workshop 1.
+
+Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
+These retention policies types are:
+ 1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
+ 2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
+ 3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is not retained.
+
+When one of those types are set, the client needs to do a mapping of these properties:
+ * For an `ldes:DurationAgoPolicy`, a `tree:value` will be set with an `xsd:duration` literal. The client MUST map this to a retention policy with this literal set for the `ldes:fullLogDuration`.
+ * For an `ldes:LatestVersionSubset`, an `ldes:amount` property will be set with an `xsd:integer` literal. The client MUST map this to a retention policy with this literal set for the `ldes:versionAmount`.
+ * For an `ldes:PointInTimePolicy`, an `ldes:pointInTime` property will be set with an `xsd:dateTime` literal. The client MUST map this to a retention policy with this literal set for the `ldes:startingFrom` property.
 
 # Vocabulary # {#vocabulary}
 
@@ -182,7 +193,7 @@ The path to the IRI in each member that defines the entity of which this member 
 
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.
 
-An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in order.
+An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in this chronological order.
 
 ## ldes:retentionPolicy ## {#voc-retentionpolicyproperty}
 
@@ -236,4 +247,52 @@ The search tree keeps its full log for a certain duration.
 
 **Range:** `xsd:duration`
 
-Issue: We still need to include the terms for versioning and transactions here.
+### Former retention policies terms ### {#voc-former-retentionpolicies}
+
+ * `ldes:DurationAgoPolicy`: A retention policy class that uses an `xsd:duration` literal to document a sliding window of data.
+ * `ldes:LatestVersionSubset`: A retention policy class that select an amount of versions based on the versionOfPath.
+ * `ldes:amount`: The number of versions to keep. This MUST be a number greater than 0.
+     - Domain: `ldes:LatestVersionSubset`
+     - Range: `xsd:integer`
+ * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting on a certain point in time.
+ * `ldes:pointInTime: The point in time from which members will be available starting from this root node.
+     - Domain: `ldes:PointInTimePolicy`
+     - Range: `xsd:dateTime` including an explicit timezone
+
+## Terms for versioning and transactions on top of ldes:EventStream ## {#voc-versioning-transactions}
+
+### ldes:versionCreatePath ### {#voc-versionCreatePath}
+
+Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type.
+
+#### ldes:versionUpdatePath ### {#voc-versionUpdatePath}
+
+Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type.
+
+### ldes:versionDeletePath ### {#voc-versionDeletePath}
+
+Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type.
+
+### ldes:versionCreateObject ### {#voc-versionCreateObject}a rdf:Property ;
+
+If the RDF object matches the object in the version create path, the member represents a create.
+
+### ldes:versionUpdateObject ### {#voc-versionUpdateObject}
+
+If the RDF object matches the object in the version update path, the member represents an update.
+
+### ldes:versionDeleteObject ### {#voc-versionDeleteObject}
+
+If the RDF object matches the object in the version delete path, the member represents a delete.
+
+### ldes:transactionPath ### {#voc-transactionPath}
+
+Path indicating how a member indicates whether it is part of a transaction.
+
+### ldes:transactionFinalizedPath ### {#voc-transactionFinalizedPath}
+
+Path indicating whether the transaction has been finalized.
+
+### ldes:transactionFinalizedObject ### {#voc-transactionFinalizedObject}
+
+If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized.
