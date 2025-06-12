@@ -2016,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2025-05-08">8 May 2025</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2025-06-12">12 June 2025</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2031,7 +2031,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 8 May 2025,
+In addition, as of 12 June 2025,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2090,7 +2090,7 @@ Parts of this work may be from another specification document.  If so, those par
    <p>An <strong>LDES client</strong> is a piece of software used by a <em>consumer</em> that accepts the URL to an entry point, and returns a stream of members of the corresponding <code>ldes:EventStream</code>.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.</p>
    <p>The client does this by extending upon a subset of <a href="https://w3id.org/tree/specification">the W3C TREE hypermedia specification</a>.
-The <em>extension</em> is that the Linked Data Event Streams specification introduces specialized terms for dealing with append-only collections, or <em>event streams</em>.
+This <em>extension</em> introduces specialized terms for dealing with append-only collections, referred to as <em>event streams</em>.
 For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.</p>
    <p class="issue" id="issue-eae450f3"><a class="self-link" href="#issue-eae450f3"></a> More extensions should be specified w.r.t. <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/69">HTTP status codes</a>, or <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/31">keeping state</a>. This should be further detailled in a chapter after the overview.</p>
    <h2 class="heading settled" data-level="2" id="overview"><span class="secno">2. </span><span class="content">Overview</span><a class="self-link" href="#overview"></a></h2>
@@ -2098,29 +2098,29 @@ For example, one can indicate what time-based property in the member is used for
    <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection (<code>rdfs:subClassOf tree:Collection</code>) of members that cannot be updated or removed once they are published, with each member being a set of RDF quads (<a data-link-type="biblio" href="#biblio-rdf-primer">[rdf-primer]</a>).
 This way, the collection of members becomes an append-only log or <em>event stream</em>.</p>
    <p>Following the <a href="https://w3id.org/tree/specification">TREE specification</a>, this event stream is published using one or more HTTP resources.
-When more resources are used, these pages, or <code>tree:Node</code>s will be structured according to a search tree.
+When more resources are used, these pages, or <code>tree:Node</code>s, will be structured according to a search tree.
 Therefore we will use the terms <em>root node</em> for the first page, and <em>subsequent node</em> for every next page in the structure.</p>
    <p>In the root node, the client will expect these properties to be described on the <code>ldes:EventStream</code> entity:</p>
    <ul>
     <li data-md>
      <p><code>ldes:timestampPath</code>: this is a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a> that identifies an <code>xsd:dateTime</code> literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When <code>ldes:timestampPath</code> is set, no member can be added to the LDES with a timestamp earlier than the latest published member.</p>
     <li data-md>
-     <p><code>ldes:versionOfPath</code>: when your entities are versioned, this property points at the object that tells you the entity is a version of (e.g., <code>dcterms:isVersionOf</code>).</p>
+     <p><code>ldes:versionOfPath</code>: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., <code>dcterms:isVersionOf</code>).</p>
     <li data-md>
-     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl">[SHACL]</a> shape that can be used for selection a search tree in the discovery phase, as well as to validate the members in the event stream.</p>
+     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl">[SHACL]</a> shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.</p>
     <li data-md>
      <p><code>tree:view</code>: connects the collection to the current page, or points to one specific root node after dereferencing the <code>ldes:EventStream</code> identifier.</p>
    </ul>
    <p>In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI <code>&lt;></code>) will be further described using these properties:</p>
    <ul>
     <li data-md>
-     <p><code>ldes:retentionPolicy</code>: indicates 0 or more retention policies (see next chapter).</p>
+     <p><code>ldes:retentionPolicy</code>: indicates 0 or more retention policies (see <a href="#retention">§ 3 Retention policies</a>).</p>
     <li data-md>
      <p><code>tree:viewDescription</code>: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the <code>dcat:Distribution</code>, the <code>tree:SearchTree</code>, or the <code>ldes:EventSource</code>) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the <code>ldes:EventSource</code> from the root <code>tree:Node</code>. By default, the <code>tree:viewDescription</code> points at the root node.</p>
    </ul>
-   <p>The client MUST implement the <a href="https://w3id.org/tree/specification#init">initialization of the TREE specification</a>, although it is not required to extract the <code>tree:search</code> form.</p>
+   <p>The client MUST implement the <a href="https://w3id.org/tree/specification#init">initialization of the TREE specification</a>, and they MAY extract the <code>tree:search</code> form.</p>
    <p>In any <code>tree:Node</code> – root node or subsequent node – the client expects to find 0 or more members of the <code>ldes:EventStream</code> using the <code>tree:member</code> property.
-The subject is the event stream instance, and the object is the root focus node of a member.
+The subject is the event stream instance and the object is the root focus node of a member.
 An LDES client MUST implement the <a href="https://w3id.org/tree/specification#member-extraction-algorithm">Member Extraction Algorithm of the TREE specification</a> to retrieve the full set of quads of the member.
 In an <code>ldes:EventStream</code>, the object of the <code>tree:member</code> triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.</p>
    <div class="example" id="example-e164ae40">
@@ -2146,10 +2146,10 @@ In an <code>ldes:EventStream</code>, the object of the <code>tree:member</code> 
                   <c- nn>tree</c-><c- p>:</c-><c- f>member</c-> <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1-activity1</c-> <c- p>.</c->
 
 <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1-activity1</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- s>"2026-01-01T00:00:00Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-> <c- p>;</c->
-                           <c- nn>adms</c-><c- p>:</c-><c- f>versionNotes</c-> <c- s>"First version of this address"</c-> <c- p>;</c->
-                           <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1</c-> <c- p>.</c->
+                            <c- nn>adms</c-><c- p>:</c-><c- f>versionNotes</c-> <c- s>"First version of this address"</c-> <c- p>;</c->
+                            <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1</c-> <c- p>.</c->
                            
- <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1-activity1</c-> <c- p>{</c->
+<c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1-activity1</c-> <c- p>{</c->
     <c- nn>ex</c-><c- p>:</c-><c- f>AddressRecord1</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>title</c-> <c- s>"Streetname X, ZIP Municipality, Country"</c-> <c- p>.</c->
 <c- p>}</c->
 </pre>
@@ -2160,19 +2160,19 @@ A client MUST keep its own <em>state</em> to know when to refetch certain <code>
    <p class="issue" id="issue-6f628f97"><a class="self-link" href="#issue-6f628f97"></a> We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on <a href="https://w3id.org/tree/specification#relationsubclasses">pruning branches</a> related to interpreting comparators for <code>xsd:dateTime</code> literals if it wants to detect immutable pages via the timestampPath.</p>
    <p class="issue" id="issue-36671e76"><a class="self-link" href="#issue-36671e76"></a> More specific server documentation should be found in a Server Primer (to do), such as containing a <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/59">link to the JSON-LD context</a>, <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/70">official SHACL shapes for LDES</a> to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.</p>
    <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
-   <p>The goal of the retention policies is to indicate that, a client should not rely on finding members that fall outside the retention policies.
+   <p>The goal of the retention policies is to indicate that a client should not rely on finding members that fall outside the retention policies.
 This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.</p>
    <p><img alt="An overview of the existing retention policies in LDES" height="400" src="retentionpolicies.svg"></p>
    <p>When no retention policy is provided in the root node, the client MUST assume all members that have been added to the <code>ldes:EventStream</code> are still available from this root node.
-When one or more retention policies are provided, a client MUST assume it will not be able to find members outside of the retention policy, or outside of the union of the retention policies when multiple are provided.</p>
-   <p>In the LDES specification, four types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code>:</p>
+When one or more retention policies are provided, a client MUST assume it will not be able to find members outside of the union of the retention policies.</p>
+   <p>In the LDES specification, three types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code>:</p>
    <ol>
     <li data-md>
      <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specified duration is removed</p>
     <li data-md>
      <p><code>ldes:LatestVersionSubset</code>: a version subset based on the latest versions of an entity in the stream</p>
     <li data-md>
-     <p><code>ldes:PointInTimePolicy</code>: a point-in-time retention policy in which data generated before a specific time is removed</p>
+     <p><code>ldes:PointInTimePolicy</code>: a point-in-time retention policy in which data generated before a specific datetime is removed</p>
    </ol>
    <p>A consumer MUST interpret the retention policies to understand whether the goal of the client can be reached.
 For example, an LDES client can work with a configured polling interval, or can be executed on a schedule.
@@ -2192,12 +2192,12 @@ Or, when an LDES client is asked for a full replication, it MUST check the reten
       <c- nn>tree</c-><c- p>:</c-><c- f>value</c-> <c- s>"P1Y"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>duration</c-> <c- p>.</c-> <c- c># Keep 1 year of data</c->
 </pre>
    </div>
-   <p>A <code>ldes:DurationAgoPolicy</code> uses a <code>tree:value</code> with an <code>xsd:duration</code>-typed literal to indicate how long ago the timestamp.
+   <p>A <code>ldes:DurationAgoPolicy</code> uses a <code>tree:value</code> with an <code>xsd:duration</code>-typed literal to denote the temporal extent to which data can be retrieved.
 When the <code>ldes:timestampPath</code> is redefined on the policy itself, a client MUST interpret the retention policy on this path instead.</p>
    <h3 class="heading settled" data-level="3.2" id="version-subsets"><span class="secno">3.2. </span><span class="content">Version-based retention policies</span><a class="self-link" href="#version-subsets"></a></h3>
-   <p>In order to indicate you only keep 2 versions of an object referred to using <code>dcterms:isVersionOf</code>:</p>
-   <div class="example" id="example-eebf39ac">
-    <a class="self-link" href="#example-eebf39ac"></a> 
+   <p>A version-based retention policy can be defined as follows, with the example configured to only retain 2 versions of an object referred to using <code>dcterms:isVersionOf</code>:</p>
+   <div class="example" id="example-e8d39e94">
+    <a class="self-link" href="#example-e8d39e94"></a> 
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C2</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
       <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- p>;</c->
       <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- p>;</c->
@@ -2207,13 +2207,13 @@ When the <code>ldes:timestampPath</code> is redefined on the policy itself, a cl
 
 <c- nn>ex</c-><c- p>:</c-><c- f>P2</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>LatestVersionSubset</c-><c- p>;</c->
       <c- nn>ldes</c-><c- p>:</c-><c- f>amount</c-> <c- mi>2</c-> <c- p>;</c->
-      <c- c>#If different from the Event Stream, this can optionally be overwritten here</c->
+      <c- c># If different from the Event Stream, this can optionally be overwritten here</c->
       <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- p>;</c->
       <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- p>.</c->
 </pre>
    </div>
-   <p>A <code>ldes:LatestVersionSubset</code> has the property <code>ldes:amount</code> and MAY redefine the <code>ldes:timestampPath</code> and/or <code>ldes:versionOfPath</code>. It MAY also define a compound version key using <code>ldes:versionKey</code> (see example below) instead of <code>ldes:versionOfPath</code>.
-The <code>ldes:amount</code> has a <code>xsd:integer</code> datatype and indicated how many to keep that defaults to 1.
+   <p>A <code>ldes:LatestVersionSubset</code> SHOULD have the property <code>ldes:amount</code> and MAY redefine the <code>ldes:timestampPath</code> and/or <code>ldes:versionOfPath</code>. It MAY also define a compound version key using <code>ldes:versionKey</code> (see example below) instead of <code>ldes:versionOfPath</code>.
+The <code>ldes:amount</code> has an <code>xsd:integer</code> datatype, indicating the number of versions to keep. By default, this value is set to 1.
 The <code>ldes:versionKey</code> is an <code>rdf:List</code> of <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a>s indicating objects that MUST be concatenated together to find the key on which versions are matched.
 When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, all members MUST be seen as a version of the same thing.</p>
    <div class="example" id="example-9998a1b2">
@@ -2246,7 +2246,7 @@ When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, a
    <h2 class="heading settled" data-level="4" id="vocabulary"><span class="secno">4. </span><span class="content">Vocabulary</span><a class="self-link" href="#vocabulary"></a></h2>
    <p>Next to re-using terms from the <code>tree:</code> vocabulary, the <code>ldes:</code> namespace introduced in this document provides a couple of new terms.
 The base IRI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>.
-There is a Turtle version available at <a href="https://w3id.org/ldes">https://w3id.org/ldes#Vocabulary</a></p>
+There is a Turtle version available at <a href="https://w3id.org/ldes">https://w3id.org/ldes#Vocabulary</a>.</p>
    <h3 class="heading settled" data-level="4.1" id="voc-eventstream"><span class="secno">4.1. </span><span class="content">ldes:EventStream</span><a class="self-link" href="#voc-eventstream"></a></h3>
    <p>The class <code>ldes:EventStream</code> is a subclass of <code>tree:Collection</code>. The specialization being that all members are immutable, and thus that this <code>tree:Collection</code> is append-only.</p>
    <h3 class="heading settled" data-level="4.2" id="voc-timestamppath"><span class="secno">4.2. </span><span class="content">ldes:timestampPath</span><a class="self-link" href="#voc-timestamppath"></a></h3>
@@ -2269,7 +2269,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
    <h3 class="heading settled" data-level="4.7" id="voc-durationagopolicy"><span class="secno">4.7. </span><span class="content">ldes:DurationAgoPolicy</span><a class="self-link" href="#voc-durationagopolicy"></a></h3>
    <p>A retention policy that uses an <code>xsd:duration</code> literal to document a sliding window of data.</p>
    <h3 class="heading settled" data-level="4.8" id="voc-latestversionsubset"><span class="secno">4.8. </span><span class="content">ldes:LatestVersionSubset</span><a class="self-link" href="#voc-latestversionsubset"></a></h3>
-   <p>A retention policy that select an amount of versions based on the versionOfPath, or a more advanced version key that can be configured.</p>
+   <p>A retention policy that selects an amount of versions based on the versionOfPath, or a more advanced version key that can be configured.</p>
    <h4 class="heading settled" data-level="4.8.1" id="voc-versionkey"><span class="secno">4.8.1. </span><span class="content">ldes:versionKey</span><a class="self-link" href="#voc-versionkey"></a></h4>
    <p>An advanced property for setting a compound key for defining the latest version of an entity.</p>
    <p><strong>Domain:</strong> <code>ldes:LatestVersionSubset</code></p>
@@ -2279,7 +2279,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
    <p><strong>Domain:</strong> <code>ldes:LatestVersionSubset</code></p>
    <p><strong>Range:</strong> <code>xsd:integer</code></p>
    <h3 class="heading settled" data-level="4.9" id="voc-pointintimepolicy"><span class="secno">4.9. </span><span class="content">ldes:PointInTimePolicy</span><a class="self-link" href="#voc-pointintimepolicy"></a></h3>
-   <p>A retention policy that indicates members are kept starting on a certain point in time.</p>
+   <p>A retention policy that indicates that members are kept starting from a certain point in time.</p>
    <h4 class="heading settled" data-level="4.9.1" id="voc-pointintime"><span class="secno">4.9.1. </span><span class="content">ldes:pointInTime</span><a class="self-link" href="#voc-pointintime"></a></h4>
    <p>The point in time from which members will be available starting from this root node.</p>
    <p><strong>Domain:</strong> <code>ldes:PointInTimePolicy</code></p>
