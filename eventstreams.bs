@@ -98,24 +98,25 @@ A client MUST have a way to make available context information to processors fur
 
 ## Versions and transactions ## {#versions-transactions}
 
-When the members of your LDES contain version representations, it can work as follows:
+Consumers can use the LDES version properties to decide what action to take.
+E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
+If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
+To that extent, on the `ldes:EventStream` entity, these properties can be used, which are further explained in the vocabulary.
+ * [`ldes:versionOfPath`](#voc-versionofpath) - such as `dcterms:isVersionOf` or `as:object`
+ * [`ldes:versionDeleteObject`](#voc-versionDeleteObject) - such as `as:Delete`
+ * [`ldes:versionCreateObject`](#voc-versionCreateObject) - such as `as:Create`
+ * [`ldes:versionUpdateObject`](#voc-versionUpdateObject) - such as `as:Update`
+ * [`ldes:versionDeletePath`](#voc-versionDeletePath) - defaults to `rdf:type`
+ * [`ldes:versionCreatePath`](#voc-versionCreatePath)- defaults to `rdf:type`
+ * [`ldes:versionUpdatePath`](#voc-versionUpdatePath)- defaults to `rdf:type`
 
- * `ldes:versionOfPath`
- * `ldes:versionDeleteObject`
- * `ldes:versionCreateObject`
- * `ldes:versionUpdateObject`
- * `ldes:versionDeletePath`
- * `ldes:versionCreatePath`
- * `ldes:versionUpdatePath`
+A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
+ * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
+ * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
+ * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-You can also indicate to a consumer that it SHOULD only commit a series of members once a transaction has been finalized using:
- * `ldes:transactionPath`
- * `ldes:transactionFinalizedPath`
- * `ldes:transactionFinalizedObject`
-
-When a processor wants to understand from the member what the envelope is, and what the payload is, it MUST apply the following logic:
-
-Issue: This algorithm is still to be done and will depend on the results of [revisiting the Member Extraction Algorithm in the TREE CG meetings](https://github.com/TREEcg/specification/issues/139).
+When the first IRI of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
+A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
 
 ## Retention policies ## {#retention}
 
