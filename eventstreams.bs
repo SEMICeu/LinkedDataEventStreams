@@ -116,7 +116,7 @@ A consumer can also understand how to process the event stream in a way that the
  * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-When the first IRI of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
+When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
 A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
 
 ## Retention policies ## {#retention}
