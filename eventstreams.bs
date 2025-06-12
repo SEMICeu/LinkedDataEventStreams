@@ -47,7 +47,7 @@ The client MUST implement the [initialization of the TREE specification](https:/
 In any `tree:Node` – root node or subsequent node – the client expects to find 0 or more members of the `ldes:EventStream` using the `tree:member` property.
 The subject is the event stream instance and the object is the root focus node of a member.
 An LDES client MUST implement the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of the member.
-In an `ldes:EventStream`, the object of the `tree:member` triple MUST be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
+In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
 An example record from a sensor observation dataset in the [[!turtle]] format:
@@ -222,7 +222,7 @@ The path to the IRI in each member that defines the entity of which this member 
 
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.
 
-An `ldes:EventSource` can *only* be published on LDESes that have a `ldes:timestampPath` set, and thus will publish their entities in order.
+An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in order.
 
 ## ldes:retentionPolicy ## {#voc-retentionpolicyproperty}
 
