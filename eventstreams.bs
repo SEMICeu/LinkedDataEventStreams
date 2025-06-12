@@ -95,6 +95,7 @@ Issue: More specific server documentation should be found in a Server Primer (to
 # Context information # {#context-information}
 
 A client MUST have a way to make available context information to processors further down the pipeline set up by a consumer.
+A consumer will be able to make decisions on how to further process the event stream using this context information.
 
 ## Versions and transactions ## {#versions-transactions}
 
@@ -102,7 +103,7 @@ Consumers can use the LDES version properties to decide what action to take.
 E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
 If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
 To that extent, on the `ldes:EventStream` entity, these properties can be used, which are further explained in the vocabulary.
- * [`ldes:versionOfPath`](#voc-versionofpath) - such as `dcterms:isVersionOf` or `as:object`
+ * [`ldes:versionOfPath`](#voc-versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
  * [`ldes:versionDeleteObject`](#voc-versionDeleteObject) - such as `as:Delete`
  * [`ldes:versionCreateObject`](#voc-versionCreateObject) - such as `as:Create`
  * [`ldes:versionUpdateObject`](#voc-versionUpdateObject) - such as `as:Update`
@@ -120,8 +121,8 @@ A consumer MUST implement a way to find back this group of triples in case an up
 
 ## Retention policies ## {#retention}
 
-The goal of a retention policy is to indicate that, a client cannot rely on finding members that fall outside the retention policies.
-This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.
+The goal of a retention policy is to indicate in what way a specific view will not be able to provide a complete history of the event stream to the consumer.
+This can help a consumer in the discovery phase to pick an specific LDES view, or help the consumer to detect non-viable synchronization set-ups.
 
 When no retention policy is provided in the root node, the consumer MUST assume that all members, that have once been added to the `ldes:EventStream`, are still available from this root node.
 When a retention policy is provided however, a consumer MUST assume it will not be able to find members outside of the retention policy.
@@ -129,7 +130,7 @@ When a retention policy is provided however, a consumer MUST assume it will not 
 <img width="100%" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
 
 <div class="example" highlight="turtle">
-An example retention policy combining the features
+An example retention policy combining different features from the overview.
 ```turtle
 ex:LDES a ldes:EventStream ;
         ldes:timestampPath as:updated ;
@@ -151,7 +152,20 @@ ex:LDES a ldes:EventStream ;
 ```
 </div>
 
-Issue: explain how a consumer MUST interpret the retention policy and include more examples here, building up the logic cfr. in the presentation in workshop 1.
+A retention policy will be described on the root node.
+The root node itself can contain this information using the property `ldes:retentionPolicy`, or the root node can refer through the property `tree:viewDescription` to an entity on which the retention policy is described using the property `ldes:retentionPolicy`.
+When the client is processing the root node, it MUST look for a retention policy in both ways.
+
+In the example above, the retention policy has been set on the root node (double typed as the `ldes:EventSource`).
+When the [`ldes:retentionPolicy`](#voc-retentionpolicyproperty) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
+Multiple properties can then be added to make the scope of members that are kept larger:
+ * [`ldes:startingFrom`](#voc-startingfrom): this view only retaines members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
+ * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from the last member’s timestamp from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
+ * [`ldes:versionAmount`](#voc-versionamount): the amount of versions to keep. 
+ * [`ldes:versionDuration`](#voc-versionduration): the duration from the last member’s timestamp from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
+ * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from the last member’s timestamp the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
+
+A publisher can redefine LDES properties such as `ldes:timestampPath` or `ldes:versionOfPath` within the retention policy.
 
 Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
 These retention policies types are:
@@ -182,7 +196,7 @@ The path to the `xsd:dateTime` literal in each member that defines the order of 
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
-## ldes:versionOfPath ## {#voc-versionofpath}
+## ldes:versionOfPath ## {#voc-versionOfPath}
 
 The path to the IRI in each member that defines the entity of which this member is a version.
 
@@ -266,7 +280,7 @@ The search tree keeps its full log for a certain duration.
 
 Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type.
 
-#### ldes:versionUpdatePath ### {#voc-versionUpdatePath}
+### ldes:versionUpdatePath ### {#voc-versionUpdatePath}
 
 Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type.
 
@@ -274,7 +288,7 @@ Path indicating where you can do an object check on whether the member represent
 
 Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type.
 
-### ldes:versionCreateObject ### {#voc-versionCreateObject}a rdf:Property ;
+### ldes:versionCreateObject ### {#voc-versionCreateObject}
 
 If the RDF object matches the object in the version create path, the member represents a create.
 
