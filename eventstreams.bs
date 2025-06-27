@@ -167,8 +167,6 @@ Multiple properties can then be added to make the scope of members that are kept
 
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
 
-A publisher can redefine LDES properties such as `ldes:timestampPath` or `ldes:versionOfPath` within the retention policy.
-
 Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
 These retention policies types are:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
