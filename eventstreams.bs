@@ -166,6 +166,7 @@ Multiple properties can then be added to make the scope of members that are kept
  * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
 
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
+The `ldes:timestampPath` points at the timestamp in the member that can be compared with the current time minus the durations.
 
 Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
 These retention policies types are:
@@ -173,54 +174,8 @@ These retention policies types are:
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
  3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is not retained.
 
-<> ldes:retentionPolicy ex:P2 .
-
-ex:P2 a ldes:LatestVersionSubset;
-      ldes:amount 2 ;
-      # If different from the Event Stream, this can optionally be overwritten here
-      ldes:timestampPath dcterms:created ;
-      ldes:versionOfPath dcterms:isVersionOf .
-```
-</div>
-
-A `ldes:LatestVersionSubset` SHOULD have the property `ldes:amount` and MAY redefine the `ldes:timestampPath` and/or `ldes:versionOfPath`. It MAY also define a compound version key using `ldes:versionKey` (see example below) instead of `ldes:versionOfPath`.
-The `ldes:amount` has an `xsd:integer` datatype, indicating the number of versions to keep. By default, this value is set to 1.
-The `ldes:versionKey` is an `rdf:List` of [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)s indicating objects that MUST be concatenated together to find the key on which versions are matched.
-When the `ldes:versionKey` is set to an empty path `()`, all members MUST be seen as a version of the same thing.
-
-<div class="example" highlight="turtle">
-For sensor datasets the version key may get more complex, grouping observations by both the observed property as the sensor that made the observation.
-
-```turtle
-ex:C1 a ldes:EventStream ;
-      tree:view <> .
-
-<> ldes:retentionPolicy ex:P3 .
-
-ex:P3 a ldes:LatestVersionSubset;
-      ldes:amount 2 ; 
-      ldes:versionKey ( ( sosa:observedProperty ) ( sosa:madeBySensor ) ) .
-```
-</div>
-
-## Point-in-time retention policies ## {#point-in-time}
-
-A point-in-time retention policy can be introduced as follows:
-
-<div class="example" highlight="turtle">
-```turtle
-ex:C4 a ldes:EventStream ;
-      ldes:timestampPath prov:generatedAtTime ;
-      tree:view <> .
-
-<> ldes:retentionPolicy ex:P4 .
-
-ex:P4 a ldes:PointInTimePolicy ;
-      ldes:pointInTime "2026-04-12T00:00:00Z"^^xsd:dateTime . # Keep data after April 12th, 2026 according to the default timezone
-```
-</div>
-
-A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member's timestamp, indicated by the `ldes:timestampPath` that MAY be redefined in the policy itself.
+A `ldes:LatestVersionSubset` uses the property `ldes:amount` with as range an `xsd:integer` datatype, indicating the number of versions to keep. By default, this value is set to 1.
+A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp.
 
 # Vocabulary # {#vocabulary}
 
