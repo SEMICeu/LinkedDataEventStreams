@@ -160,10 +160,12 @@ In the example above, the retention policy has been set on the root node (double
 When the [`ldes:retentionPolicy`](#voc-retentionpolicyproperty) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
 Multiple properties can then be added to make the scope of members that are kept larger:
  * [`ldes:startingFrom`](#voc-startingfrom): this view only retaines members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
- * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from the last member’s timestamp from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
+ * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from current time from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
  * [`ldes:versionAmount`](#voc-versionamount): the amount of versions to keep. 
- * [`ldes:versionDuration`](#voc-versionduration): the duration from the last member’s timestamp from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
- * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from the last member’s timestamp the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
+ * [`ldes:versionDuration`](#voc-versionduration): the duration from current time from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
+ * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
+
+When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
 
 A publisher can redefine LDES properties such as `ldes:timestampPath` or `ldes:versionOfPath` within the retention policy.
 
