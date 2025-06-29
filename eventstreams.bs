@@ -33,8 +33,11 @@ When more resources are used, these pages, or `tree:Node`s, will be structured a
 Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
 
 In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
- * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) (all further *Path properties are as well) that sets the chronological time with a `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), what xsd-literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
+ * `ldes:versionTimestampPath`: when those versions are not published chronologically, LDES providers have the possibility to indicate a different version timestamp to establish the latest version.
+ * `ldes:versionSequencePath`: when the versions do not follow the order in `ldes:timestampPath` and `ldes:sequencePath`, and for when `ldes:versionTimestampPath` are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of `v0.1` → `v0.2`, in which `v0.2` may have been published by the server before `v0.1`.
  * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
@@ -116,8 +119,8 @@ A consumer can also understand how to process the event stream in a way that the
  * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-If one of the processors in a pipeline relies on transactions, the LDES client MUST force to emit the members in chronological order according to the `ldes:timestampPath`.
-When processing multiple members with the same `ldes:timestampPath`, the client MUST ensure the member that finalizes the transaction is emitted last.
+If one of the processors in a pipeline relies on transactions, the LDES client MUST force to emit the members in chronological order according to the `ldes:timestampPath` and `ldes:sequencePath`.
+When processing multiple members of the transaction with the same `ldes:timestampPath`, the client MUST ensure the member that finalizes the transaction is emitted last.
 
 When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
 A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
@@ -170,6 +173,7 @@ Multiple properties can then be added to make the scope of members that are kept
 
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
 The `ldes:timestampPath` points at the timestamp in the member that can be compared with the current time minus the durations.
+When the `ldes:versionTimestampPath` has been set, the two version durations are to be compared with this timestamp.
 
 Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
 These retention policies types are:
@@ -194,15 +198,43 @@ The class `ldes:EventStream` is a subclass of `tree:Collection`. The specializat
 
 The path to the `xsd:dateTime` literal in each member that defines the order of the event stream.
 
-**Domain:** `ldes:EventStream` or `ldes:RetentionPolicy`
+**Domain:** `ldes:EventStream`
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:sequencePath ## {#voc-sequencePath}
+
+The path to an xsd literal in each member that defines the order of the event stream in addition to the `ldes:timestampPath`.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
 
 ## ldes:versionOfPath ## {#voc-versionOfPath}
 
 The path to the IRI in each member that defines the entity of which this member is a version.
 
-**Domain:** `ldes:EventStream` or `ldes:RetentionPolicy`
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+
+## ldes:versionTimestampPath ## {#voc-versionTimestampPath}
+
+For out of order event streams, this defines the path to the `xsd:dateTime` literal in each member that defines the order of versioned members.
+
+Only relevant when the `ldes:versionOfPath` has been set.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:versionSequencePath ## {#voc-versionSequencePath}
+
+For out of order event streams, this defines the path to an xsd literal in each member that defines the order of the event stream in addition to the `ldes:versionTimestampPath`.
+
+**Domain:** `ldes:EventStream`
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
