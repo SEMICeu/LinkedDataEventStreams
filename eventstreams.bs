@@ -111,8 +111,8 @@ To that extent, on the `ldes:EventStream` entity, these properties can be used, 
  * [`ldes:versionCreateObject`](#voc-versionCreateObject) - such as `as:Create`
  * [`ldes:versionUpdateObject`](#voc-versionUpdateObject) - such as `as:Update`
  * [`ldes:versionDeletePath`](#voc-versionDeletePath) - defaults to `rdf:type`
- * [`ldes:versionCreatePath`](#voc-versionCreatePath)- defaults to `rdf:type`
- * [`ldes:versionUpdatePath`](#voc-versionUpdatePath)- defaults to `rdf:type`
+ * [`ldes:versionCreatePath`](#voc-versionCreatePath) - defaults to `rdf:type`
+ * [`ldes:versionUpdatePath`](#voc-versionUpdatePath) - defaults to `rdf:type`
 
 A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
  * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.

@@ -26,17 +26,17 @@ jobs:
       - name: Publish Bikeshed document
         # You may pin to the exact commit or the version.
         # uses: netwerk-digitaal-erfgoed/bikeshed-action@9058e7fb3f90044967e63c0d2e6add0514c5ae83
-        uses: netwerk-digitaal-erfgoed/bikeshed-action@v1
+        #uses: netwerk-digitaal-erfgoed/bikeshed-action@v1
+        uses: w3c/spec-prod@v2
         with:
+          TOOLCHAIN: bikeshed
+
+          # Modify as appropriate
+          GH_PAGES_BRANCH: gh-pages
           # The source file
-          source: eventstreams.bs #
-          # The destination file
-          destination: index.html
-          
-     # Publish to gh-pages
-      - name: Publish HTML to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          target_branch: gh-pages
-          publish_dir: ./
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: eventstreams.bs #
+
+          # output filename defaults to your input
+          # with .html extension instead,
+          # but if you want to customize it:
+          DESTINATION: index.html
