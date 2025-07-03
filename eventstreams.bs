@@ -38,7 +38,7 @@ In the root node, the client will expect these properties to be described on the
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
  * `ldes:versionTimestampPath`: when those versions are not published chronologically, LDES providers have the possibility to indicate a different version timestamp to establish the latest version.
  * `ldes:versionSequencePath`: when the versions do not follow the order in `ldes:timestampPath` and `ldes:sequencePath`, and for when `ldes:versionTimestampPath` are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of `v0.1` → `v0.2`, in which `v0.2` may have been published by the server before `v0.1`.
- * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.
+ * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The `sh:NodeShape` linked validates each target of the `tree:member` property. A validator in a consumer pipeline MUST ignore other targets.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
 In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
