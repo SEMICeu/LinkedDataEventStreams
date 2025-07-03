@@ -1238,14 +1238,15 @@ Possible extra rowspan handling
 			grid-column: 2;
 			width: auto;
 			margin-right: 1rem;
+			border-bottom: 3px solid transparent;
+			margin-bottom: -3px;
 		}
 		#toc .content:hover,
 		#toc .content:focus {
 			background: rgba(75%, 75%, 75%, .25);
 			background: var(--a-hover-bg);
-			border-bottom: 3px solid #054572;
-			border-bottom: 3px solid var(--toclink-underline);
-			margin-bottom: -3px;
+			border-bottom-color: #054572;
+			border-bottom-color: var(--toclink-underline);
 		}
 		#toc li li li .content {
 			margin-left: 1rem;
@@ -1487,10 +1488,11 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
+  <meta content="Bikeshed version 618007319, updated Thu Jun 26 17:23:55 2025 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-<style>/* style-autolinks */
-
+  <meta content="c8ff968e953fd312e08e65332508a123346daba8" name="revision">
+  <meta content="dark light" name="color-scheme">
+<style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
     font-size: inherit;
@@ -1550,9 +1552,17 @@ pre .property::before, pre .property::after {
 
 [data-link-type=biblio] {
     white-space: pre;
-}</style>
-<style>/* style-colors */
+}
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        --selflink-text: black;
+        --selflink-bg: silver;
+        --selflink-hover-text: white;
+    }
+}
+</style>
+<style>/* Boilerplate: style-colors */
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
 :root {
     color-scheme: light dark;
@@ -1659,176 +1669,7 @@ pre .property::before, pre .property::after {
     --outdated-shadow: red;
 
     --editedrec-bg: darkorange;
-}</style>
-<style>/* style-counters */
-
-body {
-    counter-reset: example figure issue;
 }
-.issue {
-    counter-increment: issue;
-}
-.issue:not(.no-marker)::before {
-    content: "Issue " counter(issue);
-}
-
-.example {
-    counter-increment: example;
-}
-.example:not(.no-marker)::before {
-    content: "Example " counter(example);
-}
-.invalid.example:not(.no-marker)::before,
-.illegal.example:not(.no-marker)::before {
-    content: "Invalid Example" counter(example);
-}
-
-figcaption {
-    counter-increment: figure;
-}
-figcaption:not(.no-marker)::before {
-    content: "Figure " counter(figure) " ";
-}</style>
-<style>/* style-issues */
-
-a[href].issue-return {
-    float: right;
-    float: inline-end;
-    color: var(--issueheading-text);
-    font-weight: bold;
-    text-decoration: none;
-}
-</style>
-<style>/* style-md-lists */
-
-/* This is a weird hack for me not yet following the commonmark spec
-   regarding paragraph and lists. */
-[data-md] > :first-child {
-    margin-top: 0;
-}
-[data-md] > :last-child {
-    margin-bottom: 0;
-}</style>
-<style>/* style-selflinks */
-
-:root {
-    --selflink-text: white;
-    --selflink-bg: gray;
-    --selflink-hover-text: black;
-}
-.heading, .issue, .note, .example, li, dt {
-    position: relative;
-}
-a.self-link {
-    position: absolute;
-    top: 0;
-    left: calc(-1 * (3.5rem - 26px));
-    width: calc(3.5rem - 26px);
-    height: 2em;
-    text-align: center;
-    border: none;
-    transition: opacity .2s;
-    opacity: .5;
-}
-a.self-link:hover {
-    opacity: 1;
-}
-.heading > a.self-link {
-    font-size: 83%;
-}
-.example > a.self-link,
-.note > a.self-link,
-.issue > a.self-link {
-    /* These blocks are overflow:auto, so positioning outside
-       doesn't work. */
-    left: auto;
-    right: 0;
-}
-li > a.self-link {
-    left: calc(-1 * (3.5rem - 26px) - 2em);
-}
-dfn > a.self-link {
-    top: auto;
-    left: auto;
-    opacity: 0;
-    width: 1.5em;
-    height: 1.5em;
-    background: var(--selflink-bg);
-    color: var(--selflink-text);
-    font-style: normal;
-    transition: opacity .2s, background-color .2s, color .2s;
-}
-dfn:hover > a.self-link {
-    opacity: 1;
-}
-dfn > a.self-link:hover {
-    color: var(--selflink-hover-text);
-}
-
-a.self-link::before            { content: "¶"; }
-.heading > a.self-link::before { content: "§"; }
-dfn > a.self-link::before      { content: "#"; }
-</style>
-<style>/* style-syntax-highlighting */
-
-code.highlight { padding: .1em; border-radius: .3em; }
-pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
-
-.highlight:not(.idl) { background: rgba(0, 0, 0, .03); }
-c-[a] { color: #990055 } /* Keyword.Declaration */
-c-[b] { color: #990055 } /* Keyword.Type */
-c-[c] { color: #708090 } /* Comment */
-c-[d] { color: #708090 } /* Comment.Multiline */
-c-[e] { color: #0077aa } /* Name.Attribute */
-c-[f] { color: #669900 } /* Name.Tag */
-c-[g] { color: #222222 } /* Name.Variable */
-c-[k] { color: #990055 } /* Keyword */
-c-[l] { color: #000000 } /* Literal */
-c-[m] { color: #000000 } /* Literal.Number */
-c-[n] { color: #0077aa } /* Name */
-c-[o] { color: #999999 } /* Operator */
-c-[p] { color: #999999 } /* Punctuation */
-c-[s] { color: #a67f59 } /* Literal.String */
-c-[t] { color: #a67f59 } /* Literal.String.Single */
-c-[u] { color: #a67f59 } /* Literal.String.Double */
-c-[cp] { color: #708090 } /* Comment.Preproc */
-c-[c1] { color: #708090 } /* Comment.Single */
-c-[cs] { color: #708090 } /* Comment.Special */
-c-[kc] { color: #990055 } /* Keyword.Constant */
-c-[kn] { color: #990055 } /* Keyword.Namespace */
-c-[kp] { color: #990055 } /* Keyword.Pseudo */
-c-[kr] { color: #990055 } /* Keyword.Reserved */
-c-[ld] { color: #000000 } /* Literal.Date */
-c-[nc] { color: #0077aa } /* Name.Class */
-c-[no] { color: #0077aa } /* Name.Constant */
-c-[nd] { color: #0077aa } /* Name.Decorator */
-c-[ni] { color: #0077aa } /* Name.Entity */
-c-[ne] { color: #0077aa } /* Name.Exception */
-c-[nf] { color: #0077aa } /* Name.Function */
-c-[nl] { color: #0077aa } /* Name.Label */
-c-[nn] { color: #0077aa } /* Name.Namespace */
-c-[py] { color: #0077aa } /* Name.Property */
-c-[ow] { color: #999999 } /* Operator.Word */
-c-[mb] { color: #000000 } /* Literal.Number.Bin */
-c-[mf] { color: #000000 } /* Literal.Number.Float */
-c-[mh] { color: #000000 } /* Literal.Number.Hex */
-c-[mi] { color: #000000 } /* Literal.Number.Integer */
-c-[mo] { color: #000000 } /* Literal.Number.Oct */
-c-[sb] { color: #a67f59 } /* Literal.String.Backtick */
-c-[sc] { color: #a67f59 } /* Literal.String.Char */
-c-[sd] { color: #a67f59 } /* Literal.String.Doc */
-c-[se] { color: #a67f59 } /* Literal.String.Escape */
-c-[sh] { color: #a67f59 } /* Literal.String.Heredoc */
-c-[si] { color: #a67f59 } /* Literal.String.Interpol */
-c-[sx] { color: #a67f59 } /* Literal.String.Other */
-c-[sr] { color: #a67f59 } /* Literal.String.Regex */
-c-[ss] { color: #a67f59 } /* Literal.String.Symbol */
-c-[vc] { color: #0077aa } /* Name.Variable.Class */
-c-[vg] { color: #0077aa } /* Name.Variable.Global */
-c-[vi] { color: #0077aa } /* Name.Variable.Instance */
-c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
-</style>
-<style>/* style-darkmode */
 
 @media (prefers-color-scheme: dark) {
     :root {
@@ -1941,13 +1782,171 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
        which is quite common in practice... */
     img { background: white; }
 }
-@media (prefers-color-scheme: dark) {
-    :root {
-        --selflink-text: black;
-        --selflink-bg: silver;
-        --selflink-hover-text: white;
-    }
+</style>
+<style>/* Boilerplate: style-counters */
+body {
+    counter-reset: example figure issue;
 }
+.issue {
+    counter-increment: issue;
+}
+.issue:not(.no-marker)::before {
+    content: "Issue " counter(issue);
+}
+
+.example {
+    counter-increment: example;
+}
+.example:not(.no-marker)::before {
+    content: "Example " counter(example);
+}
+.invalid.example:not(.no-marker)::before,
+.illegal.example:not(.no-marker)::before {
+    content: "Invalid Example" counter(example);
+}
+
+figcaption {
+    counter-increment: figure;
+}
+figcaption:not(.no-marker)::before {
+    content: "Figure " counter(figure) " ";
+}
+</style>
+<style>/* Boilerplate: style-issues */
+a[href].issue-return {
+    float: right;
+    float: inline-end;
+    color: var(--issueheading-text);
+    font-weight: bold;
+    text-decoration: none;
+}
+</style>
+<style>/* Boilerplate: style-md-lists */
+/* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+[data-md] > :first-child {
+    margin-top: 0;
+}
+[data-md] > :last-child {
+    margin-bottom: 0;
+}
+</style>
+<style>/* Boilerplate: style-selflinks */
+:root {
+    --selflink-text: white;
+    --selflink-bg: gray;
+    --selflink-hover-text: black;
+}
+.heading, .issue, .note, .example, li, dt {
+    position: relative;
+}
+a.self-link {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * (3.5rem - 26px));
+    width: calc(3.5rem - 26px);
+    height: 2em;
+    text-align: center;
+    border: none;
+    transition: opacity .2s;
+    opacity: .5;
+}
+a.self-link:hover {
+    opacity: 1;
+}
+.heading > a.self-link {
+    font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
+}
+li > a.self-link {
+    left: calc(-1 * (3.5rem - 26px) - 2em);
+}
+dfn > a.self-link {
+    top: auto;
+    left: auto;
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    background: var(--selflink-bg);
+    color: var(--selflink-text);
+    font-style: normal;
+    transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+    opacity: 1;
+}
+dfn > a.self-link:hover {
+    color: var(--selflink-hover-text);
+}
+
+a.self-link::before            { content: "¶"; }
+.heading > a.self-link::before { content: "§"; }
+dfn > a.self-link::before      { content: "#"; }
+</style>
+<style>/* Boilerplate: style-syntax-highlighting */
+code.highlight { padding: .1em; border-radius: .3em; }
+pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
+
+.highlight:not(.idl) { background: rgba(0, 0, 0, .03); }
+c-[a] { color: #990055 } /* Keyword.Declaration */
+c-[b] { color: #990055 } /* Keyword.Type */
+c-[c] { color: #708090 } /* Comment */
+c-[d] { color: #708090 } /* Comment.Multiline */
+c-[e] { color: #0077aa } /* Name.Attribute */
+c-[f] { color: #669900 } /* Name.Tag */
+c-[g] { color: #222222 } /* Name.Variable */
+c-[k] { color: #990055 } /* Keyword */
+c-[l] { color: #000000 } /* Literal */
+c-[m] { color: #000000 } /* Literal.Number */
+c-[n] { color: #0077aa } /* Name */
+c-[o] { color: #999999 } /* Operator */
+c-[p] { color: #999999 } /* Punctuation */
+c-[s] { color: #a67f59 } /* Literal.String */
+c-[t] { color: #a67f59 } /* Literal.String.Single */
+c-[u] { color: #a67f59 } /* Literal.String.Double */
+c-[cp] { color: #708090 } /* Comment.Preproc */
+c-[c1] { color: #708090 } /* Comment.Single */
+c-[cs] { color: #708090 } /* Comment.Special */
+c-[kc] { color: #990055 } /* Keyword.Constant */
+c-[kn] { color: #990055 } /* Keyword.Namespace */
+c-[kp] { color: #990055 } /* Keyword.Pseudo */
+c-[kr] { color: #990055 } /* Keyword.Reserved */
+c-[ld] { color: #000000 } /* Literal.Date */
+c-[nc] { color: #0077aa } /* Name.Class */
+c-[no] { color: #0077aa } /* Name.Constant */
+c-[nd] { color: #0077aa } /* Name.Decorator */
+c-[ni] { color: #0077aa } /* Name.Entity */
+c-[ne] { color: #0077aa } /* Name.Exception */
+c-[nf] { color: #0077aa } /* Name.Function */
+c-[nl] { color: #0077aa } /* Name.Label */
+c-[nn] { color: #0077aa } /* Name.Namespace */
+c-[py] { color: #0077aa } /* Name.Property */
+c-[ow] { color: #999999 } /* Operator.Word */
+c-[mb] { color: #000000 } /* Literal.Number.Bin */
+c-[mf] { color: #000000 } /* Literal.Number.Float */
+c-[mh] { color: #000000 } /* Literal.Number.Hex */
+c-[mi] { color: #000000 } /* Literal.Number.Integer */
+c-[mo] { color: #000000 } /* Literal.Number.Oct */
+c-[sb] { color: #a67f59 } /* Literal.String.Backtick */
+c-[sc] { color: #a67f59 } /* Literal.String.Char */
+c-[sd] { color: #a67f59 } /* Literal.String.Doc */
+c-[se] { color: #a67f59 } /* Literal.String.Escape */
+c-[sh] { color: #a67f59 } /* Literal.String.Heredoc */
+c-[si] { color: #a67f59 } /* Literal.String.Interpol */
+c-[sx] { color: #a67f59 } /* Literal.String.Other */
+c-[sr] { color: #a67f59 } /* Literal.String.Regex */
+c-[ss] { color: #a67f59 } /* Literal.String.Symbol */
+c-[vc] { color: #0077aa } /* Name.Variable.Class */
+c-[vg] { color: #0077aa } /* Name.Variable.Global */
+c-[vi] { color: #0077aa } /* Name.Variable.Instance */
+c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 
 @media (prefers-color-scheme: dark) {
     .highlight:not(.idl) { background: rgba(255, 255, 255, .05); }
@@ -2016,7 +2015,8 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2025-07-03">3 July 2025</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard,
+    <time class="dt-updated" datetime="2025-07-03">3 July 2025</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2029,12 +2029,15 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     </dl>
    </div>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
+   <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a>
+To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
 In addition, as of 3 July 2025,
-the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
-which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
-Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
+the editors have made this specification available under the
+<a href="https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
+which is available at https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0.
+Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document.
+</p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
@@ -2048,35 +2051,48 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#introduction"><span class="secno">1</span> <span class="content">Introduction</span></a>
     <li><a href="#overview"><span class="secno">2</span> <span class="content">Overview</span></a>
     <li>
-     <a href="#retention"><span class="secno">3</span> <span class="content">Retention policies</span></a>
+     <a href="#context-information"><span class="secno">3</span> <span class="content">Context information</span></a>
      <ol class="toc">
-      <li><a href="#time-based-retention"><span class="secno">3.1</span> <span class="content">Time-based retention policies</span></a>
-      <li><a href="#version-subsets"><span class="secno">3.2</span> <span class="content">Version-based retention policies</span></a>
-      <li><a href="#point-in-time"><span class="secno">3.3</span> <span class="content">Point-in-time retention policies</span></a>
+      <li><a href="#versions-transactions"><span class="secno">3.1</span> <span class="content">Versions and transactions</span></a>
+      <li><a href="#retention"><span class="secno">3.2</span> <span class="content">Retention policies</span></a>
      </ol>
     <li>
      <a href="#vocabulary"><span class="secno">4</span> <span class="content">Vocabulary</span></a>
      <ol class="toc">
       <li><a href="#voc-eventstream"><span class="secno">4.1</span> <span class="content">ldes:EventStream</span></a>
       <li><a href="#voc-timestamppath"><span class="secno">4.2</span> <span class="content">ldes:timestampPath</span></a>
-      <li><a href="#voc-versionofpath"><span class="secno">4.3</span> <span class="content">ldes:versionOfPath</span></a>
-      <li><a href="#voc-eventsource"><span class="secno">4.4</span> <span class="content">ldes:EventSource</span></a>
-      <li><a href="#voc-retentionpolicyproperty"><span class="secno">4.5</span> <span class="content">ldes:retentionPolicy</span></a>
-      <li><a href="#voc-retentionpolicy"><span class="secno">4.6</span> <span class="content">ldes:RetentionPolicy</span></a>
-      <li><a href="#voc-durationagopolicy"><span class="secno">4.7</span> <span class="content">ldes:DurationAgoPolicy</span></a>
+      <li><a href="#voc-sequencePath"><span class="secno">4.3</span> <span class="content">ldes:sequencePath</span></a>
+      <li><a href="#voc-versionOfPath"><span class="secno">4.4</span> <span class="content">ldes:versionOfPath</span></a>
+      <li><a href="#voc-versionTimestampPath"><span class="secno">4.5</span> <span class="content">ldes:versionTimestampPath</span></a>
+      <li><a href="#voc-versionSequencePath"><span class="secno">4.6</span> <span class="content">ldes:versionSequencePath</span></a>
+      <li><a href="#voc-eventsource"><span class="secno">4.7</span> <span class="content">ldes:EventSource</span></a>
+      <li><a href="#voc-retentionpolicyproperty"><span class="secno">4.8</span> <span class="content">ldes:retentionPolicy</span></a>
       <li>
-       <a href="#voc-latestversionsubset"><span class="secno">4.8</span> <span class="content">ldes:LatestVersionSubset</span></a>
+       <a href="#voc-retentionpolicy"><span class="secno">4.9</span> <span class="content">ldes:RetentionPolicy</span></a>
        <ol class="toc">
-        <li><a href="#voc-versionkey"><span class="secno">4.8.1</span> <span class="content">ldes:versionKey</span></a>
-        <li><a href="#voc-amount"><span class="secno">4.8.2</span> <span class="content">ldes:amount</span></a>
+        <li><a href="#voc-startingfrom"><span class="secno">4.9.1</span> <span class="content">ldes:startingFrom</span></a>
+        <li><a href="#voc-versionduration"><span class="secno">4.9.2</span> <span class="content">ldes:versionDuration</span></a>
+        <li><a href="#voc-versionamount"><span class="secno">4.9.3</span> <span class="content">ldes:versionAmount</span></a>
+        <li><a href="#voc-versiondeleteduration"><span class="secno">4.9.4</span> <span class="content">ldes:versionDeleteDuration</span></a>
+        <li><a href="#voc-fulllogduration"><span class="secno">4.9.5</span> <span class="content">ldes:fullLogDuration</span></a>
+        <li><a href="#voc-former-retentionpolicies"><span class="secno">4.9.6</span> <span class="content">Former retention policies terms</span></a>
        </ol>
       <li>
-       <a href="#voc-pointintimepolicy"><span class="secno">4.9</span> <span class="content">ldes:PointInTimePolicy</span></a>
+       <a href="#voc-versioning-transactions"><span class="secno">4.10</span> <span class="content">Terms for versioning and transactions on top of ldes:EventStream</span></a>
        <ol class="toc">
-        <li><a href="#voc-pointintime"><span class="secno">4.9.1</span> <span class="content">ldes:pointInTime</span></a>
+        <li><a href="#voc-versionCreatePath"><span class="secno">4.10.1</span> <span class="content">ldes:versionCreatePath</span></a>
+        <li><a href="#voc-versionUpdatePath"><span class="secno">4.10.2</span> <span class="content">ldes:versionUpdatePath</span></a>
+        <li><a href="#voc-versionDeletePath"><span class="secno">4.10.3</span> <span class="content">ldes:versionDeletePath</span></a>
+        <li><a href="#voc-versionCreateObject"><span class="secno">4.10.4</span> <span class="content">ldes:versionCreateObject</span></a>
+        <li><a href="#voc-versionUpdateObject"><span class="secno">4.10.5</span> <span class="content">ldes:versionUpdateObject</span></a>
+        <li><a href="#voc-versionDeleteObject"><span class="secno">4.10.6</span> <span class="content">ldes:versionDeleteObject</span></a>
+        <li><a href="#voc-transactionPath"><span class="secno">4.10.7</span> <span class="content">ldes:transactionPath</span></a>
+        <li><a href="#voc-transactionFinalizedPath"><span class="secno">4.10.8</span> <span class="content">ldes:transactionFinalizedPath</span></a>
+        <li><a href="#voc-transactionFinalizedObject"><span class="secno">4.10.9</span> <span class="content">ldes:transactionFinalizedObject</span></a>
        </ol>
      </ol>
-    <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
+    <li><a href="#conformance"><span class="secno"></span> <span class="content">
+    Conformance</span></a>
     <li>
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
@@ -2095,7 +2111,7 @@ For example, one can indicate what time-based property in the member is used for
    <p class="issue" id="issue-eae450f3"><a class="self-link" href="#issue-eae450f3"></a> More extensions should be specified w.r.t. <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/69">HTTP status codes</a>, or <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/31">keeping state</a>. This should be further detailled in a chapter after the overview.</p>
    <h2 class="heading settled" data-level="2" id="overview"><span class="secno">2. </span><span class="content">Overview</span><a class="self-link" href="#overview"></a></h2>
    <p><img alt="An overview of the LDES specification." height="500" src="overview.svg"></p>
-   <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection (<code>rdfs:subClassOf tree:Collection</code>) of members that cannot be updated or removed once they are published, with each member being a set of RDF quads (<a data-link-type="biblio" href="#biblio-rdf-primer">[rdf-primer]</a>).
+   <p>A Linked Data Event Stream (LDES) (<code>ldes:EventStream</code>) is a collection (<code>rdfs:subClassOf tree:Collection</code>) of members that cannot be updated or removed once they are published, with each member being a set of RDF quads (<a data-link-type="biblio" href="#biblio-rdf-primer" title="RDF Primer">[rdf-primer]</a>).
 This way, the collection of members becomes an append-only log or <em>event stream</em>.</p>
    <p>Following the <a href="https://w3id.org/tree/specification">TREE specification</a>, this event stream is published using one or more HTTP resources.
 When more resources are used, these pages, or <code>tree:Node</code>s, will be structured according to a search tree.
@@ -2103,18 +2119,24 @@ Therefore we will use the terms <em>root node</em> for the first page, and <em>s
    <p>In the root node, the client will expect these properties to be described on the <code>ldes:EventStream</code> entity:</p>
    <ul>
     <li data-md>
-     <p><code>ldes:timestampPath</code>: this is a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a> that identifies an <code>xsd:dateTime</code> literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When <code>ldes:timestampPath</code> is set, no member can be added to the LDES with a timestamp earlier than the latest published member.</p>
+     <p><code>ldes:timestampPath</code>: this is a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a> (all further *Path properties are as well) that sets the chronological time with a <code>xsd:dateTime</code> literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When <code>ldes:timestampPath</code> is set, no member can be added to the LDES with a timestamp earlier than the latest published member.</p>
+    <li data-md>
+     <p><code>ldes:sequencePath</code>: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the <code>ldes:timestampPath</code>, this property defines, based on the <a data-link-type="biblio" href="#biblio-xpath-functions-31" title="XPath and XQuery Functions and Operators 3.1">[xpath-functions-31]</a> <a href="https://www.w3.org/TR/xpath-functions-31/#func-compare">comparison operator</a>, what xsd-literals define the order of processing. When no <code>ldes:timestampPath</code> has been set, the <code>ldes:sequencePath</code> defines the sequence for all members in the LDES.</p>
     <li data-md>
      <p><code>ldes:versionOfPath</code>: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., <code>dcterms:isVersionOf</code>).</p>
     <li data-md>
-     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl">[SHACL]</a> shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The <code>sh:NodeShape</code> linked validates each target of the <code>tree:member</code> property. A validator in a consumer pipeline MUST ignore other targets.</p>
+     <p><code>ldes:versionTimestampPath</code>: when those versions are not published chronologically, LDES providers have the possibility to indicate a different version timestamp to establish the latest version.</p>
+    <li data-md>
+     <p><code>ldes:versionSequencePath</code>: when the versions do not follow the order in <code>ldes:timestampPath</code> and <code>ldes:sequencePath</code>, and for when <code>ldes:versionTimestampPath</code> are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of <code>v0.1</code> → <code>v0.2</code>, in which <code>v0.2</code> may have been published by the server before <code>v0.1</code>.</p>
+    <li data-md>
+     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl" title="Shapes Constraint Language (SHACL)">[SHACL]</a> shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The <code>sh:NodeShape</code> linked validates each target of the <code>tree:member</code> property. A validator in a consumer pipeline MUST ignore other targets.</p>
     <li data-md>
      <p><code>tree:view</code>: connects the collection to the current page, or points to one specific root node after dereferencing the <code>ldes:EventStream</code> identifier.</p>
    </ul>
    <p>In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI <code>&lt;></code>) will be further described using these properties:</p>
    <ul>
     <li data-md>
-     <p><code>ldes:retentionPolicy</code>: indicates 0 or more retention policies (see <a href="#retention">§ 3 Retention policies</a>).</p>
+     <p><code>ldes:retentionPolicy</code>: indicates a retention policy (see next the dedicated chapter [](#retention)).</p>
     <li data-md>
      <p><code>tree:viewDescription</code>: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the <code>dcat:Distribution</code>, the <code>tree:SearchTree</code>, or the <code>ldes:EventSource</code>) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the <code>ldes:EventSource</code> from the root <code>tree:Node</code>. By default, the <code>tree:viewDescription</code> points at the root node.</p>
    </ul>
@@ -2124,7 +2146,9 @@ The subject is the event stream instance and the object is the root focus node o
 An LDES client MUST implement the <a href="https://w3id.org/tree/specification#member-extraction-algorithm">Member Extraction Algorithm of the TREE specification</a> to retrieve the full set of quads of the member.
 In an <code>ldes:EventStream</code>, the object of the <code>tree:member</code> triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.</p>
    <div class="example" id="example-e164ae40">
-    <a class="self-link" href="#example-e164ae40"></a> An example record from a sensor observation dataset in the <a data-link-type="biblio" href="#biblio-turtle">[turtle]</a> format: 
+    <a class="self-link" href="#example-e164ae40"></a>
+An example record from a sensor observation dataset in the <a data-link-type="biblio" href="#biblio-turtle" title="RDF 1.1 Turtle">[turtle]</a> format:
+
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>Observations</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
                 <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>sosa</c-><c- p>:</c-><c- f>resultTime</c-> <c- p>;</c->
                 <c- nn>tree</c-><c- p>:</c-><c- f>shape</c-> <c- nn>ex</c-><c- p>:</c-><c- f>shape1.shacl</c-> <c- p>;</c->
@@ -2137,7 +2161,9 @@ In an <code>ldes:EventStream</code>, the object of the <code>tree:member</code> 
 </pre>
    </div>
    <div class="example" id="example-bb63fd35">
-    <a class="self-link" href="#example-bb63fd35"></a> An example record from a base registry of addresses in the <a data-link-type="biblio" href="#biblio-trig">[trig]</a> format: 
+    <a class="self-link" href="#example-bb63fd35"></a>
+An example record from a base registry of addresses in the <a data-link-type="biblio" href="#biblio-trig" title="RDF 1.1 TriG">[trig]</a> format:
+
 <pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>AddressRecords</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
                   <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- p>;</c->
                   <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- p>;</c->
@@ -2159,90 +2185,105 @@ A client MUST traverse the relations cfr. the TREE chapters on <a href="https://
 A client MUST keep its own <em>state</em> to know when to refetch certain <code>tree:Node</code>s.</p>
    <p class="issue" id="issue-6f628f97"><a class="self-link" href="#issue-6f628f97"></a> We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on <a href="https://w3id.org/tree/specification#relationsubclasses">pruning branches</a> related to interpreting comparators for <code>xsd:dateTime</code> literals if it wants to detect immutable pages via the timestampPath.</p>
    <p class="issue" id="issue-36671e76"><a class="self-link" href="#issue-36671e76"></a> More specific server documentation should be found in a Server Primer (to do), such as containing a <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/59">link to the JSON-LD context</a>, <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/70">official SHACL shapes for LDES</a> to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.</p>
-   <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
-   <p>The goal of the retention policies is to indicate that a client should not rely on finding members that fall outside the retention policies.
-This can help a consumer in the discovery phase to pick the right LDES, or help the consumer to detect non-viable synchronization set-ups.</p>
-   <p><img alt="An overview of the existing retention policies in LDES" height="400" src="retentionpolicies.svg"></p>
-   <p>When no retention policy is provided in the root node, the client MUST assume all members that have been added to the <code>ldes:EventStream</code> are still available from this root node.
-When one or more retention policies are provided, a client MUST assume it will not be able to find members outside of the union of the retention policies.</p>
-   <p>In the LDES specification, three types of retention policies are defined which can be used with a <code>ldes:retentionPolicy</code>:</p>
+   <h2 class="heading settled" data-level="3" id="context-information"><span class="secno">3. </span><span class="content">Context information</span><a class="self-link" href="#context-information"></a></h2>
+   <p>A client MUST have a way to make available context information to processors further down the pipeline set up by a consumer.
+A consumer will be able to make decisions on how to further process the event stream using this context information.</p>
+   <h3 class="heading settled" data-level="3.1" id="versions-transactions"><span class="secno">3.1. </span><span class="content">Versions and transactions</span><a class="self-link" href="#versions-transactions"></a></h3>
+   <p>Consumers can use the LDES version properties to decide what action to take.
+E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
+If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
+To that extent, on the <code>ldes:EventStream</code> entity, these properties can be used, which are further explained in the vocabulary.</p>
+   <ul>
+    <li data-md>
+     <p><a href="#voc-versionOfPath"><code>ldes:versionOfPath</code></a> - such as <code>dcterms:isVersionOf</code> or <code>as:object</code></p>
+    <li data-md>
+     <p><a href="#voc-versionDeleteObject"><code>ldes:versionDeleteObject</code></a> - such as <code>as:Delete</code></p>
+    <li data-md>
+     <p><a href="#voc-versionCreateObject"><code>ldes:versionCreateObject</code></a> - such as <code>as:Create</code></p>
+    <li data-md>
+     <p><a href="#voc-versionUpdateObject"><code>ldes:versionUpdateObject</code></a> - such as <code>as:Update</code></p>
+    <li data-md>
+     <p><a href="#voc-versionDeletePath"><code>ldes:versionDeletePath</code></a> - defaults to <code>rdf:type</code></p>
+    <li data-md>
+     <p><a href="#voc-versionCreatePath"><code>ldes:versionCreatePath</code></a> - defaults to <code>rdf:type</code></p>
+    <li data-md>
+     <p><a href="#voc-versionUpdatePath"><code>ldes:versionUpdatePath</code></a> - defaults to <code>rdf:type</code></p>
+   </ul>
+   <p>A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:</p>
+   <ul>
+    <li data-md>
+     <p><a href="#voc-transactionPath"><code>ldes:transactionPath</code></a> - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.</p>
+    <li data-md>
+     <p><a href="#voc-transactionFinalizedPath"><code>ldes:transactionFinalizedPath</code></a> - points at the object</p>
+    <li data-md>
+     <p><a href="#voc-transactionFinalizedObject"><code>ldes:transactionFinalizedObject</code></a> - the value that the object needs to be in order to be finalized. Defaults to the <code>"true"^^xsd:boolean</code>.</p>
+   </ul>
+   <p>If one of the processors in a pipeline relies on transactions, the LDES client MUST force to emit the members in chronological order according to the <code>ldes:timestampPath</code> and <code>ldes:sequencePath</code>.
+When processing multiple members of the transaction with the same <code>ldes:timestampPath</code>, the client MUST ensure the member that finalizes the transaction is emitted last.</p>
+   <p>When the IRI in the object of the <code>tree:member</code> triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
+A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.</p>
+   <h3 class="heading settled" data-level="3.2" id="retention"><span class="secno">3.2. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h3>
+   <p>The goal of a retention policy is to indicate in what way a specific view will not be able to provide a complete history of the event stream to the consumer.
+This can help a consumer in the discovery phase to pick an specific LDES view, or help the consumer to detect non-viable synchronization set-ups.</p>
+   <p>When no retention policy is provided in the root node, the consumer MUST assume that all members, that have once been added to the <code>ldes:EventStream</code>, are still available from this root node.
+When a retention policy is provided however, a consumer MUST assume it will not be able to find members outside of the retention policy.</p>
+   <p><img alt="An overview of the existing retention policies in LDES" src="retentionpolicies.svg" width="800"></p>
+   <div class="example" id="example-690bc610">
+    <a class="self-link" href="#example-690bc610"></a>
+An example retention policy combining different features from the overview.
+
+<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>LDES</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>as</c-><c- p>:</c-><c- f>updated</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>transactionPath</c-> <c- nn>ex</c-><c- p>:</c-><c- f>transactionId</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>transactionFinalizedPath</c-> <c- nn>ex</c-><c- p>:</c-><c- f>transactionEnded</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>transactionFinalizedObject</c-> <c- l>true</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>as</c-><c- p>:</c-><c- f>object</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>versionDeleteObject</c-> <c- nn>as</c-><c- p>:</c-><c- f>Delete</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>versionCreateObject</c-> <c- nn>as</c-><c- p>:</c-><c- f>Create</c-> <c- p>;</c->
+        <c- nn>ldes</c-><c- p>:</c-><c- f>versionUpdateObject</c-> <c- nn>as</c-><c- p>:</c-><c- f>Update</c-> <c- p>;</c->
+        <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
+
+<c- g>&lt;></c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventSource</c-> <c- p>;</c->
+     <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- p>[</c->
+         <c- nn>ldes</c-><c- p>:</c-><c- f>fullLogDuration</c-> <c- s>"P1Y"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>duration</c-> <c- p>;</c->
+         <c- nn>ldes</c-><c- p>:</c-><c- f>versionAmount</c-> <c- mi>1</c-> <c- p>;</c->
+         <c- nn>ldes</c-><c- p>:</c-><c- f>versionDeleteDuration</c-> <c- s>"P1Y"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>duration</c-> <c- p>;</c->
+     <c- p>]</c-> <c- p>.</c->
+</pre>
+   </div>
+   <p>A retention policy will be described on the root node.
+The root node itself can contain this information using the property <code>ldes:retentionPolicy</code>, or the root node can refer through the property <code>tree:viewDescription</code> to an entity on which the retention policy is described using the property <code>ldes:retentionPolicy</code>.
+When the client is processing the root node, it MUST look for a retention policy in both ways.</p>
+   <p>In the example above, the retention policy has been set on the root node (double typed as the <code>ldes:EventSource</code>).
+When the <a href="#voc-retentionpolicyproperty"><code>ldes:retentionPolicy</code></a> would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
+Multiple properties can then be added to make the scope of members that are kept larger:</p>
+   <ul>
+    <li data-md>
+     <p><a href="#voc-startingfrom"><code>ldes:startingFrom</code></a>: this view only retaines members starting from this <code>xsd:dateTime</code> with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member.</p>
+    <li data-md>
+     <p><a href="#voc-fulllogduration"><code>ldes:fullLogDuration</code></a>: the duration from current time from which all members are retained. Only in combination with <code>ldes:startingFrom</code>, and when the <code>ldes:startingFrom</code> timestamp is within this window, not all members within the member are retained. No other properties can influence this property.</p>
+    <li data-md>
+     <p><a href="#voc-versionamount"><code>ldes:versionAmount</code></a>: the amount of versions to keep.</p>
+    <li data-md>
+     <p><a href="#voc-versionduration"><code>ldes:versionDuration</code></a>: the duration from current time from which an amount of version are kept, to be used together with <code>ldes:versionAmount</code>. Defaults the duration of the full event stream.</p>
+    <li data-md>
+     <p><a href="#voc-versiondeleteduration"><code>ldes:versionDeleteDuration</code></a>: the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of <code>ldes:versionAmount</code> or <code>ldes:versionDuration</code>.</p>
+   </ul>
+   <p>When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
+The <code>ldes:timestampPath</code> points at the timestamp in the member that can be compared with the current time minus the durations.
+When the <code>ldes:versionTimestampPath</code> has been set, the two version durations are to be compared with this timestamp.</p>
+   <p>Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
+These retention policies types are:</p>
    <ol>
     <li data-md>
-     <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specified duration is removed</p>
+     <p><code>ldes:DurationAgoPolicy</code>: a time-based retention policy in which data generated before a specified duration is not retained.</p>
     <li data-md>
-     <p><code>ldes:LatestVersionSubset</code>: a version subset based on the latest versions of an entity in the stream</p>
+     <p><code>ldes:LatestVersionSubset</code>: a version subset based on the latest versions of an entity in the stream.</p>
     <li data-md>
-     <p><code>ldes:PointInTimePolicy</code>: a point-in-time retention policy in which data generated before a specific datetime is removed</p>
+     <p><code>ldes:PointInTimePolicy</code>: a point-in-time retention policy in which data generated before a specific time is not retained.</p>
    </ol>
-   <p>A consumer MUST interpret the retention policies to understand whether the goal of the client can be reached.
-For example, an LDES client can work with a configured polling interval, or can be executed on a schedule.
-This polling interval, or interval between executions, cannot be longer than the retention policy of the data in the LDES.
-Or, when an LDES client is asked for a full replication, it MUST check the retention policy and whether this is possible.</p>
-   <h3 class="heading settled" data-level="3.1" id="time-based-retention"><span class="secno">3.1. </span><span class="content">Time-based retention policies</span><a class="self-link" href="#time-based-retention"></a></h3>
-   <p>A time-based retention policy can be introduced as follows:</p>
-   <div class="example" id="example-8ddb93da">
-    <a class="self-link" href="#example-8ddb93da"></a> 
-<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C3</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>prov</c-><c- p>:</c-><c- f>generatedAtTime</c-> <c- p>;</c->
-      <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
-
-<c- g>&lt;></c-> <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- nn>ex</c-><c- p>:</c-><c- f>P1</c-> <c- p>.</c->
-
-<c- nn>ex</c-><c- p>:</c-><c- f>P1</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>DurationAgoPolicy</c-> <c- p>;</c->
-      <c- nn>tree</c-><c- p>:</c-><c- f>value</c-> <c- s>"P1Y"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>duration</c-> <c- p>.</c-> <c- c># Keep 1 year of data</c->
-</pre>
-   </div>
-   <p>A <code>ldes:DurationAgoPolicy</code> uses a <code>tree:value</code> with an <code>xsd:duration</code>-typed literal to denote the temporal extent to which data can be retrieved.
-When the <code>ldes:timestampPath</code> is redefined on the policy itself, a client MUST interpret the retention policy on this path instead.</p>
-   <h3 class="heading settled" data-level="3.2" id="version-subsets"><span class="secno">3.2. </span><span class="content">Version-based retention policies</span><a class="self-link" href="#version-subsets"></a></h3>
-   <p>A version-based retention policy can be defined as follows, with the example configured to only retain 2 versions of an object referred to using <code>dcterms:isVersionOf</code>:</p>
-   <div class="example" id="example-e8d39e94">
-    <a class="self-link" href="#example-e8d39e94"></a> 
-<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C2</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- p>;</c->
-      <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
-
-<c- g>&lt;></c-> <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- nn>ex</c-><c- p>:</c-><c- f>P2</c-> <c- p>.</c->
-
-<c- nn>ex</c-><c- p>:</c-><c- f>P2</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>LatestVersionSubset</c-><c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>amount</c-> <c- mi>2</c-> <c- p>;</c->
-      <c- c># If different from the Event Stream, this can optionally be overwritten here</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>created</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>versionOfPath</c-> <c- nn>dcterms</c-><c- p>:</c-><c- f>isVersionOf</c-> <c- p>.</c->
-</pre>
-   </div>
-   <p>A <code>ldes:LatestVersionSubset</code> SHOULD have the property <code>ldes:amount</code> and MAY redefine the <code>ldes:timestampPath</code> and/or <code>ldes:versionOfPath</code>. It MAY also define a compound version key using <code>ldes:versionKey</code> (see example below) instead of <code>ldes:versionOfPath</code>.
-The <code>ldes:amount</code> has an <code>xsd:integer</code> datatype, indicating the number of versions to keep. By default, this value is set to 1.
-The <code>ldes:versionKey</code> is an <code>rdf:List</code> of <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a>s indicating objects that MUST be concatenated together to find the key on which versions are matched.
-When the <code>ldes:versionKey</code> is set to an empty path <code>()</code>, all members MUST be seen as a version of the same thing.</p>
-   <div class="example" id="example-9998a1b2">
-    <a class="self-link" href="#example-9998a1b2"></a> For sensor datasets the version key may get more complex, grouping observations by both the observed property as the sensor that made the observation. 
-<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C1</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
-      <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
-
-<c- g>&lt;></c-> <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- nn>ex</c-><c- p>:</c-><c- f>P3</c-> <c- p>.</c->
-
-<c- nn>ex</c-><c- p>:</c-><c- f>P3</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>LatestVersionSubset</c-><c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>amount</c-> <c- mi>2</c-> <c- p>;</c-> 
-      <c- nn>ldes</c-><c- p>:</c-><c- f>versionKey</c-> <c- p>(</c-> <c- p>(</c-> <c- nn>sosa</c-><c- p>:</c-><c- f>observedProperty</c-> <c- p>)</c-> <c- p>(</c-> <c- nn>sosa</c-><c- p>:</c-><c- f>madeBySensor</c-> <c- p>)</c-> <c- p>)</c-> <c- p>.</c->
-</pre>
-   </div>
-   <h3 class="heading settled" data-level="3.3" id="point-in-time"><span class="secno">3.3. </span><span class="content">Point-in-time retention policies</span><a class="self-link" href="#point-in-time"></a></h3>
-   <p>A point-in-time retention policy can be introduced as follows:</p>
-   <div class="example" id="example-61234f77">
-    <a class="self-link" href="#example-61234f77"></a> 
-<pre class="language-turtle highlight"><c- nn>ex</c-><c- p>:</c-><c- f>C4</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>EventStream</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>timestampPath</c-> <c- nn>prov</c-><c- p>:</c-><c- f>generatedAtTime</c-> <c- p>;</c->
-      <c- nn>tree</c-><c- p>:</c-><c- f>view</c-> <c- g>&lt;></c-> <c- p>.</c->
-
-<c- g>&lt;></c-> <c- nn>ldes</c-><c- p>:</c-><c- f>retentionPolicy</c-> <c- nn>ex</c-><c- p>:</c-><c- f>P4</c-> <c- p>.</c->
-
-<c- nn>ex</c-><c- p>:</c-><c- f>P4</c-> <c- b>a</c-> <c- nn>ldes</c-><c- p>:</c-><c- f>PointInTimePolicy</c-> <c- p>;</c->
-      <c- nn>ldes</c-><c- p>:</c-><c- f>pointInTime</c-> <c- s>"2026-04-12T00:00:00Z"</c-><c- p>^^</c-><c- nn>xsd</c-><c- p>:</c-><c- f>dateTime</c-> <c- p>.</c-> <c- c># Keep data after April 12th, 2026 according to the default timezone</c->
-</pre>
-   </div>
-   <p>A <code>ldes:PointInTimePolicy</code> uses a <code>ldes:pointInTime</code> with an <code>xsd:dateTime</code>-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp, indicated by the <code>ldes:timestampPath</code> that MAY be redefined in the policy itself.</p>
+   <p>A <code>ldes:LatestVersionSubset</code> uses the property <code>ldes:amount</code> with as range an <code>xsd:integer</code> datatype, indicating the number of versions to keep. By default, this value is set to 1.
+A <code>ldes:PointInTimePolicy</code> uses a <code>ldes:pointInTime</code> with an <code>xsd:dateTime</code>-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp.</p>
    <h2 class="heading settled" data-level="4" id="vocabulary"><span class="secno">4. </span><span class="content">Vocabulary</span><a class="self-link" href="#vocabulary"></a></h2>
    <p>Next to re-using terms from the <code>tree:</code> vocabulary, the <code>ldes:</code> namespace introduced in this document provides a couple of new terms.
 The base IRI for LDES is <code>https://w3id.org/ldes#</code>, and the preferred prefix is <code>ldes:</code>.
@@ -2251,56 +2292,125 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
    <p>The class <code>ldes:EventStream</code> is a subclass of <code>tree:Collection</code>. The specialization being that all members are immutable, and thus that this <code>tree:Collection</code> is append-only.</p>
    <h3 class="heading settled" data-level="4.2" id="voc-timestamppath"><span class="secno">4.2. </span><span class="content">ldes:timestampPath</span><a class="self-link" href="#voc-timestamppath"></a></h3>
    <p>The path to the <code>xsd:dateTime</code> literal in each member that defines the order of the event stream.</p>
-   <p><strong>Domain:</strong> <code>ldes:EventStream</code> or <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Domain:</strong> <code>ldes:EventStream</code></p>
    <p><strong>Range:</strong> a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a></p>
-   <h3 class="heading settled" data-level="4.3" id="voc-versionofpath"><span class="secno">4.3. </span><span class="content">ldes:versionOfPath</span><a class="self-link" href="#voc-versionofpath"></a></h3>
+   <h3 class="heading settled" data-level="4.3" id="voc-sequencePath"><span class="secno">4.3. </span><span class="content">ldes:sequencePath</span><a class="self-link" href="#voc-sequencePath"></a></h3>
+   <p>The path to an xsd literal in each member that defines the order of the event stream in addition to the <code>ldes:timestampPath</code>.</p>
+   <p><strong>Domain:</strong> <code>ldes:EventStream</code></p>
+   <p><strong>Range:</strong> a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a></p>
+   <h3 class="heading settled" data-level="4.4" id="voc-versionOfPath"><span class="secno">4.4. </span><span class="content">ldes:versionOfPath</span><a class="self-link" href="#voc-versionOfPath"></a></h3>
    <p>The path to the IRI in each member that defines the entity of which this member is a version.</p>
-   <p><strong>Domain:</strong> <code>ldes:EventStream</code> or <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Domain:</strong> <code>ldes:EventStream</code></p>
    <p><strong>Range:</strong> a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a></p>
-   <h3 class="heading settled" data-level="4.4" id="voc-eventsource"><span class="secno">4.4. </span><span class="content">ldes:EventSource</span><a class="self-link" href="#voc-eventsource"></a></h3>
+   <h3 class="heading settled" data-level="4.5" id="voc-versionTimestampPath"><span class="secno">4.5. </span><span class="content">ldes:versionTimestampPath</span><a class="self-link" href="#voc-versionTimestampPath"></a></h3>
+   <p>For out of order event streams, this defines the path to the <code>xsd:dateTime</code> literal in each member that defines the order of versioned members.</p>
+   <p>Only relevant when the <code>ldes:versionOfPath</code> has been set.</p>
+   <p><strong>Domain:</strong> <code>ldes:EventStream</code></p>
+   <p><strong>Range:</strong> a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a></p>
+   <h3 class="heading settled" data-level="4.6" id="voc-versionSequencePath"><span class="secno">4.6. </span><span class="content">ldes:versionSequencePath</span><a class="self-link" href="#voc-versionSequencePath"></a></h3>
+   <p>For out of order event streams, this defines the path to an xsd literal in each member that defines the order of the event stream in addition to the <code>ldes:versionTimestampPath</code>.</p>
+   <p><strong>Domain:</strong> <code>ldes:EventStream</code></p>
+   <p><strong>Range:</strong> a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a></p>
+   <h3 class="heading settled" data-level="4.7" id="voc-eventsource"><span class="secno">4.7. </span><span class="content">ldes:EventSource</span><a class="self-link" href="#voc-eventsource"></a></h3>
    <p>The class <code>ldes:EventSource</code> is a subclass of <code>dcat:Distribution</code>, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.</p>
-   <p>An <code>ldes:EventSource</code> can <em>only</em> be published on LDESs that have a <code>ldes:timestampPath</code> set, and thus will publish their entities in order.</p>
-   <h3 class="heading settled" data-level="4.5" id="voc-retentionpolicyproperty"><span class="secno">4.5. </span><span class="content">ldes:retentionPolicy</span><a class="self-link" href="#voc-retentionpolicyproperty"></a></h3>
-   <p>Links to one or more retention policies.</p>
+   <p>An <code>ldes:EventSource</code> can <em>only</em> be published on LDESs that have a <code>ldes:timestampPath</code> set, and thus will publish their entities in this chronological order.</p>
+   <h3 class="heading settled" data-level="4.8" id="voc-retentionpolicyproperty"><span class="secno">4.8. </span><span class="content">ldes:retentionPolicy</span><a class="self-link" href="#voc-retentionpolicyproperty"></a></h3>
+   <p>Links to a retention policy.</p>
    <p><strong>Domain:</strong> Preferably the root node. Alternatively it can occur on any type of entity that is linked from the root node using <code>tree:viewDescription</code>.</p>
    <p><strong>Range:</strong> <code>ldes:RetentionPolicy</code></p>
-   <h3 class="heading settled" data-level="4.6" id="voc-retentionpolicy"><span class="secno">4.6. </span><span class="content">ldes:RetentionPolicy</span><a class="self-link" href="#voc-retentionpolicy"></a></h3>
-   <p>An abstract class for a retention policy.</p>
-   <h3 class="heading settled" data-level="4.7" id="voc-durationagopolicy"><span class="secno">4.7. </span><span class="content">ldes:DurationAgoPolicy</span><a class="self-link" href="#voc-durationagopolicy"></a></h3>
-   <p>A retention policy that uses an <code>xsd:duration</code> literal to document a sliding window of data.</p>
-   <h3 class="heading settled" data-level="4.8" id="voc-latestversionsubset"><span class="secno">4.8. </span><span class="content">ldes:LatestVersionSubset</span><a class="self-link" href="#voc-latestversionsubset"></a></h3>
-   <p>A retention policy that selects an amount of versions based on the versionOfPath, or a more advanced version key that can be configured.</p>
-   <h4 class="heading settled" data-level="4.8.1" id="voc-versionkey"><span class="secno">4.8.1. </span><span class="content">ldes:versionKey</span><a class="self-link" href="#voc-versionkey"></a></h4>
-   <p>An advanced property for setting a compound key for defining the latest version of an entity.</p>
-   <p><strong>Domain:</strong> <code>ldes:LatestVersionSubset</code></p>
-   <p><strong>Range:</strong> an <code>rdf:List</code>, with each item of the list a <a href="https://www.w3.org/TR/shacl/#property-paths">SHACL property path</a>.</p>
-   <h4 class="heading settled" data-level="4.8.2" id="voc-amount"><span class="secno">4.8.2. </span><span class="content">ldes:amount</span><a class="self-link" href="#voc-amount"></a></h4>
+   <h3 class="heading settled" data-level="4.9" id="voc-retentionpolicy"><span class="secno">4.9. </span><span class="content">ldes:RetentionPolicy</span><a class="self-link" href="#voc-retentionpolicy"></a></h3>
+   <p>The class for a retention policy that indicates how long members are preserved in this search tree.</p>
+   <h4 class="heading settled" data-level="4.9.1" id="voc-startingfrom"><span class="secno">4.9.1. </span><span class="content">ldes:startingFrom</span><a class="self-link" href="#voc-startingfrom"></a></h4>
+   <p>The search tree only keeps members starting a certain timestamp.</p>
+   <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Range:</strong> <code>xsd:dateTime</code> with a timezone</p>
+   <h4 class="heading settled" data-level="4.9.2" id="voc-versionduration"><span class="secno">4.9.2. </span><span class="content">ldes:versionDuration</span><a class="self-link" href="#voc-versionduration"></a></h4>
+   <p>The search tree only keeps its versions, for which an <code>ldes:versionAmount</code> MUST have been set, only during a specific window.</p>
+   <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Range:</strong> <code>xsd:duration</code></p>
+   <h4 class="heading settled" data-level="4.9.3" id="voc-versionamount"><span class="secno">4.9.3. </span><span class="content">ldes:versionAmount</span><a class="self-link" href="#voc-versionamount"></a></h4>
    <p>The number of versions to keep. This MUST be a number greater than 0.</p>
-   <p><strong>Domain:</strong> <code>ldes:LatestVersionSubset</code></p>
-   <p><strong>Range:</strong> <code>xsd:integer</code></p>
-   <h3 class="heading settled" data-level="4.9" id="voc-pointintimepolicy"><span class="secno">4.9. </span><span class="content">ldes:PointInTimePolicy</span><a class="self-link" href="#voc-pointintimepolicy"></a></h3>
-   <p>A retention policy that indicates that members are kept starting from a certain point in time.</p>
-   <h4 class="heading settled" data-level="4.9.1" id="voc-pointintime"><span class="secno">4.9.1. </span><span class="content">ldes:pointInTime</span><a class="self-link" href="#voc-pointintime"></a></h4>
-   <p>The point in time from which members will be available starting from this root node.</p>
-   <p><strong>Domain:</strong> <code>ldes:PointInTimePolicy</code></p>
-   <p><strong>Range:</strong> <code>xsd:dateTime</code> including an explicit timezone</p>
+   <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Range:</strong> <code>xsd:integer</code> > 0</p>
+   <h4 class="heading settled" data-level="4.9.4" id="voc-versiondeleteduration"><span class="secno">4.9.4. </span><span class="content">ldes:versionDeleteDuration</span><a class="self-link" href="#voc-versiondeleteduration"></a></h4>
+   <p>The search tree only keeps its deletions for a certain duration.</p>
+   <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Range:</strong> <code>xsd:duration</code></p>
+   <h4 class="heading settled" data-level="4.9.5" id="voc-fulllogduration"><span class="secno">4.9.5. </span><span class="content">ldes:fullLogDuration</span><a class="self-link" href="#voc-fulllogduration"></a></h4>
+   <p>The search tree keeps its full log for a certain duration.</p>
+   <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
+   <p><strong>Range:</strong> <code>xsd:duration</code></p>
+   <h4 class="heading settled" data-level="4.9.6" id="voc-former-retentionpolicies"><span class="secno">4.9.6. </span><span class="content">Former retention policies terms</span><a class="self-link" href="#voc-former-retentionpolicies"></a></h4>
+   <ul>
+    <li data-md>
+     <p><code>ldes:DurationAgoPolicy</code>: A retention policy class that uses an <code>xsd:duration</code> literal to document a sliding window of data.</p>
+    <li data-md>
+     <p><code>ldes:LatestVersionSubset</code>: A retention policy class that select an amount of versions based on the versionOfPath.</p>
+    <li data-md>
+     <p><code>ldes:amount</code>: The number of versions to keep. This MUST be a number greater than 0.</p>
+     <ul>
+      <li data-md>
+       <p>Domain: <code>ldes:LatestVersionSubset</code></p>
+      <li data-md>
+       <p>Range: <code>xsd:integer</code></p>
+     </ul>
+    <li data-md>
+     <p><code>ldes:PointInTimePolicy</code>: A retention policy class that indicates members are kept starting on a certain point in time.</p>
+    <li data-md>
+     <p><code>ldes:pointInTime: The point in time from which members will be available starting from this root node.      - Domain: </code>ldes:PointInTimePolicy<code>     - Range:</code>xsd:dateTime` including an explicit timezone</p>
+   </ul>
+   <h3 class="heading settled" data-level="4.10" id="voc-versioning-transactions"><span class="secno">4.10. </span><span class="content">Terms for versioning and transactions on top of ldes:EventStream</span><a class="self-link" href="#voc-versioning-transactions"></a></h3>
+   <h4 class="heading settled" data-level="4.10.1" id="voc-versionCreatePath"><span class="secno">4.10.1. </span><span class="content">ldes:versionCreatePath</span><a class="self-link" href="#voc-versionCreatePath"></a></h4>
+   <p>Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type.</p>
+   <h4 class="heading settled" data-level="4.10.2" id="voc-versionUpdatePath"><span class="secno">4.10.2. </span><span class="content">ldes:versionUpdatePath</span><a class="self-link" href="#voc-versionUpdatePath"></a></h4>
+   <p>Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type.</p>
+   <h4 class="heading settled" data-level="4.10.3" id="voc-versionDeletePath"><span class="secno">4.10.3. </span><span class="content">ldes:versionDeletePath</span><a class="self-link" href="#voc-versionDeletePath"></a></h4>
+   <p>Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type.</p>
+   <h4 class="heading settled" data-level="4.10.4" id="voc-versionCreateObject"><span class="secno">4.10.4. </span><span class="content">ldes:versionCreateObject</span><a class="self-link" href="#voc-versionCreateObject"></a></h4>
+   <p>If the RDF object matches the object in the version create path, the member represents a create.</p>
+   <h4 class="heading settled" data-level="4.10.5" id="voc-versionUpdateObject"><span class="secno">4.10.5. </span><span class="content">ldes:versionUpdateObject</span><a class="self-link" href="#voc-versionUpdateObject"></a></h4>
+   <p>If the RDF object matches the object in the version update path, the member represents an update.</p>
+   <h4 class="heading settled" data-level="4.10.6" id="voc-versionDeleteObject"><span class="secno">4.10.6. </span><span class="content">ldes:versionDeleteObject</span><a class="self-link" href="#voc-versionDeleteObject"></a></h4>
+   <p>If the RDF object matches the object in the version delete path, the member represents a delete.</p>
+   <h4 class="heading settled" data-level="4.10.7" id="voc-transactionPath"><span class="secno">4.10.7. </span><span class="content">ldes:transactionPath</span><a class="self-link" href="#voc-transactionPath"></a></h4>
+   <p>Path indicating how a member indicates whether it is part of a transaction.</p>
+   <h4 class="heading settled" data-level="4.10.8" id="voc-transactionFinalizedPath"><span class="secno">4.10.8. </span><span class="content">ldes:transactionFinalizedPath</span><a class="self-link" href="#voc-transactionFinalizedPath"></a></h4>
+   <p>Path indicating whether the transaction has been finalized.</p>
+   <h4 class="heading settled" data-level="4.10.9" id="voc-transactionFinalizedObject"><span class="secno">4.10.9. </span><span class="content">ldes:transactionFinalizedObject</span><a class="self-link" href="#voc-transactionFinalizedObject"></a></h4>
+   <p>If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized.</p>
   </main>
   <div data-fill-with="conformance">
-   <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
-   <p> Conformance requirements are expressed with a combination of descriptive assertions and RFC 2119 terminology.
+   <h2 class="no-ref no-num heading settled" id="conformance"><span class="content">
+    Conformance</span><a class="self-link" href="#conformance"></a></h2>
+   <p>
+            Conformance requirements are expressed with a combination of descriptive assertions and RFC 2119 terminology.
             The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL”
             in the normative parts of this document
             are to be interpreted as described in RFC 2119.
             However, for readability,
-            these words do not appear in all uppercase letters in this specification. </p>
-   <p> All of the text of this specification is normative
-            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119">[RFC2119]</a> </p>
-   <p> Examples in this specification are introduced with the words “for example”
-            or are set apart from the normative text with <code>class="example"</code>, like this: </p>
-   <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
-   <p> Informative notes begin with the word “Note”
-            and are set apart from the normative text with <code>class="note"</code>, like this: </p>
-   <p class="note" role="note"> Note, this is an informative note.</p>
+            these words do not appear in all uppercase letters in this specification.
+
+        </p>
+   <p>
+            All of the text of this specification is normative
+            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a>
+
+        </p>
+   <p>
+            Examples in this specification are introduced with the words “for example”
+            or are set apart from the normative text with <code>class="example"</code>, like this:
+
+        </p>
+   <div class="example" id="example-example"><a class="self-link" href="#example-example"></a>
+            This is an example of an informative example.
+        </div>
+   <p>
+            Informative notes begin with the word “Note”
+            and are set apart from the normative text with <code>class="note"</code>, like this:
+
+        </p>
+   <p class="note" role="note">
+            Note, this is an informative note.</p>
   </div>
 <script>
 (function() {
@@ -2323,7 +2433,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
       on = !document.body.classList.contains('toc-sidebar');
     }
 
-    /* Don’t scroll to compensate for the ToC if we’re above it already. */
+    /* Don't scroll to compensate for the ToC if we're above it already. */
     var headY = 0;
     var head = document.querySelector('.head');
     if (head) {
@@ -2354,16 +2464,16 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
       }
       if (toggle.matches(':hover')) {
         /* Unfocus button when not using keyboard navigation,
-           because I don’t know where else to send the focus. */
+           because I don't know where else to send the focus. */
         toggle.blur();
       }
     }
   }
 
   function createSidebarToggle() {
-    /* Create the sidebar toggle in JS; it shouldn’t exist when JS is off. */
+    /* Create the sidebar toggle in JS; it shouldn't exist when JS is off. */
     var toggle = document.createElement('a');
-      /* This should probably be a button, but appearance isn’t standards-track.*/
+      /* This should probably be a button, but appearance isn't standards-track.*/
     toggle.id = 'toc-toggle';
     toggle.class = 'toc-toggle';
     toggle.href = '#toc';
@@ -2379,7 +2489,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
     toggle.addEventListener('click', toggler, false);
 
 
-    /* Get <nav id=toc-nav>, or make it if we don’t have one. */
+    /* Get <nav id=toc-nav>, or make it if we don't have one. */
     var tocNav = document.getElementById('toc-nav');
     if (!tocNav) {
       tocNav = document.createElement('p');
@@ -2387,7 +2497,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
       /* Prepend for better keyboard navigation */
       document.body.insertBefore(tocNav, document.body.firstChild);
     }
-    /* While we’re at it, make sure we have a Jump to Toc link. */
+    /* While we're at it, make sure we have a Jump to Toc link. */
     var tocJump = document.getElementById('toc-jump');
     if (!tocJump) {
       tocJump = document.createElement('a');
@@ -2415,7 +2525,7 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
     }, false);
   }
   else {
-    console.warn("Can’t find Table of Contents. Please use <nav id='toc'> around the ToC.");
+    console.warn("Can't find Table of Contents. Please use <nav id='toc'> around the ToC.");
   }
 
   /* Wrap tables in case they overflow */
@@ -2435,15 +2545,17 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-rdf-primer">[RDF-PRIMER]
-   <dd>Frank Manola; Eric Miller. <a href="https://www.w3.org/TR/rdf-primer/"><cite>RDF Primer</cite></a>. 10 February 2004. REC. URL: <a href="https://www.w3.org/TR/rdf-primer/">https://www.w3.org/TR/rdf-primer/</a>
+   <dd>Frank Manola; Eric Miller. <a href="https://w3c.github.io/rdf-primer/spec/"><cite>RDF Primer</cite></a>. URL: <a href="https://w3c.github.io/rdf-primer/spec/">https://w3c.github.io/rdf-primer/spec/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-shacl">[SHACL]
    <dd>Holger Knublauch; Dimitris Kontokostas. <a href="https://w3c.github.io/data-shapes/shacl/"><cite>Shapes Constraint Language (SHACL)</cite></a>. URL: <a href="https://w3c.github.io/data-shapes/shacl/">https://w3c.github.io/data-shapes/shacl/</a>
    <dt id="biblio-trig">[TRIG]
-   <dd>Gavin Carothers; Andy Seaborne. <a href="https://www.w3.org/TR/trig/"><cite>RDF 1.1 TriG</cite></a>. 25 February 2014. REC. URL: <a href="https://www.w3.org/TR/trig/">https://www.w3.org/TR/trig/</a>
+   <dd>Gavin Carothers; Andy Seaborne. <a href="https://w3c.github.io/rdf-trig/spec/"><cite>RDF 1.1 TriG</cite></a>. URL: <a href="https://w3c.github.io/rdf-trig/spec/">https://w3c.github.io/rdf-trig/spec/</a>
    <dt id="biblio-turtle">[TURTLE]
-   <dd>Eric Prud'hommeaux; Gavin Carothers. <a href="https://www.w3.org/TR/turtle/"><cite>RDF 1.1 Turtle</cite></a>. 25 February 2014. REC. URL: <a href="https://www.w3.org/TR/turtle/">https://www.w3.org/TR/turtle/</a>
+   <dd>Eric Prud'hommeaux; Gavin Carothers. <a href="https://w3c.github.io/rdf-turtle/spec/"><cite>RDF 1.1 Turtle</cite></a>. URL: <a href="https://w3c.github.io/rdf-turtle/spec/">https://w3c.github.io/rdf-turtle/spec/</a>
+   <dt id="biblio-xpath-functions-31">[XPATH-FUNCTIONS-31]
+   <dd>Michael Kay. <a href="https://www.w3.org/TR/xpath-functions-31/"><cite>XPath and XQuery Functions and Operators 3.1</cite></a>. 21 March 2017. REC. URL: <a href="https://www.w3.org/TR/xpath-functions-31/">https://www.w3.org/TR/xpath-functions-31/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
