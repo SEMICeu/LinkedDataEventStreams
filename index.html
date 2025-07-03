@@ -2016,7 +2016,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Linked Data Event Streams</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2025-06-12">12 June 2025</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2025-07-03">3 July 2025</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2031,7 +2031,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 12 June 2025,
+In addition, as of 3 July 2025,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2107,7 +2107,7 @@ Therefore we will use the terms <em>root node</em> for the first page, and <em>s
     <li data-md>
      <p><code>ldes:versionOfPath</code>: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., <code>dcterms:isVersionOf</code>).</p>
     <li data-md>
-     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl">[SHACL]</a> shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.</p>
+     <p><code>tree:shape</code>: a <a data-link-type="biblio" href="#biblio-shacl">[SHACL]</a> shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The <code>sh:NodeShape</code> linked validates each target of the <code>tree:member</code> property. A validator in a consumer pipeline MUST ignore other targets.</p>
     <li data-md>
      <p><code>tree:view</code>: connects the collection to the current page, or points to one specific root node after dereferencing the <code>ldes:EventStream</code> identifier.</p>
    </ul>
