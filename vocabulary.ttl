@@ -52,13 +52,13 @@ ldes:startingFrom a rdf:Property ;
                      rdfs:label "Starting from"@en;
                      rdfs:comment "The search tree only keeps members starting a certain timestamp."@en ;
                      rdfs:range xsd:dateTime ;
-		     rdfs:domain ldes:RetentionPolicy .
+                     rdfs:domain ldes:RetentionPolicy .
 
 ldes:versionDuration a rdf:Property ;
                      rdfs:label "Version duration"@en;
                      rdfs:comment "The search tree only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. "@en ;
                      rdfs:range xsd:duration ;
-		     rdfs:domain ldes:RetentionPolicy .
+                     rdfs:domain ldes:RetentionPolicy .
 
 ldes:versionAmount a rdf:Property ;
                      rdfs:label "Version amount"@en;
@@ -80,11 +80,29 @@ ldes:fullLogDuration a rdf:Property ;
 
 ldes:versionOfPath a rdf:Property ;
                    rdfs:label "versionOf Path"@en;
-                   rdfs:comment "SHACL property path to the non-versioned IRI of the entity."@en .
+                   rdfs:comment "SHACL property path to the non-versioned IRI of the entity."@en ;
+                   rdfs:domain ldes:EventStream .
 
 ldes:timestampPath a rdf:Property ;
                    rdfs:label "Timestamp Path"@en;
-                   rdfs:comment "SHACL property path to the xsd:dateTime literal in each member that defines the order of the event stream."@en .
+                   rdfs:comment "SHACL property path to the xsd:dateTime literal in each member that defines the order of the event stream."@en ;
+                   rdfs:domain ldes:EventStream .
+
+ldes:sequencePath a rdf:Property ;
+                  rdfs:label "Sequence Path"@en;
+                  rdfs:comment "SHACL property path to an xsd literal in each member that defines the order of the event stream in addition to the timestampPath."@en ;
+                  rdfs:domain ldes:EventStream .
+
+ldes:versionTimestampPath a rdf:Property ;
+                   rdfs:label "Version Timestamp Path"@en;
+                   rdfs:comment "For out of order event streams: a SHACL property path to the xsd:dateTime literal in each member that defines the order of versioned members."@en ;
+                   rdfs:domain ldes:EventStream .
+
+ldes:versionSequencePath a rdf:Property ;
+                  rdfs:label "Version Sequence Path"@en;
+                  rdfs:comment "For out of order event streams: a SHACL property path to an xsd literal in each member that defines the order of the event stream in addition to the versionTimestampPath."@en ;
+                  rdfs:domain ldes:EventStream .
+
 
 ldes:versionMaterializationOf a rdf:Property ;
                    rdfs:label "Version Materialization Of"@en;
@@ -93,52 +111,52 @@ ldes:versionMaterializationOf a rdf:Property ;
                    rdfs:domain tree:Collection .
 
 ldes:versionMaterializationUntil a rdf:Property ;
-                   rdfs:label "Version Materialization Until"@en;
-                   rdfs:comment "Timestamp until versions were processed"@en ;
-                   rdfs:range xsd:dateTime ;
-                   rdfs:domain tree:Collection .
+                                 rdfs:label "Version Materialization Until"@en;
+                                 rdfs:comment "Timestamp until versions were processed"@en ;
+                                 rdfs:range xsd:dateTime ;
+                                 rdfs:domain tree:Collection .
 
 ldes:versionCreatePath a rdf:Property ;
                        rdfs:label "Version Create Path"@en ;
-		       rdfs:comment "Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:versionUpdatePath a rdf:Property ;
                        rdfs:label "Version Update Path"@en ;
-		       rdfs:comment "Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:versionDeletePath a rdf:Property ;
                        rdfs:label "Version Delete Path"@en ;
-		       rdfs:comment "Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:versionCreateObject a rdf:Property ;
                        rdfs:label "Version Create Object"@en ;
-		       rdfs:comment "If the RDF object matches the object in the version create path, the member represents a create."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "If the RDF object matches the object in the version create path, the member represents a create."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:versionUpdateObject a rdf:Property ;
                        rdfs:label "Version Update Object"@en ;
-		       rdfs:comment "If the RDF object matches the object in the version update path, the member represents an update."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "If the RDF object matches the object in the version update path, the member represents an update."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:versionDeleteObject a rdf:Property ;
                        rdfs:label "Version Delete Object"@en ;
-		       rdfs:comment "If the RDF object matches the object in the version delete path, the member represents a delete."@en ;
-		       rdfs:domain ldes:EventStream .
+                       rdfs:comment "If the RDF object matches the object in the version delete path, the member represents a delete."@en ;
+                       rdfs:domain ldes:EventStream .
 
 ldes:transactionPath a rdf:Property ;
-                       rdfs:label "Transaction Path"@en ;
-		       rdfs:comment "Path indicating how a member indicates whether it is part of a transaction."@en ;
-		       rdfs:domain ldes:EventStream .
+                     rdfs:label "Transaction Path"@en ;
+                     rdfs:comment "Path indicating how a member indicates whether it is part of a transaction."@en ;
+                     rdfs:domain ldes:EventStream .
 
 ldes:transactionFinalizedPath a rdf:Property ;
                               rdfs:label "Transaction Finalized Path"@en ;
-			      rdfs:comment "Path indicating whether the transaction has been finalized."@en ;
-			      rdfs:domain ldes:EventStream .
+                              rdfs:comment "Path indicating whether the transaction has been finalized."@en ;
+                              rdfs:domain ldes:EventStream .
 
 ldes:transactionFinalizedObject a rdf:Property ;
-                              rdfs:label "Transaction Finalized Object"@en ;
-			      rdfs:comment "If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized."@en ;
-			      rdfs:domain ldes:EventStream .
+                                rdfs:label "Transaction Finalized Object"@en ;
+                                rdfs:comment "If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized."@en ;
+                                rdfs:domain ldes:EventStream .
