@@ -24,9 +24,7 @@ Install [bikeshed](https://tabatkins.github.io/bikeshed/) and then run `bikeshed
 
 ## Changelog
 
- * 2023-04-28 - Point in Time retention policy has been added
- * 2022-07-01 - tree:ViewDescription was introduced as a concept
-
+In 2025 the LDES specification is being rewritten from a consumer oriented perspective, while adding functionalities. Check the releases for changelogs.
 
 ## Acknowledgements
 

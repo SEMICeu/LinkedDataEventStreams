@@ -133,7 +133,7 @@ This can help a consumer in the discovery phase to pick an specific LDES view, o
 When no retention policy is provided in the root node, the consumer MUST assume that all members, that have once been added to the `ldes:EventStream`, are still available from this root node.
 When a retention policy is provided however, a consumer MUST assume it will not be able to find members outside of the retention policy.
 
-<img width="100%" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
+<img width="800" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
 
 <div class="example" highlight="turtle">
 An example retention policy combining different features from the overview.
