@@ -19,8 +19,6 @@ The client does this by extending upon a subset of [the W3C TREE hypermedia spec
 This *extension* introduces specialized terms for dealing with append-only collections, referred to as *event streams*.
 For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
 
-Issue: More extensions should be specified w.r.t. [HTTP status codes](https://github.com/SEMICeu/LinkedDataEventStreams/issues/69), or [keeping state](https://github.com/SEMICeu/LinkedDataEventStreams/issues/31). This should be further detailled in a chapter after the overview.
-
 # Overview # {#overview}
 
 <img height="500" src="overview.svg" alt="An overview of the LDES specification.">
@@ -41,15 +39,14 @@ In the root node, the client will expect these properties to be described on the
  * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
-In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
- * `ldes:retentionPolicy`: indicates a retention policy (see next the dedicated chapter [](#retention)).
- * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. By default, the `tree:viewDescription` points at the root node.
+In the root node, the client will expect these properties to be described on the root node entity. This will also be the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`):
+ * `ldes:retentionPolicy`: indicates a retention policy (see the chapter [](#retention)).
+ * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. The entity for the root node itself always needs to be processed as if it was linked through `tree:viewDescription`.
 
-The client MUST implement the [initialization of the TREE specification](https://w3id.org/tree/specification#init), and they MAY extract the `tree:search` form.
+In any `tree:Node` – root node or subsequent node – the client expects to find
+ * `tree:member` properties (0 or more) with the `ldes:EventStream` as the subject, referring to its members,
+ * `tree:relation` properties (0 or more) with the  current `tree:Node` as the subject, containing a description of the `tree:Relation`s from this node to subsequent nodes.
 
-In any `tree:Node` – root node or subsequent node – the client expects to find 0 or more members of the `ldes:EventStream` using the `tree:member` property.
-The subject is the event stream instance and the object is the root focus node of a member.
-An LDES client MUST implement the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of the member.
 In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
@@ -87,13 +84,67 @@ ex:AddressRecord1-activity1 {
 ```
 </div>
 
-In any `tree:Node`, root node or subsequent node, the client expects to find zero or more `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
-A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
-A client MUST keep its own *state* to know when to refetch certain `tree:Node`s.
+Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
+
+# Client algorithm and state management # {#client-algorithm}
+
+When there is an empty [state](#state), the client MUST execute the [initialization section of the TREE specification](https://w3id.org/tree/specification#init), resulting in:
+ 1. a set of quads of the root node,
+ 2. the IRI of the collection, and
+ 3. the IRI of the root node.
+
+A client SHOULD support the [TREE profile algorithm](https://w3id.org/tree/specification/profile) for performance.
+This is a promise from the server that it will order the quads favourably for a TREE client, and thus also for an LDES client.
+Additionally, an LDES client MUST assume the profile algorithm will return the member in ascending chronological order according to the `ldes:timestampPath` and `ldes:sequencePath`, and emit the last member of a transaction as last.
+
+A client MUST be able to function without setting any configuration parameters other than the entry point used in the initialization phase.
+
+## State ## {#state}
+
+A client MUST keep a state object.
+The state object MUST contain the following sets:
+ * `emittedMembers`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a set of IRIs of members that were already emitted.
+ * `visitedNodes`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a set of `tree:Node`s that were visited from this `tree:Node`.
+ * `refetchNodes`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a timestamp (`xsd:dateTime`) with the expiry timestamp of that `tree:Node`.
+
+In this state object, the client MUST also keep the information about an LDES and the current search tree described in the [overview](#overview) and in the [context information](#context-information) of this spec.
+
+In this state object, a client SHOULD also include:
+ * `lastTimestamp`: when `ldes:timestampPath` is given, this is the timestamp `xsd:dateTime` of the last processed member.
+ * `lastSequence`: when `ldes:sequencePath` is given, this is the sequence value of the last processed member.
+
+The client MUST support a way to pause and save the state to disk, and resume from that state at a later time.
+It MAY support configuration parameters out of this spec to work within the pipeline environment of choice, such as, setting a different default polling interval, changing the serialization of the output, or more experimental features, such as deviating from the Member Extraction Algorithm, or synchronizing only with a subset of the data in the LDES.
+
+## Emitting members ## {#member-extraction}
+
+As all `tree:Node`s can contain members, this section MUST be implemented when fetching any `tree:Node`, such as in the initialization phase when fetching the root node, but also when fetching any subsequent `tree:Node` or when re-fetching a `tree:Node`.
+
+When `ldes:timestampPath` and/or `ldes:sequencePath` has been set on the LDES, the client MUST emit the members in this ascending order.
+
+When both the server and client support the [TREE profile algorithm](https://w3id.org/tree/specification/profile), the algorithm will already have extracted the set of quads of each member in the `tree:Node`.
+Otherwise, an LDES client MUST execute the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of each member in the `tree:Node`.
+The Member Extraction Algorithm MUST be implemented. The profile algorithm SHOULD be implemented as it is a performance optimization.
+
+Every time a member is found using the Member Extraction Algorithm, the client MUST check when it can be emitted.
+This depends on:
+ 1. the `emittedMembers` in the state: if it has already been emitted, do not emit it again.
+ 2. whether it is part of a transaction and the member indicates the transaction to be final: then this member MUST be emitted when all members on the page have been processed.
+ 3. whether `ldes:timestampPath` and/or `ldes:sequencePath` has been set, the client MUST emit the members in ascending order.
+
+The client MUST emit both the IRI as indicated by the `tree:member` triple, and the quads of the member.
+
+## Traversing the relations ## {#traversing}
+
+A client MUST check the state. 
+
+Issue: We will include an explanation of how a client MUST traverse the relations compliant to the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
+
+### HTTP requests and responses ### {#http}
+
+### Establishing immutability and calculating an expiration time ### {#immutability-expires}
 
 Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
-
-Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
 # Context information # {#context-information}
 
