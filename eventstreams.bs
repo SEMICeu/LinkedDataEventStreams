@@ -35,7 +35,7 @@ Therefore we will use the terms *root node* for the first page, and *subsequent 
 In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
  * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) that identifies an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
- * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.
+ * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The `sh:NodeShape` linked validates each target of the `tree:member` property. A validator in a consumer pipeline MUST ignore other targets.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
 In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
