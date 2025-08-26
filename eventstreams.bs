@@ -15,7 +15,6 @@ Abstract: A Linked Data Event Stream (LDES) is an append-only collection of memb
 An **LDES client** is a piece of software used by a *consumer* that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 
-
 The client does this by building upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
 This *extension* introduces specialized terms for dealing with append-only collections, referred to as *event streams*.
 For example, one can indicate which time-based property in the member is used to determine the order of the event stream, specify the retention policy as a promise from the producer to the consumer, or detail how to handle version-based members.
@@ -158,8 +157,8 @@ A consumer will be able to make decisions on how to further process the event st
 ## Versions and transactions ## {#versions-transactions}
 
 Consumers can use the LDES version properties to decide what action to take.
-For example, when the consumer understands the members are versioned, it can upsert the members on each update.
-If it understands something was created instead of updated, it can simply add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
+E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
+If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
 To that extent, on the `ldes:EventStream` entity, these properties can be used, which are further explained in the vocabulary.
  * [`ldes:versionOfPath`](#voc-versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
  * [`ldes:versionDeleteObject`](#voc-versionDeleteObject) - such as `as:Delete`
@@ -213,7 +212,6 @@ ex:LDES a ldes:EventStream ;
      ] .
 ```
 </div>
-
 
 A retention policy will be described on the root node.
 The root node itself can contain this information using the property `ldes:retentionPolicy`, or the root node can refer through the property `tree:viewDescription` to an entity on which the retention policy is described using the property `ldes:retentionPolicy`.
@@ -362,7 +360,7 @@ The search tree keeps its full log for a certain duration.
      - Domain: `ldes:LatestVersionSubset`
      - Range: `xsd:integer`
  * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting on a certain point in time.
- * `ldes:pointInTime: The point in time from which members will be available starting from this root node.
+ * `ldes:pointInTime`: The point in time from which members will be available starting from this root node.
      - Domain: `ldes:PointInTimePolicy`
      - Range: `xsd:dateTime` including an explicit timezone
 
