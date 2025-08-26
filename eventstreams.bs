@@ -15,9 +15,10 @@ Abstract: A Linked Data Event Stream (LDES) is an append-only collection of memb
 An **LDES client** is a piece of software used by a *consumer* that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 
-The client does this by extending upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
+
+The client does this by building upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
 This *extension* introduces specialized terms for dealing with append-only collections, referred to as *event streams*.
-For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
+For example, one can indicate which time-based property in the member is used to determine the order of the event stream, specify the retention policy as a promise from the producer to the consumer, or detail how to handle version-based members.
 
 # Overview # {#overview}
 
@@ -28,26 +29,28 @@ This way, the collection of members becomes an append-only log or *event stream*
 
 Following the [TREE specification](https://w3id.org/tree/specification), this event stream is published using one or more HTTP resources.
 When more resources are used, these pages, or `tree:Node`s, will be structured according to a search tree.
-Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
 
-In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
- * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) (all further *Path properties are as well) that sets the chronological time with a `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
- * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), what xsd-literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
+Therefore, we use the terms *root node* for the first page, and *subsequent node* for every following page in the structure.
+
+In the root node, the client expects these properties to be described on the `ldes:EventStream` entity:
+ * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) (all further *Path properties are as well) that sets the chronological time with an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+ * `ldes:sequencePath`: when the LDES producer wants to clarify the ordering within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), which xsd-literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
  * `ldes:versionTimestampPath`: when those versions are not published chronologically, LDES providers have the possibility to indicate a different version timestamp to establish the latest version.
  * `ldes:versionSequencePath`: when the versions do not follow the order in `ldes:timestampPath` and `ldes:sequencePath`, and for when `ldes:versionTimestampPath` are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of `v0.1` → `v0.2`, in which `v0.2` may have been published by the server before `v0.1`.
  * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
-In the root node, the client will expect these properties to be described on the root node entity. This will also be the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`):
+In the root node, the client expects these properties to be described on the root node entity. This will also be the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`):
  * `ldes:retentionPolicy`: indicates a retention policy (see the chapter [](#retention)).
- * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. The entity for the root node itself always needs to be processed as if it was linked through `tree:viewDescription`.
+ * `tree:viewDescription`: can also contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful, for example, if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. The entity for the root node itself always needs to be processed as if it was linked through `tree:viewDescription`.
 
-In any `tree:Node` – root node or subsequent node – the client expects to find
+
+In any `tree:Node` – root node or subsequent node – the client expects to find:
  * `tree:member` properties (0 or more) with the `ldes:EventStream` as the subject, referring to its members,
- * `tree:relation` properties (0 or more) with the  current `tree:Node` as the subject, containing a description of the `tree:Relation`s from this node to subsequent nodes.
+ * `tree:relation` properties (0 or more) with the current `tree:Node` as the subject, containing a description of the `tree:Relation`s from this node to subsequent nodes.
 
-In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
+In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI, as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
 An example record from a sensor observation dataset in the [[!turtle]] format:
@@ -84,7 +87,7 @@ ex:AddressRecord1-activity1 {
 ```
 </div>
 
-Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
+Issue: More specific server documentation should be found in a Server Primer (to do), such as including a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES to achieve optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
 # Client algorithm and state management # {#client-algorithm}
 
@@ -103,48 +106,49 @@ A client MUST be able to function without setting any configuration parameters o
 
 A client MUST keep a state object.
 The state object MUST contain the following sets:
- * `emittedMembers`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a set of IRIs of members that were already emitted.
- * `visitedNodes`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a set of `tree:Node`s that were visited from this `tree:Node`.
- * `refetchNodes`: a `Map<key,value>` with as key the IRI of the `tree:Node`s, and as value a timestamp (`xsd:dateTime`) with the expiry timestamp of that `tree:Node`.
+ * `emittedMembers`: a `Map<key,value>` with the key as the IRI of the `tree:Node`s, and the value as a set of IRIs of members that have already been emitted.
+ * `visitedNodes`: a `Map<key,value>` with the key as the IRI of the `tree:Node`s, and the value as a set of `tree:Node`s that were visited from this `tree:Node`.
+ * `refetchNodes`: a `Map<key,value>` with the key as the IRI of the `tree:Node`s, and the value as a timestamp (`xsd:dateTime`) with the expiry timestamp of that `tree:Node`.
 
-In this state object, the client MUST also keep the information about an LDES and the current search tree described in the [overview](#overview) and in the [context information](#context-information) of this spec.
+In this state object, the client MUST also keep the information about an LDES and the current search tree described in the [overview](#overview) and in the [context information](#context-information) sections of this specification.
 
 In this state object, a client SHOULD also include:
  * `lastTimestamp`: when `ldes:timestampPath` is given, this is the timestamp `xsd:dateTime` of the last processed member.
  * `lastSequence`: when `ldes:sequencePath` is given, this is the sequence value of the last processed member.
 
-The client MUST support a way to pause and save the state to disk, and resume from that state at a later time.
-It MAY support configuration parameters out of this spec to work within the pipeline environment of choice, such as, setting a different default polling interval, changing the serialization of the output, or more experimental features, such as deviating from the Member Extraction Algorithm, or synchronizing only with a subset of the data in the LDES.
+The client MUST support a way to pause and save the state to disk, and to resume from that state at a later time.
+It MAY support configuration parameters outside of this specification to work within the pipeline environment of choice, such as setting a different default polling interval, changing the serialization of the output, or more experimental features, such as deviating from the Member Extraction Algorithm, or synchronizing only with a subset of the data in the LDES.
 
 ## Emitting members ## {#member-extraction}
 
-As all `tree:Node`s can contain members, this section MUST be implemented when fetching any `tree:Node`, such as in the initialization phase when fetching the root node, but also when fetching any subsequent `tree:Node` or when re-fetching a `tree:Node`.
+As all `tree:Node`s can contain members, this section MUST be implemented when fetching any `tree:Node`, such as in the initialization phase when fetching the root node, as well as when fetching any subsequent `tree:Node` or when re-fetching a `tree:Node`.
 
 When `ldes:timestampPath` and/or `ldes:sequencePath` has been set on the LDES, the client MUST emit the members in this ascending order.
 
 When both the server and client support the [TREE profile algorithm](https://w3id.org/tree/specification/profile), the algorithm will already have extracted the set of quads of each member in the `tree:Node`.
 Otherwise, an LDES client MUST execute the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of each member in the `tree:Node`.
-The Member Extraction Algorithm MUST be implemented. The profile algorithm SHOULD be implemented as it is a performance optimization.
+The Member Extraction Algorithm MUST be implemented. The profile algorithm SHOULD be implemented, as it is a performance optimization.
 
 Every time a member is found using the Member Extraction Algorithm, the client MUST check when it can be emitted.
 This depends on:
  1. the `emittedMembers` in the state: if it has already been emitted, do not emit it again.
- 2. whether it is part of a transaction and the member indicates the transaction to be final: then this member MUST be emitted when all members on the page have been processed.
+ 2. whether it is part of a transaction and the member indicates the transaction to be final: in this case, this member MUST be emitted when all members on the page have been processed.
  3. whether `ldes:timestampPath` and/or `ldes:sequencePath` has been set, the client MUST emit the members in ascending order.
 
 The client MUST emit both the IRI as indicated by the `tree:member` triple, and the quads of the member.
 
 ## Traversing the relations ## {#traversing}
 
-A client MUST check the state. 
 
-Issue: We will include an explanation of how a client MUST traverse the relations compliant to the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
+A client MUST check the state.
+
+Issue: We will include an explanation of how a client MUST traverse the relations in compliance with the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
 
 ### HTTP requests and responses ### {#http}
 
 ### Establishing immutability and calculating an expiration time ### {#immutability-expires}
 
-Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
+Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail, cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
 
 # Context information # {#context-information}
 
@@ -154,8 +158,8 @@ A consumer will be able to make decisions on how to further process the event st
 ## Versions and transactions ## {#versions-transactions}
 
 Consumers can use the LDES version properties to decide what action to take.
-E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
-If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
+For example, when the consumer understands the members are versioned, it can upsert the members on each update.
+If it understands something was created instead of updated, it can simply add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
 To that extent, on the `ldes:EventStream` entity, these properties can be used, which are further explained in the vocabulary.
  * [`ldes:versionOfPath`](#voc-versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
  * [`ldes:versionDeleteObject`](#voc-versionDeleteObject) - such as `as:Delete`
@@ -166,23 +170,24 @@ To that extent, on the `ldes:EventStream` entity, these properties can be used, 
  * [`ldes:versionUpdatePath`](#voc-versionUpdatePath)- defaults to `rdf:type`
 
 A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
- * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
+ * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or an IRI.
  * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-If one of the processors in a pipeline relies on transactions, the LDES client MUST force to emit the members in chronological order according to the `ldes:timestampPath` and `ldes:sequencePath`.
-When processing multiple members of the transaction with the same `ldes:timestampPath`, the client MUST ensure the member that finalizes the transaction is emitted last.
+If one of the processors in a pipeline relies on transactions, the LDES client MUST ensure that members are emitted in chronological order according to the `ldes:timestampPath` and `ldes:sequencePath`.
+When processing multiple members of the transaction with the same `ldes:timestampPath`, the client MUST ensure that the member that finalizes the transaction is emitted last.
 
 When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
-A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
+A consumer MUST implement a way to retrieve this group of triples in case an update or deletion comes in.
 
 ## Retention policies ## {#retention}
 
-The goal of a retention policy is to indicate in what way a specific view will not be able to provide a complete history of the event stream to the consumer.
-This can help a consumer in the discovery phase to pick an specific LDES view, or help the consumer to detect non-viable synchronization set-ups.
 
-When no retention policy is provided in the root node, the consumer MUST assume that all members, that have once been added to the `ldes:EventStream`, are still available from this root node.
-When a retention policy is provided however, a consumer MUST assume it will not be able to find members outside of the retention policy.
+The goal of a retention policy is to indicate in what way a specific view will not be able to provide a complete history of the event stream to the consumer.
+This can help a consumer in the discovery phase to pick a specific LDES view, or help the consumer to detect non-viable synchronization set-ups.
+
+When no retention policy is provided in the root node, the consumer MUST assume that all members that have once been added to the `ldes:EventStream` are still available from this root node.
+When a retention policy is provided, however, a consumer MUST assume it will not be able to find members outside of the retention policy.
 
 <img width="100%" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
 
@@ -209,30 +214,32 @@ ex:LDES a ldes:EventStream ;
 ```
 </div>
 
+
 A retention policy will be described on the root node.
 The root node itself can contain this information using the property `ldes:retentionPolicy`, or the root node can refer through the property `tree:viewDescription` to an entity on which the retention policy is described using the property `ldes:retentionPolicy`.
 When the client is processing the root node, it MUST look for a retention policy in both ways.
 
 In the example above, the retention policy has been set on the root node (double typed as the `ldes:EventSource`).
-When the [`ldes:retentionPolicy`](#voc-retentionpolicyproperty) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
+When the [`ldes:retentionPolicy`](#voc-retentionpolicyproperty) refers to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
 Multiple properties can then be added to make the scope of members that are kept larger:
- * [`ldes:startingFrom`](#voc-startingfrom): this view only retaines members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
- * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from current time from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
- * [`ldes:versionAmount`](#voc-versionamount): the amount of versions to keep. 
- * [`ldes:versionDuration`](#voc-versionduration): the duration from current time from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
- * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
+ * [`ldes:startingFrom`](#voc-startingfrom): this view only retains members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
+ * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from the current time from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
+ * [`ldes:versionAmount`](#voc-versionamount): the number of versions to keep. 
+ * [`ldes:versionDuration`](#voc-versionduration): the duration from the current time from which a number of versions are kept, to be used together with `ldes:versionAmount`. Defaults to the duration of the full event stream.
+ * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from the current time that deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
 
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
-The `ldes:timestampPath` points at the timestamp in the member that can be compared with the current time minus the durations.
+The `ldes:timestampPath` points to the timestamp in the member that can be compared with the current time minus the durations.
 When the `ldes:versionTimestampPath` has been set, the two version durations are to be compared with this timestamp.
 
-Historically, there are more specific type of retention policies that MUST remain supported although their use is discouraged in favor of the just introduced retention policy design.
-These retention policies types are:
+Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favor of the newly introduced retention policy design.
+These retention policy types are:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
  3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is not retained.
 
-A `ldes:LatestVersionSubset` uses the property `ldes:amount` with as range an `xsd:integer` datatype, indicating the number of versions to keep. By default, this value is set to 1.
+
+A `ldes:LatestVersionSubset` uses the property `ldes:amount` with the range as an `xsd:integer` datatype, indicating the number of versions to keep. By default, this value is set to 1.
 A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp.
 
 # Vocabulary # {#vocabulary}
