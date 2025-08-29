@@ -154,6 +154,10 @@ An `Accept` request header MUST be set.
 A client SHOULD implement the [TREE profile](https://w3id.org/tree/specification/profile) specification to speed up extracting hypermedia and members for servers that support the profile.
 Additionally to this specification, for an LDES the members will be in chronological ascending order.
 
+A client MUST inspect the `cache-control` header to see whether it is set to `immutable`.
+
+Issue: Should we support a `ldes:immutable` property? https://github.com/SEMICeu/LinkedDataEventStreams/issues/64
+
 A client MUST follow redirects.
 
 A client SHOULD support `If-None-Match` request header using the etags stored in the state, and process the `304 Not Modified` response accordingly.
