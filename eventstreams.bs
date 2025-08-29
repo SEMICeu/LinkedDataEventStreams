@@ -91,14 +91,112 @@ In any `tree:Node`, root node or subsequent node, the client expects to find zer
 A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
 A client MUST keep its own *state* to know when to refetch certain `tree:Node`s.
 
-Issue: We should refer here to a new next chapter on how to gracefully iterate over the pages and how to keep the state in more detail cfr. the extensions in Issue 1. We can then also indicate that a client MAY implement the text on [pruning branches](https://w3id.org/tree/specification#relationsubclasses) related to interpreting comparators for `xsd:dateTime` literals if it wants to detect immutable pages via the timestampPath.
-
 Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
+
+# Synchronization algorithm # {#synchronization-algorithm}
+
+There are multiple modes in which a client MAY operate: unordered, ordered ascending, or ordered descending.
+Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:timestampPath` and/or `ldes:sequencePath`.
+
+A _synchronization run_ is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
+
+Issue: How does a client decide a good time to keep between synchronization runs? https://github.com/SEMICeu/LinkedDataEventStreams/issues/53
+
+Note: Unordered will be straightforward to implement, while ordered modes will be more challenging due to the need for a more precise interpretation of relations and paths. Nevertheless, this will come with more functionality. It is up to a developer of a client to decide what functionalities they decide to offer.
+
+A client MUST have a way to indicate to other processors in a consumption pipeline that a synchronization run has been finalized.
+In order to prevent inconsistencies when reusing the result of the pipeline, in an unordered mode, a consumer pipeline SHOULD wait for this finalization flag before committing those members at once into their system. 
+In ordered mode, a consumer can operate streamingly.
+
+A client MUST take an IRI `I` as the only required argument.
+In case there is no state yet, a client MUST perform an initialization run (see next section).
+
+## Initialization ## {#initialization}
+
+`I` can denote the event stream, the root node, a redirect to the root node, or an overview page with exactly one `tree:view` property in the page.
+The client MUST dereference `I` (see [HTTP Requests - Responses](#http-requests-responses)). 
+After dereferencing the IRI, the client MUST look for the patterns `?s tree:view <>` with `<>` the base IRI (after redirect). If this pattern was matched exactly once, `<>` is to be considered the root node, and  `?s` is to be considered the `ldes:EventStream` IRI. In case it was matched multiple times, an error MUST be returned. If this pattern is not found, then it MUST look for the pattern `I tree:view ?o` instead. If this pattern matches exactly once, then `I` is to be considered the `ldes:EventStream` IRI and `?o` the root node. In this case, the IRI bound to `?o` MUST be dereferenced. In case multiple or no matches were found, an error SHOULD be returned. The client MAY extend the initialization with a source selection mechanism.
+
+After processing the root node, the client MUST initiate a state object (see [state management](#state-management)) with the context information (see [context information](#context-information)) in the root node.
+
+The client MUST proceed processing the root node as any other node.
+
+For every subsequent run, a client MUST consult the state and continue from there.
+
+## State management ## {#state-management}
+
+Note: In this section we do not mandate how exactly state management needs to be done, but provide some functionalities that must be implemented.
+
+A client MUST ensure a member is only emitted once.
+
+Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client can assume that members found on immutable pages can be safely removed from the state after the run is finished. This however also requires that you keep in the state on which page(s) you found a member.
+
+A client MUST ensure an immutable `tree:Node` is not fetched again.
+
+Note: Keeping a list of all immutable pages forever will become problematic for large LDESs. Immutable pages that will not be reachable when a parent node is immutable as well can be removed from the state.
+
+A client MUST ensure it can resume from a previous run by keeping a frontier of pages that are not (yet) immutable.
+
+A client MUST have a mechanism for consumers in the pipeline to read from the state at any time.
+
+A client MUST keep context information such as the identifier of the event stream and the root node, the SHACL shape of the event stream, or the retention policy of the root node, cf. the chapter on [Context Information](#context-information).
+
+A client SHOULD keep statistics such as the number of members emitted and the date-time of the last run.
+
+When a `tree:Node` is not immutable, the `etag` SHOULD be kept if this is set in the response.
+
+## HTTP requests and responses ## {#http-requests-responses}
+
+A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. 
+
+An `Accept` request header MUST be set.
+
+A client SHOULD implement the [TREE profile](https://w3id.org/tree/specification/profile) specification to speed up extracting hypermedia and members for servers that support the profile.
+Additionally to this specification, for an LDES the members will be in chronological ascending order.
+
+A client MUST follow redirects.
+
+A client SHOULD support `If-None-Match` request header using the etags stored in the state, and process the `304 Not Modified` response accordingly.
+
+Issue: What to do with 404? https://github.com/SEMICeu/LinkedDataEventStreams/issues/91
+
+For the following status codes, the client MUST implement a retry mechanism with a back-off strategy:
+ * 408 Request Timeout
+ * 425 Too Early
+ * 429 Too Many Requests
+ * 500 Internal Server Error
+ * 502 Bad Gateway
+ * 503 Service Unavailable
+ * 504 Gateway Timeout
+
+A client MAY implement authorization and respond to a code like `401` with an authorization routine.
+
+A client MUST abort and throw an error on any other `4xx` or `5xx` range status codes.
+
+## Emitting members ## {#members}
+
+In case the TREE profile is used, the algorithm in the TREE profile specification will emit the members.
+
+Otherwise, a client MUST process the quads parsed from the page as follows:
+
+For every occurrence of `m` in `<EventStream> tree:member ?m`, `M` is the set of quads of this member.
+ 1. `M` includes the subject-based star pattern (`m ?p ?o`) in the default graph.
+ 2. For every `o` that is a blank node:
+    1. `M` includes all triples in the default graph that matches the subject-based star pattern of that blank node. Step 2 is repeated recursively on those matches.
+    2. All quads in the graph `o` are added to `M`.
+ 3. All quads in the graph `m` are added to `M`.
+
+## Traversing the search tree ## {#traversing-search-tree}
+
+TODO: there needs to be examples here
+
+TODO: A client in unordered mode...
+
+TODO: A client in ordered mode MUST implement ...
 
 # Context information # {#context-information}
 
-A client MUST have a way to make available context information to processors further down the pipeline set up by a consumer.
-A consumer will be able to make decisions on how to further process the event stream using this context information.
+In this chapter we extend the context information described in the overview above with more advanced features and more details where needed.
 
 ## Versions and transactions ## {#versions-transactions}
 
@@ -114,13 +212,16 @@ To that extent, on the `ldes:EventStream` entity, these properties can be used, 
  * [`ldes:versionCreatePath`](#voc-versionCreatePath) - defaults to `rdf:type`
  * [`ldes:versionUpdatePath`](#voc-versionUpdatePath) - defaults to `rdf:type`
 
+Issue: Examples are required for clarity here
+
 A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
  * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
  * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-If one of the processors in a pipeline relies on transactions, the LDES client MUST force to emit the members in chronological order according to the `ldes:timestampPath` and `ldes:sequencePath`.
-When processing multiple members of the transaction with the same `ldes:timestampPath`, the client MUST ensure the member that finalizes the transaction is emitted last.
+Issue: Examples are required for clarity here
+
+The client MUST ensure that the member that finalizes the transaction is emitted only at the end of the current synchronization run.
 
 When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
 A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
@@ -304,7 +405,7 @@ The search tree keeps its full log for a certain duration.
      - Domain: `ldes:LatestVersionSubset`
      - Range: `xsd:integer`
  * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting on a certain point in time.
- * `ldes:pointInTime: The point in time from which members will be available starting from this root node.
+ * `ldes:pointInTime`: The point in time from which members will be available starting from this root node.
      - Domain: `ldes:PointInTimePolicy`
      - Range: `xsd:dateTime` including an explicit timezone
 
