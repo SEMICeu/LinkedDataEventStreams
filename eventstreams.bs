@@ -111,7 +111,7 @@ In ordered mode, a consumer can operate streamingly.
 A client MUST take an IRI `I` as the only required argument.
 In case there is no state yet, a client MUST perform an initialization run (see next section).
 
-## Initialization ## {#initialization}
+## Initialization run ## {#initialization}
 
 `I` can denote the event stream, the root node, a redirect to the root node, or an overview page with exactly one `tree:view` property in the page.
 The client MUST dereference `I` (see [HTTP Requests - Responses](#http-requests-responses)). 
@@ -183,20 +183,50 @@ In case the TREE profile is used, the algorithm in the TREE profile specificatio
 
 Otherwise, a client MUST process the quads parsed from the page as follows:
 
-For every occurrence of `m` in `<EventStream> tree:member ?m`, `M` is the set of quads of this member.
- 1. `M` includes the subject-based star pattern (`m ?p ?o`) in the default graph.
+We iterate over all IRIs `m` in the page that match the pattern  `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
+The client MUST select a set of quads as a result of:
+ 1. matching the subject-based star pattern (`<m> ?p ?o`) in the default graph.
  2. For every `o` that is a blank node:
-    1. `M` includes all triples in the default graph that matches the subject-based star pattern of that blank node. Step 2 is repeated recursively on those matches.
-    2. All quads in the graph `o` are added to `M`.
- 3. All quads in the graph `m` are added to `M`.
+    1. matching the subject-based star pattern in the default graph of that blank node. Repeat 2 for all blank nodes found.
+    2. matching all quads in the graph `o`. Repeat 2.2 for all blank nodes found as objects in this step.
+ 4. Matching all quads in the graph `m`.
+
+In unordered mode, the client SHOULD emit a member as soon as it is extracted.
+
+In ordered mode, the client MUST ensure no other member can be still discovered that has comes before the member that is to be emitted. 
+Extra conditions as documented in the next section MUST be checked before emitting it.
 
 ## Traversing the search tree ## {#traversing-search-tree}
 
 TODO: there needs to be examples here
 
-TODO: A client in unordered mode...
+### Unordered ### {#unordered-traversal}
 
-TODO: A client in ordered mode MUST implement ...
+A client in unordered mode MUST on each HTTP response of a synchronization run process both the members (see previous section) as traverse all relations.
+The relations `R` MUST be discovered using this pattern: `<> tree:relation ?r` with `<>` being the current page and `R` the set of matches of `r`.
+For each `r`in `R` the pattern `?r tree:node ?n` MUST be matched.
+Each distinct `n` MUST be further dereferenced and processed.
+
+### Ordered ### {#ordered-traversal}
+
+A client in ordered mode MUST be able to find the matching objects from a SHACL property path as this functionality is required for interpretting the paths in the TREE/LDES and SHACL specifications. The path is to be evaluated on the full set of quads, across all named graphs, of an individual member.
+
+The client in ordered mode MUST in the initialization phase check whether there is an `ldes:timestampPath` and/or `ldes:sequencePath` set. If not, it MUST return an error as order cannot be guaranteed. If it is, order can be ascending or descending.
+
+A client MUST implement a priority mechanism while interpretting these `tree:Relation` subclasses related to time literals:
+ * `tree:GreaterThanRelation`: later in time
+ * `tree:GreaterThanOrEqualToRelation`: later in or at the same time
+ * `tree:LessThanRelation`: earlier in time than a certain timestamp
+ * `tree:LessThanOrEqualToRelation`: 
+
+A client MUST check whether the `ldes:timestampPath` is used in the `tree:path`. Only then the relation can be used for ordering.
+The client MUST now have a priority list of URLs to fetch as the frontier based on the relations.
+
+A client MUST combine multiple relations to the same node using a logical AND. This way, bounded links to another page can be understood, such as in the following example:
+
+TODO: example
+
+As an addition to transactions text in the next chapter, the client in ordered mode MUST ensure that the member that finalizes the transaction is emitted as the last member when there are multiple members with on the same `ldes:timestampPath` and/or `ldes:sequencePath`.
 
 # Context information # {#context-information}
 
@@ -224,8 +254,6 @@ A consumer can also understand how to process the event stream in a way that the
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
 Issue: Examples are required for clarity here
-
-The client MUST ensure that the member that finalizes the transaction is emitted only at the end of the current synchronization run.
 
 When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
 A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
