@@ -15,11 +15,8 @@ Abstract: A Linked Data Event Stream (LDES) is an append-only collection of memb
 An **LDES client** is a piece of software used by a *consumer* that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 
-The client does this by extending upon a subset of [the W3C TREE hypermedia specification](https://w3id.org/tree/specification).
-This *extension* introduces specialized terms for dealing with append-only collections, referred to as *event streams*.
+In LDES, we extend [the vocabulary of the W3C TREE hypermedia](https://w3id.org/tree/specification) with specialized terms for dealing with append-only collections, referred to as *event streams*.
 For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
-
-Issue: More extensions should be specified w.r.t. [HTTP status codes](https://github.com/SEMICeu/LinkedDataEventStreams/issues/69), or [keeping state](https://github.com/SEMICeu/LinkedDataEventStreams/issues/31). This should be further detailled in a chapter after the overview.
 
 # Overview # {#overview}
 
@@ -32,7 +29,7 @@ Following the [TREE specification](https://w3id.org/tree/specification), this ev
 When more resources are used, these pages, or `tree:Node`s, will be structured according to a search tree.
 Therefore we will use the terms *root node* for the first page, and *subsequent node* for every next page in the structure.
 
-In the root node, the client will expect these properties to be described on the `ldes:EventStream` entity:
+In the **root node**, the client will expect these properties to be described on the `ldes:EventStream` entity:
  * `ldes:timestampPath`: this is a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths) (all further *Path properties are as well) that sets the chronological time with a `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), what xsd-literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
@@ -41,16 +38,17 @@ In the root node, the client will expect these properties to be described on the
  * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The `sh:NodeShape` linked validates each target of the `tree:member` property. A validator in a consumer pipeline MUST ignore other targets.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
-In the root node, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
+In the **root node**, the current node identified by the URL of the page (a provider can achieve this simply by using a relative IRI `<>`) will be further described using these properties:
  * `ldes:retentionPolicy`: indicates a retention policy (see next the dedicated chapter [](#retention)).
  * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. By default, the `tree:viewDescription` points at the root node.
 
-The client MUST implement the [initialization of the TREE specification](https://w3id.org/tree/specification#init), and they MAY extract the `tree:search` form.
 
-In any `tree:Node` – root node or subsequent node – the client expects to find 0 or more members of the `ldes:EventStream` using the `tree:member` property.
+In **any `tree:Node`**, root node or subsequent node, the client expects to find
+ * members (0 or more) of the `ldes:EventStream` using the `tree:member` property.
 The subject is the event stream instance and the object is the root focus node of a member.
-An LDES client MUST implement the [Member Extraction Algorithm of the TREE specification](https://w3id.org/tree/specification#member-extraction-algorithm) to retrieve the full set of quads of the member.
-In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
+ * relations (0 or more) of the `tree:Node` the client is currently on, using the `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
+
+Note: In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
 
 <div class="example" highlight="turtle">
 An example record from a sensor observation dataset in the [[!turtle]] format:
@@ -87,15 +85,12 @@ ex:AddressRecord1-activity1 {
 ```
 </div>
 
-In any `tree:Node`, root node or subsequent node, the client expects to find zero or more `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
-A client MUST traverse the relations cfr. the TREE chapters on [traversing the search tree](https://w3id.org/tree/specification#traversing).
-A client MUST keep its own *state* to know when to refetch certain `tree:Node`s.
-
 Issue: More specific server documentation should be found in a Server Primer (to do), such as containing a [link to the JSON-LD context](https://github.com/SEMICeu/LinkedDataEventStreams/issues/59), [official SHACL shapes for LDES](https://github.com/SEMICeu/LinkedDataEventStreams/issues/70) to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc.
 
 # Synchronization algorithm # {#synchronization-algorithm}
 
-There are multiple modes in which a client MAY operate: unordered, ordered ascending, or ordered descending.
+There are multiple modes in which a client MAY operate.
+The client MUST implement the unordered mode, SHOULD implement an ordered ascending mode, and MAY implement any other mode not specified in this document.
 Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:timestampPath` and/or `ldes:sequencePath`.
 
 A _synchronization run_ is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
@@ -106,20 +101,22 @@ Note: Unordered will be straightforward to implement, while ordered modes will b
 
 A client MUST have a way to indicate to other processors in a consumption pipeline that a synchronization run has been finalized.
 In order to prevent inconsistencies when reusing the result of the pipeline, in an unordered mode, a consumer pipeline SHOULD wait for this finalization flag before committing those members at once into their system. 
-In ordered mode, a consumer can operate streamingly.
+In ordered ascending mode, a consumer can operate streamingly.
 
 A client MUST take an IRI `I` as the only required argument.
+`I` can denote the event stream itself, the root node, a redirect to the root node, or an overview page with exactly one `tree:view` property in the page.
 In case there is no state yet, a client MUST perform an initialization run (see next section).
 
 ## Initialization run ## {#initialization}
 
-`I` can denote the event stream, the root node, a redirect to the root node, or an overview page with exactly one `tree:view` property in the page.
 The client MUST dereference `I` (see [HTTP Requests - Responses](#http-requests-responses)). 
-After dereferencing the IRI, the client MUST look for the patterns `?s tree:view <>` with `<>` the base IRI (after redirect). If this pattern was matched exactly once, `<>` is to be considered the root node, and  `?s` is to be considered the `ldes:EventStream` IRI. In case it was matched multiple times, an error MUST be returned. If this pattern is not found, then it MUST look for the pattern `I tree:view ?o` instead. If this pattern matches exactly once, then `I` is to be considered the `ldes:EventStream` IRI and `?o` the root node. In this case, the IRI bound to `?o` MUST be dereferenced. In case multiple or no matches were found, an error SHOULD be returned. The client MAY extend the initialization with a source selection mechanism.
+After dereferencing the IRI, the client MUST look for the patterns `?s tree:view <>` with `<>` the base IRI (after redirect). If this pattern was matched exactly once, `<>` is to be considered the root node, and  `?s` is to be considered the `ldes:EventStream` IRI. In case it was matched multiple times, an error MUST be returned. If this pattern is not found, then it MUST look for the pattern `I tree:view ?o` instead. If this pattern matches exactly once, then `I` is to be considered the `ldes:EventStream` IRI and `?o` the root node. In this case, the IRI bound to `?o` MUST be dereferenced. In case multiple or no matches were found, an error SHOULD be returned. 
 
-After processing the root node, the client MUST initiate a state object (see [state management](#state-management)) with the context information (see [context information](#context-information)) in the root node.
+The client MAY extend the initialization with a source selection mechanism.
 
-The client MUST proceed processing the root node as any other node.
+After processing the root node, the client MUST initiate a state object (see [state management](#state-management)) with the context information (see [context information](#context-information)) as found in the root node.
+
+The client MUST proceed processing the root node as any other node: i.e. processing the members, traversing the relations, and doing the state management.
 
 For every subsequent run, a client MUST consult the state and continue from there.
 
@@ -151,9 +148,6 @@ A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [
 
 An `Accept` request header MUST be set.
 
-A client SHOULD implement the [TREE profile](https://w3id.org/tree/specification/profile) specification to speed up extracting hypermedia and members for servers that support the profile.
-Additionally to this specification, for an LDES the members will be in chronological ascending order.
-
 A client MUST inspect the `cache-control` header to see whether it is set to `immutable`.
 
 Issue: Should we support a `ldes:immutable` property? https://github.com/SEMICeu/LinkedDataEventStreams/issues/64
@@ -162,43 +156,40 @@ A client MUST follow redirects.
 
 A client SHOULD support `If-None-Match` request header using the etags stored in the state, and process the `304 Not Modified` response accordingly.
 
-Issue: What to do with 404? https://github.com/SEMICeu/LinkedDataEventStreams/issues/91
-
 For the following status codes, the client MUST implement a retry mechanism with a back-off strategy:
- * 408 Request Timeout
- * 425 Too Early
- * 429 Too Many Requests
- * 500 Internal Server Error
- * 502 Bad Gateway
- * 503 Service Unavailable
- * 504 Gateway Timeout
+ * `408 Request Timeout`
+ * `425 Too Early`
+ * `429 Too Many Requests`
+ * `500 Internal Server Error`
+ * `502 Bad Gateway`
+ * `503 Service Unavailable`
+ * `504 Gateway Timeout`
 
 A client MAY implement authorization and respond to a code like `401` with an authorization routine.
+
+A client MUST process `410 Gone` as a page with an empty set of relations and an empty set of members.
 
 A client MUST abort and throw an error on any other `4xx` or `5xx` range status codes.
 
 ## Emitting members ## {#members}
 
-In case the TREE profile is used, the algorithm in the TREE profile specification will emit the members.
-
-Otherwise, a client MUST process the quads parsed from the page as follows:
-
-We iterate over all IRIs `m` in the page that match the pattern  `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
-The client MUST select a set of quads as a result of:
- 1. matching the subject-based star pattern (`<m> ?p ?o`) in the default graph.
- 2. For every `o` that is a blank node:
-    1. matching the subject-based star pattern in the default graph of that blank node. Repeat 2 for all blank nodes found.
-    2. matching all quads in the graph `o`. Repeat 2.2 for all blank nodes found as objects in this step.
- 4. Matching all quads in the graph `m`.
-
 In unordered mode, the client SHOULD emit a member as soon as it is extracted.
 
-In ordered mode, the client MUST ensure no other member can be still discovered that has comes before the member that is to be emitted. 
+In ordered mode, the client MUST ensure no other member can be still discovered the could precede the member that is to be emitted. 
 Extra conditions as documented in the next section MUST be checked before emitting it.
 
-## Traversing the search tree ## {#traversing-search-tree}
+A client MAY implement support for content types and profiles that can speed up parsing and extracting.
+For example, the [TREE profile](https://w3id.org/tree/specification/profile) specification promises to a parser that the member quads are going to be grouped together, and delimited by the `tree:member` quad.
+Additionally to this specification, for an LDES the members will be in chronological ascending order.
 
-TODO: there needs to be examples here
+Otherwise, a client MUST process the quads parsed from the page as follows:
+ 
+A client MUST make a list of all member IRIs matching `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
+Each match of is called a focus node.
+For each focus node, a client MUST look up the subject-based star pattern (`<m> ?p ?o`) in the default graph, and all quads in the named graph `m` (`?s ?p ?o <m>`).
+For each match where `o` is a blank node, the algorithm is to be repeated recursively with `o` being the new focus node.
+
+## Traversing the search tree ## {#traversing-search-tree}
 
 ### Unordered ### {#unordered-traversal}
 
@@ -209,24 +200,25 @@ Each distinct `n` MUST be further dereferenced and processed.
 
 ### Ordered ### {#ordered-traversal}
 
-A client in ordered mode MUST be able to find the matching objects from a SHACL property path as this functionality is required for interpretting the paths in the TREE/LDES and SHACL specifications. The path is to be evaluated on the full set of quads, across all named graphs, of an individual member.
+A client in ordered mode MUST be able to find the matching objects from a SHACL property path as this functionality is required for interpretting the paths in the TREE/LDES and SHACL specifications.
 
-The client in ordered mode MUST in the initialization phase check whether there is an `ldes:timestampPath` and/or `ldes:sequencePath` set. If not, it MUST return an error as order cannot be guaranteed. If it is, order can be ascending or descending.
+The client in ordered mode MUST in the initialization phase check whether there is an `ldes:timestampPath` and/or `ldes:sequencePath` set. If not, it MUST return an error as order cannot be guaranteed.
 
 A client MUST implement a priority mechanism while interpretting these `tree:Relation` subclasses related to time literals:
  * `tree:GreaterThanRelation`: later in time
  * `tree:GreaterThanOrEqualToRelation`: later in or at the same time
- * `tree:LessThanRelation`: earlier in time than a certain timestamp
- * `tree:LessThanOrEqualToRelation`: 
+ * `tree:LessThanRelation`: earlier in time
+ * `tree:LessThanOrEqualToRelation`: earlier in or at the same time
 
-A client MUST check whether the `ldes:timestampPath` is used in the `tree:path`. Only then the relation can be used for ordering.
+A client MUST check whether the `ldes:timestampPath` is used in the `tree:path`. 
+Only then the relation can be used for ordering.
 The client MUST now have a priority list of URLs to fetch as the frontier based on the relations.
 
-A client MUST combine multiple relations to the same node using a logical AND. This way, bounded links to another page can be understood, such as in the following example:
+A client MUST combine multiple relations to the same node using a logical AND.
 
-TODO: example
+Note: This way you can for example have a link to a page that is between 2 timestamps.
 
-As an addition to transactions text in the next chapter, the client in ordered mode MUST ensure that the member that finalizes the transaction is emitted as the last member when there are multiple members with on the same `ldes:timestampPath` and/or `ldes:sequencePath`.
+As an addition to transactions text in the next chapter, the client in ordered ascending mode MUST ensure that the member that finalizes the transaction is emitted as the last member when there are multiple members with on the same `ldes:timestampPath` and/or `ldes:sequencePath`.
 
 # Context information # {#context-information}
 
