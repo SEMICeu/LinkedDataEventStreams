@@ -44,8 +44,7 @@ In the **root node**, the current node identified by the URL of the page (a prov
 
 
 In **any `tree:Node`**, root node or subsequent node, the client expects to find
- * members (0 or more) of the `ldes:EventStream` using the `tree:member` property.
-The subject is the event stream instance and the object is the root focus node of a member.
+ * members (0 or more) of the `ldes:EventStream` using the `tree:member` property. The subject is the event stream instance and the object is the root focus node of a member.
  * relations (0 or more) of the `tree:Node` the client is currently on, using the `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
 
 Note: In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
