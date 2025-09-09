@@ -128,6 +128,13 @@ A client MUST ensure a member is only emitted once.
 
 Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client can assume that members found on immutable pages, or pages that contain members older than the timestamp of the last member, can be safely removed from the state after the run is finished. This however also requires that you keep in the state on which page(s) you found a member.
 
+A  `tree:Node` is considered _immutable_, when re-fetching it will not result in new members.
+
+For every `tree:Node`, a client SHOULD check whether it is immutable:
+ 1. A client MUST check the caching headers (see next section)
+ 2. A client MUST check whether `<> ldes:immutable true .` is set
+ 3. A client MAY check whether the `tree:Relation` that points to the `tree:Node` has an upper bound that is earlier than the time of the latest processed member.
+
 A client SHOULD ensure an immutable `tree:Node` is not fetched again.
 
 Note: Keeping a list of all immutable pages forever will become problematic for large LDESs. Immutable pages that won’t be reachable anymore as its parent node is immutable as well, can be removed from the state.
@@ -150,9 +157,7 @@ A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [
 
 An `Accept` request header MUST be set.
 
-A client MUST inspect the `cache-control` header to see whether it is set to `immutable`.
-
-Issue: Should we support a `ldes:immutable` property? [](https://github.com/SEMICeu/LinkedDataEventStreams/issues/64)
+A client SHOULD inspect the `cache-control` header to see whether it is set to `immutable`.
 
 A client MUST follow redirects.
 
@@ -383,6 +388,14 @@ For out of order event streams, this defines the path to an xsd literal in each 
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.
 
 An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in this chronological order.
+
+## ldes:immutable ## {#voc-immutable}
+
+Re-fetching this tree:Node will not result in new members.
+
+**Domain:**: `tree:Node`
+
+**Range:**: `xsd:boolean`
 
 ## ldes:retentionPolicy ## {#voc-retentionpolicyproperty}
 

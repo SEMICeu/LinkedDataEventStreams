@@ -160,3 +160,9 @@ ldes:transactionFinalizedObject a rdf:Property ;
                                 rdfs:label "Transaction Finalized Object"@en ;
                                 rdfs:comment "If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized."@en ;
                                 rdfs:domain ldes:EventStream .
+
+ldes:immutable a rdf:Property ;
+            rdfs:label "Immutable"@en ;
+            rdfs:comment "Re-fetching this tree:Node will not result in new members."@en ;
+            rdfs:domain tree:Node ;
+            rdfs:range xsd:boolean .
