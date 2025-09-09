@@ -14,6 +14,7 @@ Abstract: A Linked Data Event Stream (LDES) is an append-only collection of memb
 
 An **LDES client** is a piece of software used by a *consumer* that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
+The specification describes two modes for the client: either it fetches all updates since the previous synchronization run in an unordered fashion, either it does this while maintaining the chronological order.
 
 In LDES, we extend [the vocabulary of the W3C TREE hypermedia](https://w3id.org/tree/specification) with specialized terms for dealing with append-only collections, referred to as *event streams*.
 For example, one can indicate what time-based property in the member is used for indicating the order of the event stream, indicate the retention policy as a promise from the producer to the consumer, or detail how to deal with version-based members.
