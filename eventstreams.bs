@@ -35,7 +35,7 @@ In the **root node**, the client will expect these properties to be described on
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), what xsd-literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * `ldes:versionOfPath`: when your entities are versioned, this property points at the object that tells you what entity it is a version of (e.g., `dcterms:isVersionOf`).
  * `ldes:versionTimestampPath`: when those versions are not published chronologically, LDES providers have the possibility to indicate a different version timestamp to establish the latest version.
- * `ldes:versionSequencePath`: when the versions do not follow the order in `ldes:timestampPath` and `ldes:sequencePath`, and for when `ldes:versionTimestampPath` are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of `v0.1` → `v0.2`, in which `v0.2` may have been published by the server before `v0.1`.
+ * `ldes:versionSequencePath`: when the versions do not follow the order in `ldes:timestampPath` and `ldes:sequencePath`, and for when `ldes:versionTimestampPath` are the same for multiple members, or for when this property is not set. E.g., for out of order publishing of `1` → `2`, in which `2` may have been published by the server before `1`.
  * `tree:shape`: a [[!SHACL]] shape that can be used to select a search tree in the discovery phase, as well as to validate the members in the event stream. The `sh:NodeShape` linked validates each target of the `tree:member` property. A validator in a consumer pipeline MUST ignore other targets.
  * `tree:view`: connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
 
@@ -137,11 +137,11 @@ A client MUST ensure it can resume from a previous run.
 It SHOULD do so by keeping a frontier of pages that are not (yet) immutable.
 In ordered mode, it MAY also use timestamp and sequence path of the last member as a bookmark.
 
-A client MUST have a mechanism for consumers in the pipeline to read from the state at any time.
-
 A client MUST keep context information such as the identifier of the event stream and the root node, the SHACL shape of the event stream, or the retention policy of the root node, cf. the chapter on [Context Information](#context-information).
 
 A client SHOULD keep statistics such as the number of members emitted and the date-time of the last run.
+
+A client MUST have a mechanism to communicate this context information and statistics to other processors in the pipeline.
 
 When a `tree:Node` is not immutable, the `etag` SHOULD be kept if this is set in the response.
 
