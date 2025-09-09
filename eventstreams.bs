@@ -54,6 +54,7 @@ An example record from a sensor observation dataset in the [[!turtle]] format:
 ```turtle
 ex:Observations a ldes:EventStream ;
                 ldes:timestampPath sosa:resultTime ;
+                ldes:pollingInterval 60; # Each minute, new results are expected
                 tree:shape ex:shape1.shacl ;
                 tree:view <> ;
                 tree:member ex:Observation1 .
@@ -68,6 +69,7 @@ ex:Observation1 a sosa:Observation ;
 An example record from a base registry of addresses in the [[!trig]] format:
 ```turtle
 ex:AddressRecords a ldes:EventStream ;
+                  ldes:pollingInterval 86400; # Each day, new addresses are expected
                   ldes:timestampPath dcterms:created ;
                   ldes:versionOfPath dcterms:isVersionOf ;
                   tree:shape ex:shape2.shacl ;
@@ -95,7 +97,7 @@ Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:times
 
 A _synchronization run_ is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
 
-Issue: How does a client decide a good time to keep between synchronization runs? https://github.com/SEMICeu/LinkedDataEventStreams/issues/53
+A client SHOULD check whether an `ldes:pollingInterval` was set on the LDES. If it is, the client SHOULD use this amount of seconds (`xsd:integer`) to set the time to keep between synchronization runs.
 
 Note: Unordered will be straightforward to implement, while ordered modes will be more challenging due to the need for a more precise interpretation of relations and paths. Nevertheless, this will come with more functionality. It is up to a developer of a client to decide what functionalities they decide to offer.
 
@@ -350,6 +352,13 @@ The path to an xsd literal in each member that defines the order of the event st
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
+## ldes:pollingInterval ## {#voc-pollingInterval}
+
+The amount of seconds the client should keep in-between synchronization runs.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `xsd:integer`
 
 ## ldes:versionOfPath ## {#voc-versionOfPath}
 
