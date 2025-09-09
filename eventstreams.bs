@@ -95,7 +95,7 @@ The client MUST have an unordered mode and/or an ordered ascending mode.
 It MAY also have any other mode not specified in this document.
 Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:timestampPath` and/or `ldes:sequencePath`.
 
-A _synchronization run_ is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
+A *synchronization run* is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
 
 A client SHOULD check whether an `ldes:pollingInterval` was set on the LDES. If it is, the client SHOULD use this amount of seconds (`xsd:integer`) to set the time to keep between synchronization runs.
 
