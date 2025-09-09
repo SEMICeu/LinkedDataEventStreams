@@ -182,14 +182,16 @@ Extra conditions as documented in the next section MUST be checked before emitti
 
 A client MAY implement support for content types and profiles that can speed up parsing and extracting.
 For example, the [TREE profile](https://w3id.org/tree/specification/profile) specification promises to a parser that the member quads are going to be grouped together, and delimited by the `tree:member` quad.
-Additionally to this specification, for an LDES the members will be in chronological ascending order.
+Additionally to this specification an LDES client can assume the members will be in chronological ascending order and does not have to sort them anymore.
 
-Otherwise, a client MUST process the quads parsed from the page as follows:
+Otherwise, a client MUST process the quads, once they are fully parsed from a `tree:Node` as follows:
  
 A client MUST make a list of all member IRIs matching `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
 Each match of is called a focus node.
 For each focus node, a client MUST look up the subject-based star pattern (`<m> ?p ?o`) in the default graph, and all quads in the named graph `m` (`?s ?p ?o <m>`).
 For each match where `o` is a blank node, the algorithm is to be repeated recursively with `o` being the new focus node.
+
+As the set of members in this case is unordered, a client in ordered mode MUST order the members itself.
 
 ## Traversing the search tree ## {#traversing-search-tree}
 
