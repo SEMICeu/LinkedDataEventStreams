@@ -255,14 +255,49 @@ To that extent, on the `ldes:EventStream` entity, these properties can be used, 
  * [`ldes:versionCreatePath`](#voc-versionCreatePath) - defaults to `rdf:type`
  * [`ldes:versionUpdatePath`](#voc-versionUpdatePath) - defaults to `rdf:type`
 
-Issue: Examples are required for clarity here
+<div class="example" highlight="turtle">
+Example: Versioned members using `ldes:versionOfPath`, `ldes:versionCreateObject`, `ldes:versionUpdateObject`, and `ldes:versionDeleteObject`:
+
+```turtle
+ex:AddressRecords a ldes:EventStream ;
+    ldes:timestampPath dcterms:created ;
+    ldes:versionOfPath dcterms:isVersionOf ;
+    ldes:versionCreatePath rdf:type ;
+    ldes:versionCreateObject as:Create ;
+    ldes:versionUpdatePath rdf:type ;
+    ldes:versionUpdateObject as:Update ;
+    ldes:versionDeletePath rdf:type ;
+    ldes:versionDeleteObject as:Delete .
+```
+</div>
 
 A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
  * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
  * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
  * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
-Issue: Examples are required for clarity here
+<div class="example" highlight="turtle">
+Example: Using `ldes:transactionPath`, `ldes:transactionFinalizedPath`, and `ldes:transactionFinalizedObject` to indicate transactions in an event stream:
+
+```turtle
+ex:LDES a ldes:EventStream ;
+    ldes:timestampPath as:updated ;
+    ldes:transactionPath ex:transactionId ;
+    ldes:transactionFinalizedPath ex:transactionEnded ;
+    ldes:transactionFinalizedObject true ;
+    tree:view <> .
+
+ex:Observation1 a sosa:Observation ;
+    as:updated "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+    ex:transactionId "txn-123" ;
+    ex:transactionEnded false .
+
+ex:Observation2 a sosa:Observation ;
+    as:updated "2026-01-01T01:00:00Z"^^xsd:dateTime ;
+    ex:transactionId "txn-123" ;
+    ex:transactionEnded true .
+```
+</div>
 
 When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
 A consumer MUST implement a way to find back this group of triples in case an update or deletion comes in.
@@ -282,9 +317,6 @@ An example retention policy combining different features from the overview.
 ```turtle
 ex:LDES a ldes:EventStream ;
         ldes:timestampPath as:updated ;
-        ldes:transactionPath ex:transactionId ;
-        ldes:transactionFinalizedPath ex:transactionEnded ;
-        ldes:transactionFinalizedObject true ;
         ldes:versionOfPath as:object ;
         ldes:versionDeleteObject as:Delete ;
         ldes:versionCreateObject as:Create ;
