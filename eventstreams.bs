@@ -147,7 +147,7 @@ When a `tree:Node` is not immutable, the `etag` SHOULD be kept if this is set in
 
 ## HTTP requests and responses ## {#http-requests-responses}
 
-A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. 
+A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] and [[!json-ld]]. For JSON-LD external contexts, the client SHOULD implement HTTP caching.
 
 An `Accept` request header MUST be set.
 
