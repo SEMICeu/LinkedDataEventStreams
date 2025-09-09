@@ -126,7 +126,7 @@ Note: In this section we do not mandate how exactly state management needs to be
 
 A client MUST ensure a member is only emitted once.
 
-Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client can assume that members found on immutable pages, or pages that contain members older than the timestamp of the last member, can be safely removed from the state after the run is finished. This however also requires that you keep in the state on which page(s) you found a member.
+Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client can assume that members found on immutable pages can safely be removed from the state after the run is finished. This however also requires that you keep in the state on which page(s) you found a member.
 
 A client SHOULD ensure an immutable `tree:Node` is not fetched again.
 
