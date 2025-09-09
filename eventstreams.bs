@@ -43,7 +43,7 @@ In the **root node**, the current node identified by the URL of the page (a prov
  * `tree:viewDescription`: can as well contain the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. By default, the `tree:viewDescription` points at the root node.
 
 
-In **any `tree:Node`**, root node or subsequent node, the client expects to find
+In **any node**, root node or subsequent node, the client expects to find
  * members (0 or more) of the `ldes:EventStream` using the `tree:member` property. The subject is the event stream instance and the object is the root focus node of a member.
  * relations (0 or more) of the `tree:Node` the client is currently on, using the `tree:relation` properties, containing a description of the `tree:Relation`s from this node to subsequent nodes.
 
