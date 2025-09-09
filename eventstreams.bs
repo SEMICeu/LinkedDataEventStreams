@@ -93,7 +93,7 @@ The client MUST have an unordered mode and/or an ordered ascending mode.
 It MAY also have any other mode not specified in this document.
 Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:timestampPath` and/or `ldes:sequencePath`.
 
-A _synchronization run_ is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
+A *synchronization run* is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run it emits the newly found members.
 
 Issue: How does a client decide a good time to keep between synchronization runs? https://github.com/SEMICeu/LinkedDataEventStreams/issues/53
 
