@@ -1,0 +1,101 @@
+<pre class='metadata'>
+Title: LDES Server Primer
+Shortname: LDES-SERVER
+Level: 1
+Status: LS
+URL: https://w3id.org/ldes/specification/server-primer
+Markup Shorthands: markdown yes
+Editor: Pieter Colpaert, https://pietercolpaert.be
+Repository: https://github.com/SEMICeu/LinkedDataEventStreams
+Abstract: A Linked Data Event Stream (LDES) is an append-only collection of members described using the Resource Description Framework (RDF). This specification contains specification text on publishing an LDES.
+</pre>
+
+# Introduction # {#introduction}
+
+The server primer is a collection of derived normative rules from the main client-oriented specification, as well as some considerations and best practices.
+
+There’s also an [application profile](https://w3id.org/ldes/specification/ap) with SHACL shapes available.
+
+# Serializations and HTTP responses # {#serializations}
+
+A server MUST provide the data in either [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. It MAY also provide multiple serializations using content negotiation.
+
+Note: Don’t forget to set a `Vary: Accept` header in case you would use content negotiation and caching.
+
+It SHOULD provide an `etag` header on responses. In case the page is immutable, it SHOULD provide a `cache-control: immutable` header. 
+
+In case [[!json-ld]] is used, we provide a context at https://w3id.org/ldes/context. You MUST copy this into your project and not refer to this source externally as we do not promise to keep this stable. In case you host an external context yourself, you SHOULD ensure decent caching with the `etag` and/or `cache-control` max-age headers.
+
+When you want to optimize your server for client performance, you SHOULD implement the [TREE Profile specification](https://w3id.org/tree/specification/profile). You MUST order the members chronologically (i.e. append the members to the file as you go).
+
+Issue: we still need to look at how we are going to integrate with the [Jelly protocol](https://jelly-rdf.github.io/dev) as this serialization will raise performance drastically.
+
+In case the server is overloaded, it MUST provide a `429 Too Many Requests`. The client will then retry later.
+
+# Context information # {#context-information}
+
+The first page, or root node, you MUST include the context information about the LDES and this particular root node of the LDES.
+For features and how a client would interpret them, see [the main spec](https://w3id.org/ldes/specification).
+
+# Paginating your event stream ## {#paginating}
+
+Instead of a 1 or 2 dimensional pagination, in TREE/LDES we allow you to describe the relations you want and you can build the search tree you want. We however recommend the following:
+ * You SHOULD set the chronological order of your event stream using `ldes:timestampPath`. Other properties such as `ldes:sequencePath` MAY be used as an addition, or as an alternative. In the latter case, the ordering will be incremental based on the ordering of the xsd-literal.
+ * You SHOULD use the same `tree:path` in your relations as in your `ldes:timestampPath`. This way, a client knows you structured your search tree according to chronological order.
+ * Use two relations towards one node, one with the lower bound and another with the upper bound of the time interval it directs to.
+ * Start with 1 root node that contains links to member pages. If that gets too large, you can introduce another level.
+ * All `xsd:dateTime` literals you publish SHOULD come with a timezone.
+
+Every `tree:Node` MAY contain zero or more members and MAY contain zero or more relations.
+
+You MUST check whether your nodes validate according to the application profile.
+
+## Members ## {#members}
+
+Members must be linked from the evenstream identifier using `tree:member`. For example:
+
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix ex: <http://example.org/> .
+
+ex:eventstream a ldes:EventStream ;
+    tree:view <> ;
+    tree:member ex:member1, ex:member2 ;
+    ldes:timestampPath ex:createdAt ;
+    ldes:versionOfPath ex:versionOf .
+```
+
+The object of `tree:member` MUST be an IRI. This IRI MUST be chosen in a way that no other member IRI can ever conflict with it.
+
+In case you want to add a member to multiple pages, this MUST be done atomically.
+
+## Transactions ## {#transactions}
+
+If as a server developer you want to flag that certain members are certainly to be processed together (e.g., a large deletion operation), then you can use transactions.
+
+Issue: TODO - examples and text
+
+# Scaling # {#scaling}
+
+Next to optimizations such as using a binary format such as [Jelly](https://jelly-rdf.github.io), or manually creating an aggregated summary LDES as a derived LDES, there are also two other tools one can use for scaling up.
+
+## Retention policies: log compaction ## {#log-compaction}
+
+Issue: section is still TODO
+
+## Rebalancing the search tree ## {#rebalancing}
+
+Rebalancing a search tree of an LDES is interesting for old immutable pages as most clients are going to be interested in the full history anyway. Compression becomes much more efficient on bigger pages, and thus less data will need to be transferred over the wire, saving bandwidth.
+
+Rebalancing is tricky though, because a client might get stuck in edge cases when it is just replicating the datasets while the rebalancing is happening, and also a server cache might still have a copy of all or some of your immutable pages.
+
+As a running example, imagine a client is synchronizing a day-page `2022-05-02` but then all pages under `2022` are getting merged into one.
+
+A server MUST in this case provide redirects to a new IRI, such as `2022-rebalanced`, from all old pages, including the page `2022` to `2022-rebalanced`.
+
+Note: the semantics of `ldes:immutable` is that the members on this page and the relations should not be processed again. The page MAY still be rebalanced later on, or the page can become unavailable on disk (`410 Gone`).
+
+# Status log # {#status-log}
+
+Issue: status log is still undefined
