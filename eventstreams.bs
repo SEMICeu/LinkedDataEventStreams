@@ -195,9 +195,9 @@ A client MUST ensure a blank node is not processed twice.
 
 A client in ordered mode that reads data from a `tree:Node` without a specialized profile or content type, MUST order the members according to the `ldes:timestampPath` and/or `ldes:sequencePath` itself.
 
-<div class="example" highlight="trig">
+<div class="example" highlight="turtle">
 An example member that will be fully extracted thanks to the algorithm:
-```trig
+```turtle
 ex:EventStream a ldes:EventStream ;
     ldes:timestampPath dcterms:created ;
     tree:member ex:Member1 .
