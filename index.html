@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3f621ba99, updated Mon Jul 28 15:38:36 2025 -0700" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="4d76ac475e1353a423b91e6177f6e33810aedc8e" name="revision">
+  <meta content="aa6bb361d1fc2edcde50f7f31dbda319a8f4e205" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2081,29 +2081,30 @@ Parts of this work may be from another specification document.  If so, those par
       <li><a href="#voc-versionTimestampPath"><span class="secno">5.6</span> <span class="content">ldes:versionTimestampPath</span></a>
       <li><a href="#voc-versionSequencePath"><span class="secno">5.7</span> <span class="content">ldes:versionSequencePath</span></a>
       <li><a href="#voc-eventsource"><span class="secno">5.8</span> <span class="content">ldes:EventSource</span></a>
-      <li><a href="#voc-retentionpolicyproperty"><span class="secno">5.9</span> <span class="content">ldes:retentionPolicy</span></a>
+      <li><a href="#voc-immutable"><span class="secno">5.9</span> <span class="content">ldes:immutable</span></a>
+      <li><a href="#voc-retentionpolicyproperty"><span class="secno">5.10</span> <span class="content">ldes:retentionPolicy</span></a>
       <li>
-       <a href="#voc-retentionpolicy"><span class="secno">5.10</span> <span class="content">ldes:RetentionPolicy</span></a>
+       <a href="#voc-retentionpolicy"><span class="secno">5.11</span> <span class="content">ldes:RetentionPolicy</span></a>
        <ol class="toc">
-        <li><a href="#voc-startingfrom"><span class="secno">5.10.1</span> <span class="content">ldes:startingFrom</span></a>
-        <li><a href="#voc-versionduration"><span class="secno">5.10.2</span> <span class="content">ldes:versionDuration</span></a>
-        <li><a href="#voc-versionamount"><span class="secno">5.10.3</span> <span class="content">ldes:versionAmount</span></a>
-        <li><a href="#voc-versiondeleteduration"><span class="secno">5.10.4</span> <span class="content">ldes:versionDeleteDuration</span></a>
-        <li><a href="#voc-fulllogduration"><span class="secno">5.10.5</span> <span class="content">ldes:fullLogDuration</span></a>
-        <li><a href="#voc-former-retentionpolicies"><span class="secno">5.10.6</span> <span class="content">Former retention policies terms</span></a>
+        <li><a href="#voc-startingfrom"><span class="secno">5.11.1</span> <span class="content">ldes:startingFrom</span></a>
+        <li><a href="#voc-versionduration"><span class="secno">5.11.2</span> <span class="content">ldes:versionDuration</span></a>
+        <li><a href="#voc-versionamount"><span class="secno">5.11.3</span> <span class="content">ldes:versionAmount</span></a>
+        <li><a href="#voc-versiondeleteduration"><span class="secno">5.11.4</span> <span class="content">ldes:versionDeleteDuration</span></a>
+        <li><a href="#voc-fulllogduration"><span class="secno">5.11.5</span> <span class="content">ldes:fullLogDuration</span></a>
+        <li><a href="#voc-former-retentionpolicies"><span class="secno">5.11.6</span> <span class="content">Former retention policies terms</span></a>
        </ol>
       <li>
-       <a href="#voc-versioning-transactions"><span class="secno">5.11</span> <span class="content">Terms for versioning and transactions on top of ldes:EventStream</span></a>
+       <a href="#voc-versioning-transactions"><span class="secno">5.12</span> <span class="content">Terms for versioning and transactions on top of ldes:EventStream</span></a>
        <ol class="toc">
-        <li><a href="#voc-versionCreatePath"><span class="secno">5.11.1</span> <span class="content">ldes:versionCreatePath</span></a>
-        <li><a href="#voc-versionUpdatePath"><span class="secno">5.11.2</span> <span class="content">ldes:versionUpdatePath</span></a>
-        <li><a href="#voc-versionDeletePath"><span class="secno">5.11.3</span> <span class="content">ldes:versionDeletePath</span></a>
-        <li><a href="#voc-versionCreateObject"><span class="secno">5.11.4</span> <span class="content">ldes:versionCreateObject</span></a>
-        <li><a href="#voc-versionUpdateObject"><span class="secno">5.11.5</span> <span class="content">ldes:versionUpdateObject</span></a>
-        <li><a href="#voc-versionDeleteObject"><span class="secno">5.11.6</span> <span class="content">ldes:versionDeleteObject</span></a>
-        <li><a href="#voc-transactionPath"><span class="secno">5.11.7</span> <span class="content">ldes:transactionPath</span></a>
-        <li><a href="#voc-transactionFinalizedPath"><span class="secno">5.11.8</span> <span class="content">ldes:transactionFinalizedPath</span></a>
-        <li><a href="#voc-transactionFinalizedObject"><span class="secno">5.11.9</span> <span class="content">ldes:transactionFinalizedObject</span></a>
+        <li><a href="#voc-versionCreatePath"><span class="secno">5.12.1</span> <span class="content">ldes:versionCreatePath</span></a>
+        <li><a href="#voc-versionUpdatePath"><span class="secno">5.12.2</span> <span class="content">ldes:versionUpdatePath</span></a>
+        <li><a href="#voc-versionDeletePath"><span class="secno">5.12.3</span> <span class="content">ldes:versionDeletePath</span></a>
+        <li><a href="#voc-versionCreateObject"><span class="secno">5.12.4</span> <span class="content">ldes:versionCreateObject</span></a>
+        <li><a href="#voc-versionUpdateObject"><span class="secno">5.12.5</span> <span class="content">ldes:versionUpdateObject</span></a>
+        <li><a href="#voc-versionDeleteObject"><span class="secno">5.12.6</span> <span class="content">ldes:versionDeleteObject</span></a>
+        <li><a href="#voc-transactionPath"><span class="secno">5.12.7</span> <span class="content">ldes:transactionPath</span></a>
+        <li><a href="#voc-transactionFinalizedPath"><span class="secno">5.12.8</span> <span class="content">ldes:transactionFinalizedPath</span></a>
+        <li><a href="#voc-transactionFinalizedObject"><span class="secno">5.12.9</span> <span class="content">ldes:transactionFinalizedObject</span></a>
        </ol>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content">
@@ -2225,6 +2226,16 @@ After dereferencing the IRI, the client MUST look for the patterns <code>?s tree
    <p class="note" role="note"><span class="marker">Note:</span> In this section we do not mandate how exactly state management needs to be done, but provide some functionalities that must be implemented.</p>
    <p>A client MUST ensure a member is only emitted once.</p>
    <p class="note" role="note"><span class="marker">Note:</span> Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.</p>
+   <p>A  <code>tree:Node</code> is considered <em>immutable</em>, when re-fetching it will not result in new members.</p>
+   <p>For every <code>tree:Node</code>, a client SHOULD check whether it is immutable by first checking whether</p>
+   <ol>
+    <li data-md>
+     <p>the triple <code>&lt;> ldes:immutable true .</code> is set; then whether</p>
+    <li data-md>
+     <p>the cache-control HTTP response header is set to immutable; and finally</p>
+    <li data-md>
+     <p>a client MAY check whether the <code>tree:Relation</code> with a <code>tree:path</code> equal to the <code>ldes:timestampPath</code> that pointed us to the <code>tree:Node</code> had an upper bound that is earlier than the time of the latest processed member.</p>
+   </ol>
    <p>A client SHOULD ensure an immutable <code>tree:Node</code> is not fetched more than once.</p>
    <p class="note" role="note"><span class="marker">Note:</span> Keeping a list of all immutable pages forever will become problematic for large LDESs.</p>
    <p>A client MUST ensure it can resume from a previous run.
@@ -2237,8 +2248,7 @@ In ordered mode, it MAY also use timestamp and sequence path of the last member 
    <h3 class="heading settled" data-level="3.3" id="http-requests-responses"><span class="secno">3.3. </span><span class="content">HTTP requests and responses</span><a class="self-link" href="#http-requests-responses"></a></h3>
    <p>A client MUST support HTTP responses in at least <a data-link-type="biblio" href="#biblio-n-quads" title="RDF 1.1 N-Quads">[n-quads]</a>, <a data-link-type="biblio" href="#biblio-n-triples" title="RDF 1.1 N-Triples">[n-triples]</a>, <a data-link-type="biblio" href="#biblio-trig" title="RDF 1.1 TriG">[trig]</a>, <a data-link-type="biblio" href="#biblio-turtle" title="RDF 1.1 Turtle">[turtle]</a> and <a data-link-type="biblio" href="#biblio-json-ld" title="JSON-LD 1.0">[json-ld]</a>. For JSON-LD external contexts, the client SHOULD implement HTTP caching.</p>
    <p>An <code>Accept</code> request header MUST be set.</p>
-   <p>A client MUST inspect the <code>cache-control</code> header to see whether it is set to <code>immutable</code>.</p>
-   <p class="issue" id="issue-bbb17129"><a class="self-link" href="#issue-bbb17129"></a> Should we support a <code>ldes:immutable</code> property? [](https://github.com/SEMICeu/LinkedDataEventStreams/issues/64)</p>
+   <p>A client SHOULD inspect the <code>cache-control</code> header to see whether it is set to <code>immutable</code>.</p>
    <p>A client MUST follow redirects.</p>
    <p>A client SHOULD support <code>If-None-Match</code> request header using the etags stored in the state, and process the <code>304 Not Modified</code> response accordingly.</p>
    <p>For the following status codes, the client MUST implement a retry mechanism with a back-off strategy:</p>
@@ -2505,33 +2515,37 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
    <h3 class="heading settled" data-level="5.8" id="voc-eventsource"><span class="secno">5.8. </span><span class="content">ldes:EventSource</span><a class="self-link" href="#voc-eventsource"></a></h3>
    <p>The class <code>ldes:EventSource</code> is a subclass of <code>dcat:Distribution</code>, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.</p>
    <p>An <code>ldes:EventSource</code> can <em>only</em> be published on LDESs that have a <code>ldes:timestampPath</code> set, and thus will publish their entities in this chronological order.</p>
-   <h3 class="heading settled" data-level="5.9" id="voc-retentionpolicyproperty"><span class="secno">5.9. </span><span class="content">ldes:retentionPolicy</span><a class="self-link" href="#voc-retentionpolicyproperty"></a></h3>
+   <h3 class="heading settled" data-level="5.9" id="voc-immutable"><span class="secno">5.9. </span><span class="content">ldes:immutable</span><a class="self-link" href="#voc-immutable"></a></h3>
+   <p>Re-fetching this tree:Node will not result in new members.</p>
+   <p><strong>Domain:</strong>: <code>tree:Node</code></p>
+   <p><strong>Range:</strong>: <code>xsd:boolean</code></p>
+   <h3 class="heading settled" data-level="5.10" id="voc-retentionpolicyproperty"><span class="secno">5.10. </span><span class="content">ldes:retentionPolicy</span><a class="self-link" href="#voc-retentionpolicyproperty"></a></h3>
    <p>Links to a retention policy.</p>
    <p><strong>Domain:</strong> Preferably the root node. Alternatively it can occur on any type of entity that is linked from the root node using <code>tree:viewDescription</code>.</p>
    <p><strong>Range:</strong> <code>ldes:RetentionPolicy</code></p>
-   <h3 class="heading settled" data-level="5.10" id="voc-retentionpolicy"><span class="secno">5.10. </span><span class="content">ldes:RetentionPolicy</span><a class="self-link" href="#voc-retentionpolicy"></a></h3>
+   <h3 class="heading settled" data-level="5.11" id="voc-retentionpolicy"><span class="secno">5.11. </span><span class="content">ldes:RetentionPolicy</span><a class="self-link" href="#voc-retentionpolicy"></a></h3>
    <p>The class for a retention policy that indicates how long members are preserved in this search tree.</p>
-   <h4 class="heading settled" data-level="5.10.1" id="voc-startingfrom"><span class="secno">5.10.1. </span><span class="content">ldes:startingFrom</span><a class="self-link" href="#voc-startingfrom"></a></h4>
+   <h4 class="heading settled" data-level="5.11.1" id="voc-startingfrom"><span class="secno">5.11.1. </span><span class="content">ldes:startingFrom</span><a class="self-link" href="#voc-startingfrom"></a></h4>
    <p>The search tree only keeps members starting a certain timestamp.</p>
    <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
    <p><strong>Range:</strong> <code>xsd:dateTime</code> with a timezone</p>
-   <h4 class="heading settled" data-level="5.10.2" id="voc-versionduration"><span class="secno">5.10.2. </span><span class="content">ldes:versionDuration</span><a class="self-link" href="#voc-versionduration"></a></h4>
+   <h4 class="heading settled" data-level="5.11.2" id="voc-versionduration"><span class="secno">5.11.2. </span><span class="content">ldes:versionDuration</span><a class="self-link" href="#voc-versionduration"></a></h4>
    <p>The search tree only keeps its versions, for which an <code>ldes:versionAmount</code> MUST have been set, only during a specific window.</p>
    <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
    <p><strong>Range:</strong> <code>xsd:duration</code></p>
-   <h4 class="heading settled" data-level="5.10.3" id="voc-versionamount"><span class="secno">5.10.3. </span><span class="content">ldes:versionAmount</span><a class="self-link" href="#voc-versionamount"></a></h4>
+   <h4 class="heading settled" data-level="5.11.3" id="voc-versionamount"><span class="secno">5.11.3. </span><span class="content">ldes:versionAmount</span><a class="self-link" href="#voc-versionamount"></a></h4>
    <p>The number of versions to keep. This MUST be a number greater than 0.</p>
    <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
    <p><strong>Range:</strong> <code>xsd:integer</code> > 0</p>
-   <h4 class="heading settled" data-level="5.10.4" id="voc-versiondeleteduration"><span class="secno">5.10.4. </span><span class="content">ldes:versionDeleteDuration</span><a class="self-link" href="#voc-versiondeleteduration"></a></h4>
+   <h4 class="heading settled" data-level="5.11.4" id="voc-versiondeleteduration"><span class="secno">5.11.4. </span><span class="content">ldes:versionDeleteDuration</span><a class="self-link" href="#voc-versiondeleteduration"></a></h4>
    <p>The search tree only keeps its deletions for a certain duration.</p>
    <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
    <p><strong>Range:</strong> <code>xsd:duration</code></p>
-   <h4 class="heading settled" data-level="5.10.5" id="voc-fulllogduration"><span class="secno">5.10.5. </span><span class="content">ldes:fullLogDuration</span><a class="self-link" href="#voc-fulllogduration"></a></h4>
+   <h4 class="heading settled" data-level="5.11.5" id="voc-fulllogduration"><span class="secno">5.11.5. </span><span class="content">ldes:fullLogDuration</span><a class="self-link" href="#voc-fulllogduration"></a></h4>
    <p>The search tree keeps its full log for a certain duration.</p>
    <p><strong>Domain:</strong> <code>ldes:RetentionPolicy</code></p>
    <p><strong>Range:</strong> <code>xsd:duration</code></p>
-   <h4 class="heading settled" data-level="5.10.6" id="voc-former-retentionpolicies"><span class="secno">5.10.6. </span><span class="content">Former retention policies terms</span><a class="self-link" href="#voc-former-retentionpolicies"></a></h4>
+   <h4 class="heading settled" data-level="5.11.6" id="voc-former-retentionpolicies"><span class="secno">5.11.6. </span><span class="content">Former retention policies terms</span><a class="self-link" href="#voc-former-retentionpolicies"></a></h4>
    <ul>
     <li data-md>
      <p><code>ldes:DurationAgoPolicy</code>: A retention policy class that uses an <code>xsd:duration</code> literal to document a sliding window of data.</p>
@@ -2556,24 +2570,24 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
        <p>Range: <code>xsd:dateTime</code> including an explicit timezone</p>
      </ul>
    </ul>
-   <h3 class="heading settled" data-level="5.11" id="voc-versioning-transactions"><span class="secno">5.11. </span><span class="content">Terms for versioning and transactions on top of ldes:EventStream</span><a class="self-link" href="#voc-versioning-transactions"></a></h3>
-   <h4 class="heading settled" data-level="5.11.1" id="voc-versionCreatePath"><span class="secno">5.11.1. </span><span class="content">ldes:versionCreatePath</span><a class="self-link" href="#voc-versionCreatePath"></a></h4>
+   <h3 class="heading settled" data-level="5.12" id="voc-versioning-transactions"><span class="secno">5.12. </span><span class="content">Terms for versioning and transactions on top of ldes:EventStream</span><a class="self-link" href="#voc-versioning-transactions"></a></h3>
+   <h4 class="heading settled" data-level="5.12.1" id="voc-versionCreatePath"><span class="secno">5.12.1. </span><span class="content">ldes:versionCreatePath</span><a class="self-link" href="#voc-versionCreatePath"></a></h4>
    <p>Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type.</p>
-   <h4 class="heading settled" data-level="5.11.2" id="voc-versionUpdatePath"><span class="secno">5.11.2. </span><span class="content">ldes:versionUpdatePath</span><a class="self-link" href="#voc-versionUpdatePath"></a></h4>
+   <h4 class="heading settled" data-level="5.12.2" id="voc-versionUpdatePath"><span class="secno">5.12.2. </span><span class="content">ldes:versionUpdatePath</span><a class="self-link" href="#voc-versionUpdatePath"></a></h4>
    <p>Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type.</p>
-   <h4 class="heading settled" data-level="5.11.3" id="voc-versionDeletePath"><span class="secno">5.11.3. </span><span class="content">ldes:versionDeletePath</span><a class="self-link" href="#voc-versionDeletePath"></a></h4>
+   <h4 class="heading settled" data-level="5.12.3" id="voc-versionDeletePath"><span class="secno">5.12.3. </span><span class="content">ldes:versionDeletePath</span><a class="self-link" href="#voc-versionDeletePath"></a></h4>
    <p>Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type.</p>
-   <h4 class="heading settled" data-level="5.11.4" id="voc-versionCreateObject"><span class="secno">5.11.4. </span><span class="content">ldes:versionCreateObject</span><a class="self-link" href="#voc-versionCreateObject"></a></h4>
+   <h4 class="heading settled" data-level="5.12.4" id="voc-versionCreateObject"><span class="secno">5.12.4. </span><span class="content">ldes:versionCreateObject</span><a class="self-link" href="#voc-versionCreateObject"></a></h4>
    <p>If the RDF object matches the object in the version create path, the member represents a create.</p>
-   <h4 class="heading settled" data-level="5.11.5" id="voc-versionUpdateObject"><span class="secno">5.11.5. </span><span class="content">ldes:versionUpdateObject</span><a class="self-link" href="#voc-versionUpdateObject"></a></h4>
+   <h4 class="heading settled" data-level="5.12.5" id="voc-versionUpdateObject"><span class="secno">5.12.5. </span><span class="content">ldes:versionUpdateObject</span><a class="self-link" href="#voc-versionUpdateObject"></a></h4>
    <p>If the RDF object matches the object in the version update path, the member represents an update.</p>
-   <h4 class="heading settled" data-level="5.11.6" id="voc-versionDeleteObject"><span class="secno">5.11.6. </span><span class="content">ldes:versionDeleteObject</span><a class="self-link" href="#voc-versionDeleteObject"></a></h4>
+   <h4 class="heading settled" data-level="5.12.6" id="voc-versionDeleteObject"><span class="secno">5.12.6. </span><span class="content">ldes:versionDeleteObject</span><a class="self-link" href="#voc-versionDeleteObject"></a></h4>
    <p>If the RDF object matches the object in the version delete path, the member represents a delete.</p>
-   <h4 class="heading settled" data-level="5.11.7" id="voc-transactionPath"><span class="secno">5.11.7. </span><span class="content">ldes:transactionPath</span><a class="self-link" href="#voc-transactionPath"></a></h4>
+   <h4 class="heading settled" data-level="5.12.7" id="voc-transactionPath"><span class="secno">5.12.7. </span><span class="content">ldes:transactionPath</span><a class="self-link" href="#voc-transactionPath"></a></h4>
    <p>Path indicating how a member indicates whether it is part of a transaction.</p>
-   <h4 class="heading settled" data-level="5.11.8" id="voc-transactionFinalizedPath"><span class="secno">5.11.8. </span><span class="content">ldes:transactionFinalizedPath</span><a class="self-link" href="#voc-transactionFinalizedPath"></a></h4>
+   <h4 class="heading settled" data-level="5.12.8" id="voc-transactionFinalizedPath"><span class="secno">5.12.8. </span><span class="content">ldes:transactionFinalizedPath</span><a class="self-link" href="#voc-transactionFinalizedPath"></a></h4>
    <p>Path indicating whether the transaction has been finalized.</p>
-   <h4 class="heading settled" data-level="5.11.9" id="voc-transactionFinalizedObject"><span class="secno">5.11.9. </span><span class="content">ldes:transactionFinalizedObject</span><a class="self-link" href="#voc-transactionFinalizedObject"></a></h4>
+   <h4 class="heading settled" data-level="5.12.9" id="voc-transactionFinalizedObject"><span class="secno">5.12.9. </span><span class="content">ldes:transactionFinalizedObject</span><a class="self-link" href="#voc-transactionFinalizedObject"></a></h4>
    <p>If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized.</p>
   </main>
   <div data-fill-with="conformance">
@@ -2763,5 +2777,4 @@ There is a Turtle version available at <a href="https://w3id.org/ldes">https://w
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
    <div class="issue"> More specific server documentation should be found in a Server Primer (to do), such as containing a <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/59">link to the JSON-LD context</a>, <a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/70">official SHACL shapes for LDES</a> to validate your pages, best practices for publishing an LDES for reaching an optimal performance, best practices for enveloping your data using named graphs, how to build a status log for the use case of an aggregator or harvester, etc. <a class="issue-return" href="#issue-36671e76" title="Jump to section">↵</a></div>
-   <div class="issue"> Should we support a <code>ldes:immutable</code> property? [](https://github.com/SEMICeu/LinkedDataEventStreams/issues/64) <a class="issue-return" href="#issue-bbb17129" title="Jump to section">↵</a></div>
   </div>
