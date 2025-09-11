@@ -181,18 +181,45 @@ In unordered mode, the client SHOULD emit a member as soon as it is extracted.
 In ordered mode, the client MUST ensure no other member can be still discovered that could precede the member that is to be emitted. 
 Extra conditions as documented in the next section MUST be checked before emitting it.
 
-A client MAY implement support for content types and profiles that can speed up parsing and extracting.
+A client MAY implement support for more specialized content types and profiles.
 For example, the [TREE profile](https://w3id.org/tree/specification/profile) specification promises to a parser that the member quads are going to be grouped together, and delimited by the `tree:member` quad.
 Additionally to this specification an LDES client can assume the members will be in chronological ascending order and does not have to sort them anymore.
 
-Otherwise, a client MUST process the quads, once they are fully parsed from a `tree:Node` as follows:
+Without a specialized profile or content type that can indicate a “grouping of quads”/a “message”/a “frame”, a client MUST extract a description of the members as follows:
  
-A client MUST make a list of all member IRIs matching `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
-Each match of is called a focus node.
+Once the `tree:Node` has been fully parsed, a client MUST make a list of all member IRIs matching `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
+Each match of this pattern is called a focus node.
 For each focus node, a client MUST look up the subject-based star pattern (`<m> ?p ?o`) in the default graph, and all quads in the named graph `m` (`?s ?p ?o <m>`).
 For each match where `o` is a blank node, the algorithm is to be repeated recursively with `o` being the new focus node.
+A client MUST ensure a blank node is not processed twice.
 
-As the set of members in this case is unordered, a client in ordered mode MUST order the members itself.
+A client in ordered mode that reads data from a `tree:Node` without a specialized profile or content type, MUST order the members according to the `ldes:timestampPath` and/or `ldes:sequencePath` itself.
+
+<div class="example" highlight="trig">
+An example member that will be fully extracted thanks to the algorithm:
+```trig
+ex:EventStream a ldes:EventStream ;
+    ldes:timestampPath dcterms:created ;
+    tree:member ex:Member1 .
+
+## Member1 quads
+ex:Member1 a ex:Record ;
+        dcterms:created "2027-01-01T00:00:00Z"^^xsd:dateTime ;
+        ex:hasDetail _:bDetail ;
+        ex:hasSignature _:bSignature .
+
+ex:Member1 {
+  _:bDetail ex:detailValue "Some detail" .
+}
+
+_:bSignature {
+    ex:Sig1 ex:signatureValue "MEUCIQDh..." ;
+            ex:signsNamedGraph ex:Member1 ;
+            ex:signatureAlgorithm "RS256" .
+}
+```
+</div>
+
 
 ## Traversing the search tree ## {#traversing-search-tree}
 
