@@ -16,6 +16,7 @@
       "view": {"@type": "@id", "@id": "tree:view"},
       "path": {"@container": "@list", "@id": "tree:path", "@type": "@id"},
       "value": {"@id":"tree:value"},
+      "immutable": {"@id": "ldes:immutable"},
       "timestampPath": {"@id":"ldes:timestampPath", "@type":"@id", "@container":"@list"},
       "versionOfPath": {"@id":"ldes:versionOfPath", "@type":"@id", "@container":"@list"},
       "retentionPolicies": {"@id":"ldes:retentionPolicy", "@type": "@id", "@container":"@list"},
