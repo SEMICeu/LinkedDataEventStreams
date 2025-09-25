@@ -2,33 +2,39 @@
 Title: LDES Server Primer
 Shortname: LDES-SERVER
 Level: 1
-Status: LS
+Status: LD
 URL: https://w3id.org/ldes/specification/server-primer
 Markup Shorthands: markdown yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
-Abstract: A Linked Data Event Stream (LDES) is an append-only collection of members described using the Resource Description Framework (RDF). This specification contains specification text on publishing an LDES.
+Abstract: This Server Primer for Linked Data Event Streams (LDES) provides practical guidance for data publishers on implementing and hosting an LDES server. LDES aims to help publishers balance between offering rich querying APIs and simple data dumps by proposing an event stream as the base API. This primer focuses on lightweight, scalable approaches and best practices for setting up and maintaining an LDES server.
+
 </pre>
 
 # Introduction # {#introduction}
 
-The server primer is a collection of derived normative rules from the main client-oriented specification, as well as some considerations and best practices.
+The server primer is a Living Document of derived normative rules based on [the main consumer-oriented LDES specification](https://w3id.org/ldes/specification) and the [W3C TREE hypermedia specification](https://w3id.org/tree/specification).
 
-There’s also an [application profile](https://w3id.org/ldes/specification/ap) with SHACL shapes available.
+A Linked Data Event Stream (LDES) is an append-only log consisting of _immutable_ members. The term “member” could also be interpreted as “event”, “activity”, “observation”, “record”, or “immutable entity”. For example, “an observation states that at this timestamp a specific sensor observed 5°C”. However, since LDES extends the W3C TREE hypermedia specification, we use the term “member” for consistency.
+
+Next to the Server Primer, there are also [application profiles](https://w3id.org/ldes/specification/ap) available with SHACL shapes for validating the pages of an LDES provider.
 
 # Serializations and HTTP responses # {#serializations}
 
-A server MUST provide the data in either [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. It MAY also provide multiple serializations using content negotiation.
+A server MUST provide the data in either [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. 
+It MAY also provide multiple serializations using content negotiation.
 
-Note: Don’t forget to set a `Vary: Accept` header in case you would use content negotiation and caching.
+Note: Do set a `Vary: Accept` header in case you would use content negotiation.
 
 It SHOULD provide an `etag` header on responses. In case the page is immutable, it SHOULD provide a `cache-control: immutable` header. 
 
-In case [[!json-ld]] is used, we provide a context at https://w3id.org/ldes/context. You MUST copy this into your project and not refer to this source externally as we do not promise to keep this stable. In case you host an external context yourself, you SHOULD ensure decent caching with the `etag` and/or `cache-control` max-age headers.
+In case [[!json-ld]] is used, we provide a context at https://w3id.org/ldes/context. 
+You MUST copy this into your project and not refer to this source externally as we do not promise to keep this stable. 
+In case you host an external context yourself, you SHOULD ensure decent caching with the `etag` and/or `cache-control` max-age headers.
 
-When you want to optimize your server for client performance, you SHOULD implement the [TREE Profile specification](https://w3id.org/tree/specification/profile). You MUST order the members chronologically (i.e. append the members to the file as you go).
+You SHOULD implement the [TREE Profile specification](https://w3id.org/tree/specification/profile) for performance. In case you do, you MUST order the members chronologically in the page (i.e. append the members to the file as you go).
 
-Issue: we still need to look at how we are going to integrate with the [Jelly protocol](https://jelly-rdf.github.io/dev) as this serialization will raise performance drastically.
+Issue: We still will try to generalize this in the future so that we can also integrate with [Jelly](https://jelly-rdf.github.io/dev). This binary serialization has the potential to raise performance drastically.
 
 In case the server is overloaded, it MUST provide a `429 Too Many Requests`. The client will then retry later.
 
