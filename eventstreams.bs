@@ -283,13 +283,13 @@ Consumers can use the LDES version properties to decide what action to take.
 E.g., when the consumer understands the members are versioned, it can upsert the members on each update.
 If it understands something was created instead of updated, it can just add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
 To that extent, on the `ldes:EventStream` entity, these properties can be used, which are further explained in the vocabulary.
- * [`ldes:versionOfPath`](#voc-versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
- * [`ldes:versionDeleteObject`](#voc-versionDeleteObject) - such as `as:Delete`
- * [`ldes:versionCreateObject`](#voc-versionCreateObject) - such as `as:Create`
- * [`ldes:versionUpdateObject`](#voc-versionUpdateObject) - such as `as:Update`
- * [`ldes:versionDeletePath`](#voc-versionDeletePath) - defaults to `rdf:type`
- * [`ldes:versionCreatePath`](#voc-versionCreatePath) - defaults to `rdf:type`
- * [`ldes:versionUpdatePath`](#voc-versionUpdatePath) - defaults to `rdf:type`
+ * [`ldes:versionOfPath`](https://w3id.org/ldes#versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
+ * [`ldes:versionDeleteObject`](https://w3id.org/ldes#versionDeleteObject) - such as `as:Delete`
+ * [`ldes:versionCreateObject`](https://w3id.org/ldes#versionCreateObject) - such as `as:Create`
+ * [`ldes:versionUpdateObject`](https://w3id.org/ldes#versionUpdateObject) - such as `as:Update`
+ * [`ldes:versionDeletePath`](https://w3id.org/ldes#versionDeletePath) - defaults to `rdf:type`
+ * [`ldes:versionCreatePath`](https://w3id.org/ldes#versionCreatePath) - defaults to `rdf:type`
+ * [`ldes:versionUpdatePath`](https://w3id.org/ldes#versionUpdatePath) - defaults to `rdf:type`
 
 <div class="example" highlight="turtle">
 Example: Versioned members using `ldes:versionOfPath`, `ldes:versionCreateObject`, `ldes:versionUpdateObject`, and `ldes:versionDeleteObject`:
@@ -308,9 +308,9 @@ ex:AddressRecords a ldes:EventStream ;
 </div>
 
 A consumer can also understand how to process the event stream in a way that the resulting knowledge graph will be consistent, by interpreting transactions using these properties:
- * [`ldes:transactionPath`](#voc-transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
- * [`ldes:transactionFinalizedPath`](#voc-transactionFinalizedPath) - points at the object 
- * [`ldes:transactionFinalizedObject`](#voc-transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
+ * [`ldes:transactionPath`](https://w3id.org/ldes#transactionPath) - points at an identifier for the transaction. The result of evaluating the path can be a literal or a IRI.
+ * [`ldes:transactionFinalizedPath`](https://w3id.org/ldes#transactionFinalizedPath) - points at the object 
+ * [`ldes:transactionFinalizedObject`](https://w3id.org/ldes#transactionFinalizedObject) - the value that the object needs to be in order to be finalized. Defaults to the `"true"^^xsd:boolean`.
 
 <div class="example" highlight="turtle">
 Example: Using `ldes:transactionPath`, `ldes:transactionFinalizedPath`, and `ldes:transactionFinalizedObject` to indicate transactions in an event stream:
@@ -373,13 +373,13 @@ The root node itself can contain this information using the property `ldes:reten
 When the client is processing the root node, it MUST look for a retention policy in both ways.
 
 In the example above, the retention policy has been set on the root node (double typed as the `ldes:EventSource`).
-When the [`ldes:retentionPolicy`](#voc-retentionpolicyproperty) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
+When the [`ldes:retentionPolicy`](https://w3id.org/ldes#retentionPolicy) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
 Multiple properties can then be added to make the scope of members that are kept larger:
- * [`ldes:startingFrom`](#voc-startingfrom): this view only retaines members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
- * [`ldes:fullLogDuration`](#voc-fulllogduration): the duration from current time from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
- * [`ldes:versionAmount`](#voc-versionamount): the amount of versions to keep. 
- * [`ldes:versionDuration`](#voc-versionduration): the duration from current time from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
- * [`ldes:versionDeleteDuration`](#voc-versiondeleteduration): the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
+ * [`ldes:startingFrom`](https://w3id.org/ldes#startingFrom): this view only retaines members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
+ * [`ldes:fullLogDuration`](https://w3id.org/ldes#fullLogDuration): the duration from current time from which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the member are retained. No other properties can influence this property.
+ * [`ldes:versionAmount`](https://w3id.org/ldes#versionAmount): the amount of versions to keep. 
+ * [`ldes:versionDuration`](https://w3id.org/ldes#versionDuration): the duration from current time from which an amount of version are kept, to be used together with `ldes:versionAmount`. Defaults the duration of the full event stream.
+ * [`ldes:versionDeleteDuration`](https://w3id.org/ldes#versionDeleteDuration): the period of time from current time the deletions in the event stream are retained. Before this period, deletions are not retained, regardless of `ldes:versionAmount` or `ldes:versionDuration`.
 
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
 The `ldes:timestampPath` points at the timestamp in the member that can be compared with the current time minus the durations.
@@ -393,180 +393,3 @@ These retention policies types are:
 
 A `ldes:LatestVersionSubset` uses the property `ldes:amount` with as range an `xsd:integer` datatype, indicating the number of versions to keep. By default, this value is set to 1.
 A `ldes:PointInTimePolicy` uses a `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp.
-
-# Vocabulary # {#vocabulary}
-
-Next to re-using terms from the `tree:` vocabulary, the `ldes:` namespace introduced in this document provides a couple of new terms.
-The base IRI for LDES is `https://w3id.org/ldes#`, and the preferred prefix is `ldes:`.
-There is a Turtle version available at [https://w3id.org/ldes#Vocabulary](https://w3id.org/ldes).
-
-## ldes:EventStream ## {#voc-eventstream}
-
-The class `ldes:EventStream` is a subclass of `tree:Collection`. The specialization being that all members are immutable, and thus that this `tree:Collection` is append-only.
-
-## ldes:timestampPath ## {#voc-timestamppath}
-
-The path to the `xsd:dateTime` literal in each member that defines the order of the event stream.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
-
-## ldes:sequencePath ## {#voc-sequencePath}
-
-The path to an xsd literal in each member that defines the order of the event stream in addition to the `ldes:timestampPath`.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
-
-## ldes:pollingInterval ## {#voc-pollingInterval}
-
-The amount of seconds the client should keep in-between synchronization runs.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** `xsd:integer`
-
-## ldes:versionOfPath ## {#voc-versionOfPath}
-
-The path to the IRI in each member that defines the entity of which this member is a version.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
-
-
-## ldes:versionTimestampPath ## {#voc-versionTimestampPath}
-
-For out of order event streams, this defines the path to the `xsd:dateTime` literal in each member that defines the order of versioned members.
-
-Only relevant when the `ldes:versionOfPath` has been set.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
-
-## ldes:versionSequencePath ## {#voc-versionSequencePath}
-
-For out of order event streams, this defines the path to an xsd literal in each member that defines the order of the event stream in addition to the `ldes:versionTimestampPath`.
-
-**Domain:** `ldes:EventStream`
-
-**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
-
-## ldes:EventSource ## {#voc-eventsource}
-
-The class `ldes:EventSource` is a subclass of `dcat:Distribution`, the specialization being that this is a feed that uses a chronological search tree to make available a Linked Data Event Stream in order.
-
-An `ldes:EventSource` can *only* be published on LDESs that have a `ldes:timestampPath` set, and thus will publish their entities in this chronological order.
-
-## ldes:immutable ## {#voc-immutable}
-
-Re-fetching this tree:Node will not result in new members.
-
-**Domain:**: `tree:Node`
-
-**Range:**: `xsd:boolean`
-
-## ldes:retentionPolicy ## {#voc-retentionpolicyproperty}
-
-Links to a retention policy.
-
-**Domain:** Preferably the root node. Alternatively it can occur on any type of entity that is linked from the root node using `tree:viewDescription`.
-
-**Range:** `ldes:RetentionPolicy`
-
-## ldes:RetentionPolicy ## {#voc-retentionpolicy}
-
-The class for a retention policy that indicates how long members are preserved in this search tree.
-
-### ldes:startingFrom ### {#voc-startingfrom}
-
-The search tree only keeps members starting a certain timestamp.
-
-**Domain:** `ldes:RetentionPolicy`
-
-**Range:** `xsd:dateTime` with a timezone
-
-### ldes:versionDuration ### {#voc-versionduration}
-
-The search tree only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. 
-
-**Domain:** `ldes:RetentionPolicy`
-
-**Range:** `xsd:duration`
-
-### ldes:versionAmount ### {#voc-versionamount}
-
-The number of versions to keep. This MUST be a number greater than 0.
-
-**Domain:** `ldes:RetentionPolicy`
-
-**Range:** `xsd:integer` > 0
-
-### ldes:versionDeleteDuration ### {#voc-versiondeleteduration}
-
-The search tree only keeps its deletions for a certain duration.
-
-**Domain:** `ldes:RetentionPolicy`
-
-**Range:** `xsd:duration`
-
-### ldes:fullLogDuration ### {#voc-fulllogduration}
-
-The search tree keeps its full log for a certain duration.
-
-**Domain:** `ldes:RetentionPolicy`
-
-**Range:** `xsd:duration`
-
-### Former retention policies terms ### {#voc-former-retentionpolicies}
-
- * `ldes:DurationAgoPolicy`: A retention policy class that uses an `xsd:duration` literal to document a sliding window of data.
- * `ldes:LatestVersionSubset`: A retention policy class that select an amount of versions based on the versionOfPath.
- * `ldes:amount`: The number of versions to keep. This MUST be a number greater than 0.
-     - Domain: `ldes:LatestVersionSubset`
-     - Range: `xsd:integer`
- * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting on a certain point in time.
- * `ldes:pointInTime`: The point in time from which members will be available starting from this root node.
-     - Domain: `ldes:PointInTimePolicy`
-     - Range: `xsd:dateTime` including an explicit timezone
-
-## Terms for versioning and transactions on top of ldes:EventStream ## {#voc-versioning-transactions}
-
-### ldes:versionCreatePath ### {#voc-versionCreatePath}
-
-Path indicating where you can do an object check on whether the member represents a create. Defaults to rdf:type.
-
-### ldes:versionUpdatePath ### {#voc-versionUpdatePath}
-
-Path indicating where you can do an object check on whether the member represents an update. Defaults to rdf:type.
-
-### ldes:versionDeletePath ### {#voc-versionDeletePath}
-
-Path indicating where you can do an object check on whether the member represents a delete. Defaults to rdf:type.
-
-### ldes:versionCreateObject ### {#voc-versionCreateObject}
-
-If the RDF object matches the object in the version create path, the member represents a create.
-
-### ldes:versionUpdateObject ### {#voc-versionUpdateObject}
-
-If the RDF object matches the object in the version update path, the member represents an update.
-
-### ldes:versionDeleteObject ### {#voc-versionDeleteObject}
-
-If the RDF object matches the object in the version delete path, the member represents a delete.
-
-### ldes:transactionPath ### {#voc-transactionPath}
-
-Path indicating how a member indicates whether it is part of a transaction.
-
-### ldes:transactionFinalizedPath ### {#voc-transactionFinalizedPath}
-
-Path indicating whether the transaction has been finalized.
-
-### ldes:transactionFinalizedObject ### {#voc-transactionFinalizedObject}
-
-If the RDF object matches the object in the transaction finalized path, the member indicates the transaction has been finalized.
