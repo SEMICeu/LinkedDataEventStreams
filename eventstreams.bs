@@ -32,7 +32,10 @@ An **LDES client** is a piece of software used by a **consumer** that accepts th
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 The client can be used in a **consumer pipeline** with other **processors** in the pipeline that can benefit from the **context information** provided by the client.
 
-Issue: Let’s introduce a drawing to indicate what a provider, consumer, client, pipeline and processors means.
+An **LDES Server** is an HTTP server with a view of the members that can be consumed by an LDES client.
+A **producer** can choose to do this by hosting static pages as well as hosting a dynamic server application.
+
+<img width="800" src="provider-consumer.svg" alt="The meaning of the words consumer, client, producer, server, etc.">
 
 An LDES is published using one or more HTTP resources, reusing the concepts from the [W3C TREE hypermedia specification](https://w3id.org/tree/specification).
 When more resources are used, these pages, or **nodes** (`tree:Node`), will be structured according to a **search tree**.
