@@ -76,6 +76,7 @@ Avoid ambiguity by ensuring there is exactly one `tree:view` for the entry point
 
 Members MUST be linked from the event stream identifier using `tree:member`. For example:
 
+<div class="example" highlight="turtle">
 ```turtle
 @prefix ldes: <https://w3id.org/ldes#> .
 @prefix tree: <https://w3id.org/tree#> .
@@ -87,6 +88,7 @@ ex:eventstream a ldes:EventStream ;
     ldes:timestampPath ex:createdAt ;
     ldes:versionOfPath ex:versionOf .
 ```
+</div>
 
 The object of `tree:member` MUST be an IRI that identifies an immutable concept.
 
@@ -109,9 +111,68 @@ Producers SHOULD ensure the member that finalizes the transaction has an equal o
 
 Next to optimizations such as using a binary format such as [Jelly](https://jelly-rdf.github.io), or manually creating an aggregated summary LDES as a derived LDES, there are also two other tools one can use for scaling up.
 
-## Retention policies: log compaction ## {#log-compaction}
+## Compacting your log with a retention policy ## {#log-compaction}
 
-Issue: section is still TODO
+Retention policies enable servers to compact their logs while keeping client expectations clear. By declaring a retention policy on the root node (or via a `tree:viewDescription` entity linked from the root), producers communicate what portion of the event history is still available from this view. Clients will assume they cannot retrieve members outside the declared policy window.
+
+Where to publish and cardinality
+- Publish the retention policy at the root node using `ldes:retentionPolicy` (0..1), or at an entity referenced from the root via `tree:viewDescription` with its own `ldes:retentionPolicy`.
+- If `ldes:retentionPolicy` points to an IRI with no further statements in the current page, clients will assume no members are retained from this view.
+
+Supported policy properties
+- `ldes:startingFrom` (`xsd:dateTime` with timezone): Earliest timestamp of retained members for this view.
+- `ldes:fullLogDuration` (`xsd:duration`): Duration from the current time for which all members are retained. Used to express a sliding full-history window.
+- `ldes:versionAmount` (`xsd:integer` > 0): Number of versions retained per entity.
+- `ldes:versionDuration` (`xsd:duration`): Duration from the current time for which up to `ldes:versionAmount` versions are retained.
+- `ldes:versionDeleteDuration` (`xsd:duration`): Duration from the current time for which delete events are retained.
+
+Computation and time base
+- Use the member timestamp indicated by `ldes:timestampPath` to compare with the current time minus durations.
+- If `ldes:versionTimestampPath` is set, evaluate `ldes:versionDuration` and `ldes:versionDeleteDuration` against that version timestamp.
+- Servers SHOULD account for small clock skew by using a safety buffer when computing which members fall outside the window.
+
+Publishing changes and server behavior
+- When compaction removes members or whole nodes from a view, update the search tree so that no relations point to removed nodes.
+- For nodes that are no longer available, respond with `410 Gone`. Clients will treat such a page as having no members and no relations.
+- Do not modify the content of immutable pages; instead, stop linking to them, redirect, or make them `410 Gone`.
+- Keep relation semantics consistent: if you publish lower/upper bounds to a node, ensure the window described by the relations still matches the members after compaction.
+
+<div class="example" highlight="turtle">
+Sliding full history for one year, plus version constraints
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a ldes:EventSource ;
+   ldes:retentionPolicy [
+     ldes:fullLogDuration "P1Y"^^xsd:duration ;
+     ldes:versionAmount 1 ;
+     ldes:versionDeleteDuration "P1Y"^^xsd:duration
+   ] .
+```
+</div>
+
+<div class="example" highlight="turtle">
+Point-in-time start and version window
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a ldes:EventSource ;
+   ldes:retentionPolicy [
+     ldes:startingFrom "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+     ldes:versionAmount 3 ;
+     ldes:versionDuration "P90D"^^xsd:duration
+   ] .
+```
+</div>
+
+Notes
+- Changing a retention policy affects client expectations; keep the policy in sync with the actual availability of members.
+- Historical, more specific policy classes (`ldes:DurationAgoPolicy`, `ldes:LatestVersionSubset`, `ldes:PointInTimePolicy`) SHOULD remain supported for backward compatibility but are discouraged in favor of `ldes:retentionPolicy` with the properties above.
 
 ## Rebalancing the search tree ## {#rebalancing}
 
