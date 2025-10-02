@@ -44,7 +44,7 @@ For features and how a client would interpret them, see [the main spec](https://
 
 Using `tree:viewDescription` on the root node, you MAY also link to an entity (embedded in the same page) that contains the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful for example if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. Implicitely, the `tree:viewDescription` points to the root node.
 
-# Paginating your event stream ## {#paginating}
+# Paginating your event stream # {#paginating}
 
 Instead of a 1 or 2 dimensional pagination, in TREE/LDES we allow you to describe the relations you want and you can build the search tree you want. We however recommend the following:
  * You SHOULD set the chronological order of your event stream using `ldes:timestampPath`. Other properties such as `ldes:sequencePath` MAY be used as an addition, or as an alternative. In the latter case, the ordering will be incremental based on the ordering of the xsd-literal.
@@ -75,7 +75,7 @@ ex:eventstream a ldes:EventStream ;
 
 The object of `tree:member` MUST be an IRI. This IRI MUST be chosen in a way that no other member IRI can ever conflict with it.
 
-In case you want to add a member to multiple pages, this MUST be done atomically.
+In case you want to add a member to multiple pages, this MUST be done atomically. This is t oprevent a client would encounter a member again on a separate synchronization run.
 
 ## Transactions ## {#transactions}
 

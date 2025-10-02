@@ -48,7 +48,7 @@ The **root node** and any **subsequent node** will contain members and relations
 
 A `tree:Node` is considered **immutable**, when re-fetching it will not result in new members.
 
-Issue: Let’s introduce a drawing to show the search tree design.
+<img src="searchtree.svg" alt="A search tree visualization">
 
 An LDES has a **chronological order** that is the order of the members as they appear in the log. This is also the default order followed by the versions. A more specific **version order** can be set though, in which versions will not appear in the same order as their intended meaning (for example, version 2 might be published chronologically before version 1).
 
