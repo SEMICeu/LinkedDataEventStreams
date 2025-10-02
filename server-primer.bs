@@ -88,9 +88,11 @@ ex:eventstream a ldes:EventStream ;
     ldes:versionOfPath ex:versionOf .
 ```
 
-The object of `tree:member` MUST be an IRI. This IRI MUST be chosen such that no other member IRI can ever conflict with it.
+The object of `tree:member` MUST be an IRI that identifies an immutable concept.
 
-If you add a member to multiple pages, this MUST be done atomically. This is to prevent a client from encountering a member again on a separate synchronization run.
+Note: To ensure immutability, the IRI should reference a resource that cannot change over time. A common approach is to include a timestamp, hash or version identifier in the IRI, so that each IRI corresponds to a specific, unalterable state or event.
+
+If you add a member to multiple pages, this MUST be done atomically. This ensures that a client’s synchronization run is reliable: members emitted in the current run will not be newly encountered in future runs. This atomicity is a precondition for clients to safely forget parts of the log, as those members cannot be encountered again once the pages the members were encountered in become immutable.
 
 If you reuse the member IRI as a named graph, clients MAY assume the payload of the upsert is in that named graph. Publish consistently so consumers can locate the triples for updates and deletions.
 
