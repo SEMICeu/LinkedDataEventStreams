@@ -190,21 +190,6 @@ A current page `<>` has 0 or more `tree:relation` properties to relations.
 This page MAY also have `ldes:immutable true` attached to it.
 The default value is false. If it is not immutable, this SHOULD NOT be made explicit using a `false` value.
 
-### Immutability and Caching ### {#immutability}
-
-- When a page becomes immutable, set `ldes:immutable true` in RDF and return `Cache-Control: immutable` at the HTTP level.
-- Do not add or remove members from immutable pages. If a page needs correction, publish a new page and update relations.
-- Return `ETag` for all pages; keep the `ETag` stable for identical content.
-
-### HTTP Status Codes ### {#status-codes}
-
-- `200 OK`: for successful node retrieval.
-- `301/302`: MAY be used to redirect to a moved node.
-- `304 Not Modified`: SHOULD be used with `If-None-Match` and `ETag`.
-- `410 Gone`: use when a previously published node is permanently removed; respond with an empty set of relations and members.
-- `429 Too Many Requests`: use for overload, optionally with `Retry-After`.
-- `5xx`: use appropriately for server errors.
-
 ## Relations ## {#relations}
 
 Relations in LDES are used to describe how pages or nodes are connected within the event stream. Each relation is represented using the `tree:relation` property and SHOULD specify its type and relevant properties.
@@ -216,9 +201,3 @@ In case it is typed a `tree:GreaterThanRelation`, `tree:LessThanRelation`, `tree
 For chronological views, you SHOULD use the same `tree:path` as the `ldes:timestampPath`. For time windows, publish both lower- and upper-bound relations to the same node; clients combine relations to the same node using logical AND. Avoid orphan relations and overlapping intervals that cause ambiguous traversal.
 
 If a relation type isn’t understood by clients (e.g., a geospatial relation), provide an ordering-compatible path elsewhere so ordered clients can still discover early members.
-
-### Versioning and Transactions (Producer Guidance) ### {#producer-versioning}
-
-- If you publish versioned members, set `ldes:versionOfPath` and, when applicable, publish create/update/delete markers using `ldes:versionCreatePath`/`Object`, `ldes:versionUpdatePath`/`Object`, and `ldes:versionDeletePath`/`Object`.
-- If versions are published out of chronological order, also set `ldes:versionTimestampPath` and optionally `ldes:versionSequencePath` to define the intended version order.
-- If members participate in transactions, set `ldes:transactionPath` and indicate completion via `ldes:transactionFinalizedPath` and `ldes:transactionFinalizedObject`.
