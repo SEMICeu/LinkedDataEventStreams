@@ -42,7 +42,7 @@ If the server is overloaded, it MUST provide a `429 Too Many Requests`. The clie
 On the first page (root node), you MUST include context information about the LDES and this particular root node of the LDES.
 For features and how a client would interpret them, see [the main spec](https://w3id.org/ldes/specification).
 
-Using `tree:viewDescription` on the root node, you MAY also link to an entity (embedded in the same page) that contains the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful, for example, if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`. Implicitly, the `tree:viewDescription` describes the current page.
+Using `tree:viewDescription` on the root node, you MAY also link to an entity (embedded in the same page) that contains the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful, for example, if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`.
 
 Recommended context properties on the `ldes:EventStream`:
 - `ldes:timestampPath` (chronological order)
@@ -63,8 +63,6 @@ Instead of a one- or two-dimensional pagination scheme, TREE/LDES lets you descr
  * All `xsd:dateTime` literals you publish SHOULD come with a timezone.
 
 Every `tree:Node` MAY contain zero or more members and MAY contain zero or more relations.
-
-You MUST ensure your nodes validate according to the application profile.
 
 ## Entry Points and Discovery ## {#entry-points}
 
