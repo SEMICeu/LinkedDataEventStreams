@@ -316,7 +316,7 @@ Using the property `tree:shape` on the LDES, a [[!SHACL]] `sh:NodeShape` can be 
 
 Note: This can be used by a client looking for specific members across multiple LDESs that wants to extend the initialization phase with a discovery or source selection phase. 
 
-When building a processor to validate the members of an LDES, the validator MUST ignore the target selection in the SHACL shapes, and instead MUST attach each `tree:member` object to the `sh:NodeShape` linked.
+When building a processor to validate the members of an LDES, the processor MUST pass each `tree:member` object as the target for the given `sh:NodeShape` to the SHACL validator that is being used.
 
 Note: Multiple NodeShapes can be provided using [SHACL logical constraint components](https://www.w3.org/TR/shacl/#core-components-logical).
 
