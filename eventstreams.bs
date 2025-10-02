@@ -289,14 +289,17 @@ The client MUST extract context about the LDES, as well as about the service tha
 <div class="example" highlight="turtle">
 A client must be able to handle context information on the LDES, on the root node, or in a view description:
 ```turtle
+# event stream level context information
 <ES> a ldes:EventStream ;
     ldes:timestampPath dcterms:created ;
     tree:view <> .
 # Using a view description is optional for producers
-<> tree:viewDescription [
-    ldes:retentionPolicy  [
-        # ... see example below
-    ] .
+<> tree:viewDescription <#LatestView> .
+# view-level context information
+<#LatestView> ldes:retentionPolicy  [
+    # ... see example of retention policies below
+] .
+# page-level context information
 <> ldes:immutable true .
 ```
 </div>
