@@ -328,13 +328,13 @@ Consumers can use the LDES version properties to decide what action to take.
 For example, when the consumer understands the members are versioned, it can upsert the members on each update.
 If it understands something was created instead of updated, it can add it into the store without removing statements first, and when a deletion comes in, it knows it can remove the statements associated with the previous insert or upsert.
 To that extent, on the `ldes:EventStream` entity, these properties can be used and are further explained in the vocabulary.
- * [`ldes:versionOfPath`](https://w3id.org/ldes#versionOfPath) - such as `dcterms:isVersionOf` or `as:object`
- * [`ldes:versionDeleteObject`](https://w3id.org/ldes#versionDeleteObject) - such as `as:Delete`
- * [`ldes:versionCreateObject`](https://w3id.org/ldes#versionCreateObject) - such as `as:Create`
- * [`ldes:versionUpdateObject`](https://w3id.org/ldes#versionUpdateObject) - such as `as:Update`
- * [`ldes:versionDeletePath`](https://w3id.org/ldes#versionDeletePath) - defaults to `rdf:type`
- * [`ldes:versionCreatePath`](https://w3id.org/ldes#versionCreatePath) - defaults to `rdf:type`
- * [`ldes:versionUpdatePath`](https://w3id.org/ldes#versionUpdatePath) - defaults to `rdf:type`
+ * [`ldes:versionOfPath`](https://w3id.org/ldes#versionOfPath): such as `dcterms:isVersionOf` or `as:object`
+ * [`ldes:versionDeleteObject`](https://w3id.org/ldes#versionDeleteObject): such as `as:Delete`
+ * [`ldes:versionCreateObject`](https://w3id.org/ldes#versionCreateObject): such as `as:Create`
+ * [`ldes:versionUpdateObject`](https://w3id.org/ldes#versionUpdateObject): such as `as:Update`
+ * [`ldes:versionDeletePath`](https://w3id.org/ldes#versionDeletePath): defaults to `rdf:type`
+ * [`ldes:versionCreatePath`](https://w3id.org/ldes#versionCreatePath): defaults to `rdf:type`
+ * [`ldes:versionUpdatePath`](https://w3id.org/ldes#versionUpdatePath): defaults to `rdf:type`
 
 <div class="example" highlight="turtle">
 Example: Versioned members using `ldes:versionOfPath`, `ldes:versionCreateObject`, `ldes:versionUpdateObject`, and `ldes:versionDeleteObject`:
