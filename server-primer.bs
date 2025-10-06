@@ -61,6 +61,9 @@ Instead of a one- or two-dimensional pagination scheme, TREE/LDES lets you descr
  * Use two relations towards one node, one with the lower bound and another with the upper bound of the time interval it directs to.
  * Start with 1 root node that contains links to member pages. If that gets too large, you can introduce another level.
  * All `xsd:dateTime` literals you publish SHOULD come with a timezone.
+ * You SHOULD use relative IRIs when referring to other pages.
+
+Issue: we should still add examples of how to paginate here.
 
 Every `tree:Node` MAY contain zero or more members and MAY contain zero or more relations.
 
@@ -71,6 +74,8 @@ Publish a stable entry point for clients. Expose either:
 - An `ldes:EventStream` IRI `S` that has exactly one `tree:view` triple pointing to the root node `R`.
 
 Avoid ambiguity by ensuring there is exactly one `tree:view` for the entry point. If you rotate the root node over time, keep `R` stable or use redirects.
+
+Issue: Discovery is yet to be further explained. More input from existing implementations is appreciated through the issue tracker.
 
 ## Members ## {#members}
 
