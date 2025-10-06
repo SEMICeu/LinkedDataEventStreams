@@ -1,0 +1,32 @@
+name: LDES Vocabulary Build
+
+on:
+  pull_request:
+    paths: ["vocabulary.bs"]
+  push:
+    branches: [main]
+    paths: ["vocabulary.bs"]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Publish Bikeshed document
+        uses: w3c/spec-prod@v2
+        with:
+          TOOLCHAIN: bikeshed
+
+          # Modify as appropriate
+          GH_PAGES_BRANCH: gh-pages
+          # The source file
+          SOURCE: vocabulary.bs
+
+          # output filename defaults to your input
+          # with .html extension instead,
+          # but if you want to customize it:
+          DESTINATION: vocabulary.html

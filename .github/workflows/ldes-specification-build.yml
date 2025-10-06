@@ -1,0 +1,38 @@
+name: LDES Specification Build
+
+on:
+  pull_request:
+    paths: ["eventstreams.bs"]
+  push:
+    branches: [main]
+    paths: ["eventstreams.bs"]
+
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Publish Bikeshed document
+        # You may pin to the exact commit or the version.
+        uses: w3c/spec-prod@v2
+        with:
+          TOOLCHAIN: bikeshed
+
+          # Modify as appropriate
+          GH_PAGES_BRANCH: gh-pages
+          # The source file
+          SOURCE: eventstreams.bs
+
+          # output filename defaults to your input
+          # with .html extension instead,
+          # but if you want to customize it:
+          DESTINATION: index.html
