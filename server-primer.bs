@@ -186,10 +186,6 @@ A server MUST, in that case, provide redirects to a new IRI, such as `2022-rebal
 
 Note: the semantics of `ldes:immutable` are that the members on this page and the relations should not be processed again. The page MAY still be rebalanced later on, or the page can become unavailable on disk (`410 Gone`).
 
-# Status log # {#status-log}
-
-Issue: status log is still undefined
-
 # Validating the pages # {#validating}
 
 This section includes the rules to validate an implementation of a root node and any subsequent node.
