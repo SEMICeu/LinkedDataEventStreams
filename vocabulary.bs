@@ -81,6 +81,20 @@ For out-of-order event streams, this defines the path to an `xsd`-typed literal 
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
+## ldes:pollingInterval ## {#pollingInterval}
+
+The number of seconds the client should keep between synchronization run calls.
+
+**Domain:** `ldes:EventStream`
+**Range:** `xsd:integer`
+
+## ldes:immutable ## {#immutable}
+
+If the node is not going to contain new relations leading to new members, or new members itself, it can be set to immutable.
+
+**Domain:** `tree:Node`
+**Range:** `xsd:boolean`
+
 ## ldes:EventSource ## {#EventSource}
 
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`,
