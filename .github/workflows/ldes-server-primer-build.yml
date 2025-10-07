@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
     paths: ["server-primer.bs"]
+    tags: ["*"]
 
   workflow_dispatch:
 
@@ -30,3 +31,33 @@ jobs:
           # with .html extension instead,
           # but if you want to customize it:
           DESTINATION: server-primer.html
+
+  copy-tag-version:
+    name: Copy tag snapshot
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Copy server-primer snapshot
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          dest="versions/${tag}"
+          mkdir -p "${dest}"
+          cp server-primer.html "${dest}/server-primer.html"
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
+            git config user.name "SEMIC EU archival [bot]"
+            git add "${dest}/server-primer.html"
+            git commit -m "Add server primer snapshot for ${tag}"
+            git push
+          else
+            echo "No changes to commit."

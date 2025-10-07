@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
     paths: ["eventstreams.bs"]
+    tags: ["*"]
 
   workflow_dispatch:
 
@@ -36,3 +37,33 @@ jobs:
           # with .html extension instead,
           # but if you want to customize it:
           DESTINATION: index.html
+
+  copy-tag-version:
+    name: Copy tag snapshot
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Copy spec snapshot
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          dest="versions/${tag}"
+          mkdir -p "${dest}"
+          cp index.html "${dest}/index.html"
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
+            git config user.name "SEMIC EU archival [bot]"
+            git add "${dest}/index.html"
+            git commit -m "Add spec snapshot for ${tag}"
+            git push
+          else
+            echo "No changes to commit."
