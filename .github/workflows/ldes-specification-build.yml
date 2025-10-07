@@ -1,0 +1,69 @@
+name: LDES Specification Build
+
+on:
+  pull_request:
+    paths: ["eventstreams.bs"]
+  push:
+    branches: [main]
+    paths: ["eventstreams.bs"]
+    tags: ["*"]
+
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Publish Bikeshed document
+        # You may pin to the exact commit or the version.
+        uses: w3c/spec-prod@v2
+        with:
+          TOOLCHAIN: bikeshed
+
+          # Modify as appropriate
+          GH_PAGES_BRANCH: gh-pages
+          # The source file
+          SOURCE: eventstreams.bs
+
+          # output filename defaults to your input
+          # with .html extension instead,
+          # but if you want to customize it:
+          DESTINATION: index.html
+
+  copy-tag-version:
+    name: Copy tag snapshot
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Copy spec snapshot
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          dest="versions/${tag}"
+          mkdir -p "${dest}"
+          cp index.html "${dest}/index.html"
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
+            git config user.name "SEMIC EU archival [bot]"
+            git add "${dest}/index.html"
+            git commit -m "Add spec snapshot for ${tag}"
+            git push
+          else
+            echo "No changes to commit."

@@ -166,3 +166,9 @@ ldes:immutable a rdf:Property ;
             rdfs:comment "Re-fetching this tree:Node will not result in new members."@en ;
             rdfs:domain tree:Node ;
             rdfs:range xsd:boolean .
+
+ldes:pollingInterval a rdf:Property ;
+            rdfs:label "Polling Interval"@en ;
+            rdfs:comment "The number of seconds the client should keep between synchronization run calls."@en ;
+            rdfs:domain ldes:EventStream ;
+            rdfs:range xsd:integer .

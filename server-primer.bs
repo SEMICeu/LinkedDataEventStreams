@@ -1,0 +1,265 @@
+<pre class='metadata'>
+Title: LDES Server Primer
+Shortname: LDES-SERVER
+Level: 1
+Status: LD
+URL: https://w3id.org/ldes/server-primer
+Markup Shorthands: markdown yes
+Editor: Pieter Colpaert, https://pietercolpaert.be
+Repository: https://github.com/SEMICeu/LinkedDataEventStreams
+Abstract: This Server Primer for Linked Data Event Streams (LDES) provides practical guidance for data publishers on implementing and hosting an LDES server. LDES aims to help publishers balance between offering rich querying APIs and simple data dumps by proposing an event stream as the base API. This primer focuses on lightweight, scalable approaches and best practices for setting up and maintaining an LDES server.
+</pre>
+
+# Introduction # {#introduction}
+
+This server primer is a living document of derived normative rules based on [the main consumer-oriented LDES specification](https://w3id.org/ldes/specification) and the [W3C TREE hypermedia specification](https://w3id.org/tree/specification).
+
+A Linked Data Event Stream (LDES) is an append-only log consisting of *immutable* members. The term “member” could also be interpreted as “event”, “activity”, “observation”, “record”, or “immutable entity”. For example, “an observation states that at this timestamp a specific sensor observed 5°C”. However, since LDES extends the W3C TREE hypermedia specification, we use the term “member” for consistency.
+
+<img height="500" src="overview.svg" alt="An overview of the LDES specification.">
+
+# Serializations and HTTP Responses # {#serializations}
+
+A server MUST provide data in either [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]] or [[!json-ld]]. 
+It MAY also provide multiple serializations using content negotiation.
+
+Note: When using content negotiation, set `Vary: Accept`.
+
+It SHOULD provide an `ETag` header on responses. If the page is immutable, it SHOULD provide a `Cache-Control: immutable` header.
+
+If [[!json-ld]] is used, there is an example context at https://w3id.org/ldes/context. 
+Do not reference this URL directly in production; copy it into your project. 
+If you host an external context yourself, ensure robust caching with the `ETag` and/or `Cache-Control` max-age headers.
+
+A provider SHOULD implement the [TREE Profile specification](https://w3id.org/tree/specification/profile) for performance. In this case, you MUST order members chronologically in the page (i.e., append the members to the file as you go).
+
+Issue: We will try to generalize this in the future so that we can also integrate with [Jelly](https://jelly-rdf.github.io/dev). This binary serialization has the potential to raise performance drastically.
+
+If the server is overloaded, it MUST provide a `429 Too Many Requests`. The client will then retry later.
+
+# Context Information # {#context-information}
+
+On the first page (root node), you MUST include context information about the LDES and this particular root node of the LDES.
+For features and how a client would interpret them, see [the main spec](https://w3id.org/ldes/specification).
+
+Using `tree:viewDescription` on the root node, you MAY also link to an entity (embedded in the same page) that contains the retention policy, or other context data about this view of the LDES (e.g., the `dcat:Distribution`, the `tree:SearchTree`, or the `ldes:EventSource`) as a named entity. This is useful, for example, if a producer would like to disambiguate the IRI for the `ldes:EventSource` from the root `tree:Node`.
+
+Recommended context properties on the `ldes:EventStream`:
+- `ldes:timestampPath`:chronological order
+- `ldes:sequencePath`: tie-breaking or alternative order
+- `ldes:pollingInterval`: expected seconds between new members
+- `tree:shape`: SHACL node shape for members. If the `sh:NodeShape` changes, it should remain backwards compatible to avoid breaking existing consumers. If a backwards-incompatible change is needed (such as changing your dataset to a different vocabulary), it should be published as a new event stream, ensuring older streams continue to function as expected.
+- Versioning: `ldes:versionOfPath`, optional create/update/delete paths and objects
+- Out-of-order versioning: `ldes:versionTimestampPath`, `ldes:versionSequencePath`
+- Transactions (optional): `ldes:transactionPath`, `ldes:transactionFinalizedPath`, `ldes:transactionFinalizedObject`
+
+# Paginating Your Event Stream # {#paginating}
+
+Instead of a one- or two-dimensional pagination scheme, TREE/LDES lets you describe the relations you want and build the search tree you need. We recommend the following:
+ * You SHOULD set the chronological order of your event stream using `ldes:timestampPath`. Other properties such as `ldes:sequencePath` MAY be used as an addition, or as an alternative. In the latter case, the ordering will be incremental based on the ordering of the XSD literal.
+ * You SHOULD use the same `tree:path` in your relations as in your `ldes:timestampPath`. This way, a client knows you structured your search tree according to chronological order.
+ * Use two relations towards one node, one with the lower bound and another with the upper bound of the time interval it directs to.
+ * Start with 1 root node that contains links to member pages. If that gets too large, you can introduce another level.
+ * All `xsd:dateTime` literals you publish SHOULD come with a timezone.
+ * You SHOULD use relative IRIs when referring to other pages.
+
+Issue: we should still add examples of how to paginate here.
+
+Every `tree:Node` MAY contain zero or more members and MAY contain zero or more relations.
+
+## Entry Points and Discovery ## {#entry-points}
+
+Publish a stable entry point for clients. Expose either:
+- A page where the `ldes:EventStream` IRI `S` links with `tree:view <>` to the current page; or
+- An `ldes:EventStream` IRI `S` that has exactly one `tree:view` triple pointing to the root node `R`.
+
+Avoid ambiguity by ensuring there is exactly one `tree:view` for the entry point. If you rotate the root node over time, keep `R` stable or use redirects.
+
+Issue: Discovery is yet to be further explained. More input from existing implementations is appreciated through the issue tracker.
+
+## Members ## {#members}
+
+Members MUST be linked from the event stream identifier using `tree:member`. For example:
+
+<div class="example" highlight="turtle">
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix ex: <http://example.org/> .
+
+ex:eventstream a ldes:EventStream ;
+    tree:view <> ;
+    tree:member ex:member1, ex:member2 ;
+    ldes:timestampPath ex:createdAt ;
+    ldes:versionOfPath ex:versionOf .
+```
+</div>
+
+The object of `tree:member` MUST be an IRI that identifies an immutable concept.
+
+Note: To ensure immutability, the IRI should reference a resource that cannot change over time. A common approach is to include a timestamp, hash or version identifier in the IRI, so that each IRI corresponds to a specific, unalterable state or event.
+
+If you add a member to multiple pages, this MUST be done atomically. This ensures that a client’s synchronization run is reliable: members emitted in the current run will not be newly encountered in future runs. This atomicity is a precondition for clients to safely forget parts of the log, as those members cannot be encountered again once the pages the members were encountered in become immutable.
+
+If you reuse the member IRI as a named graph, clients MAY assume the payload of the upsert is in that named graph. Publish consistently so consumers can locate the triples for updates and deletions.
+
+## Transactions ## {#transactions}
+
+If you want to flag that certain members must be processed together (e.g., a large deletion operation), you can model transactions:
+- Set `ldes:transactionPath` to identify the transaction (literal or IRI).
+- Set `ldes:transactionFinalizedPath` whose object indicates the transaction is finalized.
+- Optionally set `ldes:transactionFinalizedObject` to the value that denotes finalization (defaults to `"true"^^xsd:boolean`).
+
+Producers SHOULD ensure the member that finalizes the transaction has an equal or later `ldes:timestampPath`/`ldes:sequencePath` than preceding transaction members so ordered clients can emit it last.
+
+# Scaling # {#scaling}
+
+Next to optimizations such as using a binary format such as [Jelly](https://jelly-rdf.github.io), or manually creating an aggregated summary LDES as a derived LDES, there are also two other tools one can use for scaling up.
+
+## Compacting your log with a retention policy ## {#log-compaction}
+
+Retention policies enable servers to compact their logs while keeping client expectations clear. By declaring a retention policy on the root node (or via a `tree:viewDescription` entity linked from the root), producers communicate what portion of the event history is still available from this view. Clients will assume they cannot retrieve members outside the declared policy window.
+
+Where to publish and cardinality
+- Publish the retention policy at the root node using `ldes:retentionPolicy` (0..1), or at an entity referenced from the root via `tree:viewDescription` with its own `ldes:retentionPolicy`.
+- If `ldes:retentionPolicy` points to an IRI with no further statements in the current page, clients will assume no members are retained from this view.
+
+Supported policy properties
+- `ldes:startingFrom` (`xsd:dateTime` with timezone): Earliest timestamp of retained members for this view.
+- `ldes:fullLogDuration` (`xsd:duration`): Duration from the current time for which all members are retained. Used to express a sliding full-history window.
+- `ldes:versionAmount` (`xsd:integer` > 0): Number of versions retained per entity.
+- `ldes:versionDuration` (`xsd:duration`): Duration from the current time for which up to `ldes:versionAmount` versions are retained.
+- `ldes:versionDeleteDuration` (`xsd:duration`): Duration from the current time for which delete events are retained.
+
+Computation and time base
+- Use the member timestamp indicated by `ldes:timestampPath` to compare with the current time minus durations.
+- If `ldes:versionTimestampPath` is set, evaluate `ldes:versionDuration` and `ldes:versionDeleteDuration` against that version timestamp.
+- Servers SHOULD account for small clock skew by using a safety buffer when computing which members fall outside the window.
+
+Publishing changes and server behavior
+- When compaction removes members or whole nodes from a view, update the search tree so that no relations point to removed nodes.
+- For nodes that are no longer available, respond with `410 Gone`. Clients will treat such a page as having no members and no relations.
+- Do not modify the content of immutable pages; instead, stop linking to them, redirect, or make them `410 Gone`.
+- Keep relation semantics consistent: if you publish lower/upper bounds to a node, ensure the window described by the relations still matches the members after compaction.
+
+<div class="example" highlight="turtle">
+Sliding full history for one year, plus version constraints
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a ldes:EventSource ;
+   ldes:retentionPolicy [
+     ldes:fullLogDuration "P1Y"^^xsd:duration ;
+     ldes:versionAmount 1 ;
+     ldes:versionDeleteDuration "P1Y"^^xsd:duration
+   ] .
+```
+</div>
+
+<div class="example" highlight="turtle">
+Point-in-time start and version window
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a ldes:EventSource ;
+   ldes:retentionPolicy [
+     ldes:startingFrom "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+     ldes:versionAmount 3 ;
+     ldes:versionDuration "P90D"^^xsd:duration
+   ] .
+```
+</div>
+
+Notes
+- Changing a retention policy affects client expectations; keep the policy in sync with the actual availability of members.
+- Historical, more specific policy classes (`ldes:DurationAgoPolicy`, `ldes:LatestVersionSubset`, `ldes:PointInTimePolicy`) SHOULD remain supported for backward compatibility but are discouraged in favor of `ldes:retentionPolicy` with the properties above.
+
+## Rebalancing the search tree ## {#rebalancing}
+
+Rebalancing a search tree of an LDES is interesting for old immutable pages as most clients are going to be interested in the full history anyway. Compression becomes much more efficient on bigger pages, and thus less data will need to be transferred over the wire, saving bandwidth.
+
+Rebalancing is tricky though, because a client might get stuck in edge cases when it is just replicating the datasets while the rebalancing is happening, and also a server cache might still have a copy of all or some of your immutable pages.
+
+As a running example, imagine a client is synchronizing a day-page `2022-05-02` but then all pages under `2022` are getting merged into one.
+
+A server MUST, in that case, provide redirects to a new IRI, such as `2022-rebalanced`, from all old pages, including the page `2022` to `2022-rebalanced`.
+
+Note: the semantics of `ldes:immutable` are that the members on this page and the relations should not be processed again. The page MAY still be rebalanced later on, or the page can become unavailable on disk (`410 Gone`).
+
+# Validating the pages # {#validating}
+
+This section includes the rules to validate an implementation of a root node and any subsequent node.
+
+Issue: we still need to build the SHACL shapes here.
+
+Issue: we still need an UML image here.
+
+## For the Root Node ## {#rootnode}
+
+A root node MUST link the event stream to the view using the `tree:view` property.
+
+A root node MUST contain context information about the LDES. All these properties in the domain of the event stream have a cardinality of 0 or 1:
+- `ldes:timestampPath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:sequencePath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionOfPath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionTimestampPath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionSequencePath` : points to a SHACL property path (an rdf:List or an IRI)
+- `tree:shape`: point to a `sh:NodeShape`.
+- `ldes:versionCreatePath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionUpdatePath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionDeletePath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionCreateObject`
+- `ldes:versionUpdateObject`
+- `ldes:versionDeleteObject`
+- `ldes:transactionPath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:transactionFinalizedPath`: points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:transactionFinalizedObject`
+
+A root node MUST contain context information about this particular entry point:
+- `ldes:retentionPolicy` 0 or 1. Although in older versions of the spec multiple were allowed.
+- `tree:viewDescription` 0 or 1.
+
+### For the Retention policies ### {#retention-policies}
+
+A root node MUST contain at most one `ldes:retentionPolicy` property (cardinality: 0..1).  
+The value of `ldes:retentionPolicy` MUST be an IRI referring to a retention policy description.
+
+A retention policy description MAY contain the following properties, each with cardinality 0 or 1:
+
+- `ldes:startingFrom` (0..1) If present, this property MUST be a `xsd:dateTime` literal indicating the earliest timestamp for retained members.
+
+- `ldes:fullLogDuration` (0..1) If present, this property MUST be a duration literal specifying the time window for which all members are retained.
+
+- `ldes:versionAmount` (0..1) If present, this property MUST be an integer literal specifying the number of versions to retain per entity.
+
+- `ldes:versionDuration` (0..1) If present, this property MUST be a duration literal specifying the time window for which versions are retained.
+
+- `ldes:versionDeleteDuration` (0..1) If present, this property MUST be a duration literal specifying the time window for which deletions are retained.
+
+## Root Node and Subsequent Nodes ## {#nodes}
+
+On the event stream, 0 or more `tree:member` triples are provided. The objects MUST be IRIs.
+
+A `tree:view` triple MAY be present on the event stream to the current page `<>`.
+
+A current page `<>` has 0 or more `tree:relation` properties to relations.
+
+This page MAY also have `ldes:immutable true` attached to it.
+The default value is false. If it is not immutable, this SHOULD NOT be made explicit using a `false` value.
+
+## Relations ## {#relations}
+
+Relations in LDES are used to describe how pages or nodes are connected within the event stream. Each relation is represented using the `tree:relation` property and SHOULD specify its type and relevant properties.
+
+On all relations, exactly one `tree:node` MUST be present. The object MUST be an IRI.
+
+In case it is typed a `tree:GreaterThanRelation`, `tree:LessThanRelation`, `tree:EqualToRelation`, `tree:LessThanOrEqualToRelation`, or `tree:GreaterThanOrEqualToRelation`, each of these relations MUST specify exactly one `tree:path` (a [[!SHACL]] path) and `tree:value`.
+
+For chronological views, you SHOULD use the same `tree:path` as the `ldes:timestampPath`. For time windows, publish both lower- and upper-bound relations to the same node; clients combine relations to the same node using logical AND. Avoid orphan relations and overlapping intervals that cause ambiguous traversal.
+
+If a relation type isn’t understood by clients (e.g., a geospatial relation), provide an ordering-compatible path elsewhere so ordered clients can still discover early members.

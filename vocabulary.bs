@@ -1,0 +1,205 @@
+<pre class='metadata'>
+Title: Linked Data Event Streams Vocabulary
+Shortname: LDES Vocabulary
+Level: 1
+Status: LS
+URL: https://w3id.org/ldes
+Markup Shorthands: markdown yes
+Editor: Pieter Colpaert, https://pietercolpaert.be
+Repository: https://github.com/SEMICeu/LinkedDataEventStreams
+Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary, which provides terms for describing append-only, immutable collections of events as Linked Data. The vocabulary extends existing standards such as the TREE and DCAT vocabularies to support event streams, versioning, retention policies, and transactional semantics.
+</pre>
+
+# Introduction # {#introduction}
+
+This specification introduces terms used to describe event streams.
+While these terms can be used independently of the LDES specification,
+the main LDES specification is available at [https://w3id.org/ldes/specification](https://w3id.org/ldes/specification).
+
+# Terms # {#terms}
+
+This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.
+There is also a [Turtle version available](https://w3id.org/ldes.ttl).
+
+Used prefixes are:
+
+```turtle
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+```
+
+## ldes:EventStream ## {#EventStream}
+
+The class `ldes:EventStream` is a subclass of `tree:Collection`, which in turn is a subclass of `dcat:Dataset`,
+specialized such that all members are immutable, making the collection append-only.
+
+## ldes:timestampPath ## {#timestampPath}
+
+The path to the `xsd:dateTime` literal in each member that defines the order of the event stream.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:sequencePath ## {#sequencePath}
+
+The path to an `xsd`-typed literal in each member that defines the order of the event stream in addition to the `ldes:timestampPath`.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+
+## ldes:versionOfPath ## {#versionOfPath}
+
+The path to the IRI in each member that defines the entity of which this member is a version.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+
+## ldes:versionTimestampPath ## {#versionTimestampPath}
+
+For out-of-order event streams, this defines the path to the `xsd:dateTime` literal in each member that defines the order of versioned members.
+
+Only relevant when the `ldes:versionOfPath` has been set.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:versionSequencePath ## {#versionSequencePath}
+
+For out-of-order event streams, this defines the path to an `xsd`-typed literal in each member that defines the order of the event stream in addition to the `ldes:versionTimestampPath`.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:pollingInterval ## {#pollingInterval}
+
+The number of seconds the client should keep between synchronization run calls.
+
+**Domain:** `ldes:EventStream`
+**Range:** `xsd:integer`
+
+## ldes:immutable ## {#immutable}
+
+If the node is not going to contain new relations leading to new members, or new members itself, it can be set to immutable.
+
+**Domain:** `tree:Node`
+**Range:** `xsd:boolean`
+
+## ldes:EventSource ## {#EventSource}
+
+The class `ldes:EventSource` is a subclass of `dcat:Distribution`,
+specialized to represent a feed that uses a chronological search tree to make a Linked Data Event Stream available in order.
+
+An `ldes:EventSource` can only be published for LDESs that have `ldes:timestampPath` set, and thus publishes its entities in chronological order.
+
+## ldes:retentionPolicy ## {#retentionPolicy}
+
+Links to a retention policy.
+
+**Domain:** Preferably on the root node. Alternatively, it can occur on any entity linked from the root node using `tree:viewDescription`.
+
+**Range:** `ldes:RetentionPolicy`
+
+## ldes:RetentionPolicy ## {#RetentionPolicy}
+
+The class for a retention policy that indicates how long members are preserved in this view.
+
+### ldes:startingFrom ### {#startingFrom}
+
+The view only keeps members starting from a certain timestamp.
+
+**Domain:** `ldes:RetentionPolicy`
+
+**Range:** `xsd:dateTime` with a timezone
+
+### ldes:versionDuration ### {#versionDuration}
+
+The view keeps versions (for which `ldes:versionAmount` MUST be set) only for a specific time window. 
+
+**Domain:** `ldes:RetentionPolicy`
+
+**Range:** `xsd:duration`
+
+### ldes:versionAmount ### {#versionAmount}
+
+The number of versions to keep. This MUST be greater than 0.
+
+**Domain:** `ldes:RetentionPolicy`
+
+**Range:** `xsd:integer`
+
+### ldes:versionDeleteDuration ### {#versionDeleteDuration}
+
+The view only keeps its deletions for a certain duration.
+
+**Domain:** `ldes:RetentionPolicy`
+
+**Range:** `xsd:duration`
+
+### ldes:fullLogDuration ### {#fullLogDuration}
+
+The view keeps its full log for a certain duration.
+
+**Domain:** `ldes:RetentionPolicy`
+
+**Range:** `xsd:duration`
+
+### Former retention policy terms ### {#former-retentionpolicies}
+
+ * `ldes:DurationAgoPolicy`: A retention policy class that uses an `xsd:duration` literal to document a sliding window of data.
+ * `ldes:LatestVersionSubset`: A retention policy class that selects a number of versions based on `ldes:versionOfPath`.
+ * `ldes:amount`: The number of versions to keep. This MUST be a number greater than 0.
+     - Domain: `ldes:LatestVersionSubset`
+     - Range: `xsd:integer`
+ * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting from a certain point in time.
+ * `ldes:pointInTime`: The point in time from which members will be available starting from this root node.
+     - Domain: `ldes:PointInTimePolicy`
+     - Range: `xsd:dateTime` including an explicit timezone
+
+## Terms for versioning and transactions on top of ldes:EventStream ## {#versioning-transactions}
+
+### ldes:versionCreatePath ### {#versionCreatePath}
+
+Path whose object indicates that the member represents a create. Defaults to `rdf:type`.
+
+### ldes:versionUpdatePath ### {#versionUpdatePath}
+
+Path whose object indicates that the member represents an update. Defaults to `rdf:type`.
+
+### ldes:versionDeletePath ### {#versionDeletePath}
+
+Path whose object indicates that the member represents a delete. Defaults to `rdf:type`.
+
+### ldes:versionCreateObject ### {#versionCreateObject}
+
+If the object at `ldes:versionCreatePath` equals this value, the member represents a create.
+
+### ldes:versionUpdateObject ### {#versionUpdateObject}
+
+If the object at `ldes:versionUpdatePath` equals this value, the member represents an update.
+
+### ldes:versionDeleteObject ### {#versionDeleteObject}
+
+If the object at `ldes:versionDeletePath` equals this value, the member represents a delete.
+
+### ldes:transactionPath ### {#transactionPath}
+
+Path whose object indicates whether the member is part of a transaction.
+
+### ldes:transactionFinalizedPath ### {#transactionFinalizedPath}
+
+Path indicating whether the transaction has been finalized.
+
+### ldes:transactionFinalizedObject ### {#transactionFinalizedObject}
+
+If the object at `ldes:transactionFinalizedPath` equals this value, the member indicates the transaction has been finalized.
