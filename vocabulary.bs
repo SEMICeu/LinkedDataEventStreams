@@ -16,6 +16,11 @@ This specification introduces terms used to describe event streams.
 While these terms can be used independently of the LDES specification,
 the main LDES specification is available at [https://w3id.org/ldes/specification](https://w3id.org/ldes/specification).
 
+<figure id="fig-ldes-model">
+ <img src="uml.svg" alt="LDES model diagram">
+ <figcaption>LDES model diagram (<a href="uml.puml">source</a>)</figcaption>
+</figure>
+
 # Terms # {#terms}
 
 This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.
