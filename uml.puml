@@ -12,7 +12,6 @@ class "tree::Relation" {
  
 class "tree::Node" {
  + ldes:immutable : boolean
- + ldes:viewDescription
 }
  
 class "tree::Collection" {
@@ -22,8 +21,10 @@ class "tree::Collection" {
 class "sh::NodeShape"
  
 class "dcat::Distribution"
- 
-class "hydra::IriTemplate"
+
+class "dcat::DataService"
+
+class "tree::SearchTree"
  
 class "ldes::RetentionPolicy" {
  + ldes:fullLogDuration
@@ -58,12 +59,16 @@ class "ldes::EventSource" {
 ' Relationships
 ' ===================
  
+"tree::Node" --> "tree::SearchTree" : tree:viewDescription
+"tree::Node" --> "dcat::Distribution" : tree:viewDescription
+"tree::Node" --> "dcat::DataService" : tree:viewDescription
+"tree::Node" --> "ldes::RetentionPolicy" : ldes:retentionPolicy
+"tree::Node" --> "tree::Relation" : tree:relation
 "tree::Relation" --> "tree::Node" : tree:node
-"tree::Node" --> "tree::Collection" : tree:view
-"tree::Collection" --> "tree::Node" : tree:shape
+"tree::Collection" --> "tree::Node" : tree:view
+"tree::Collection" --> "sh::NodeShape" : tree:shape
+"tree::Collection" <|-- "ldes::EventStream"
 "dcat::Distribution" <|-- "ldes::EventSource"
-"ldes::EventSource" --> "ldes::EventStream" : tree:viewDescription
-"ldes::EventStream" --> "ldes::RetentionPolicy" : ldes:retentionPolicy
-"tree::Relation" --> "hydra::IriTemplate" : hydra:iriTemplate
- 
+"ldes::EventStream" --> "ldes::EventSource" : tree:viewDescription
+
 @enduml
