@@ -435,7 +435,7 @@ When using the current time in calculations, the consumer MUST take into account
 The `ldes:timestampPath` points to the timestamp in the member that can be compared with the current time minus the durations.
 When the `ldes:versionTimestampPath` has been set, the two version durations must be compared with this timestamp.
 
-Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favour of the retention policy design just introduced.
+Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favor of the retention policy design just introduced.
 These retention policy types are:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
