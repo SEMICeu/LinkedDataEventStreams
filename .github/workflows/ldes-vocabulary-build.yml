@@ -13,9 +13,47 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML jar
+        run: curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
+      # Optionally check the SHA256 checksum to avoid corrupt downloads
+      # - name: Verify PlantUML jar checksum
+      #   run: echo "<expected_sha256_here>  plantuml.jar" | sha256sum -c -
+
+      - name: Render .puml to .svg
+        run: |
+          find . -name '*.puml' -exec java -jar plantuml.jar -tsvg -o . {} +
+
+      - name: Commit rendered diagrams
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.svg
+
+          if git diff --cached --quiet; then
+            echo "No diagram changes to commit."
+          else
+            git commit -m "auto-rendered PlantUML diagrams"
+            git push
+          fi
+          rm -f plantuml.jar || true
 
       - name: Publish Bikeshed document
         uses: w3c/spec-prod@v2
