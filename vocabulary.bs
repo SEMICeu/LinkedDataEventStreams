@@ -16,11 +16,6 @@ This specification introduces terms used to describe event streams.
 While these terms can be used independently of the LDES specification,
 the main LDES specification is available at [https://w3id.org/ldes/specification](https://w3id.org/ldes/specification).
 
-<figure id="fig-ldes-model">
- <img src="uml.svg" alt="LDES model diagram">
- <figcaption>LDES model diagram (<a href="uml.puml">source</a>)</figcaption>
-</figure>
-
 # Terms # {#terms}
 
 This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.
@@ -29,11 +24,11 @@ There is also a [Turtle version available](https://w3id.org/ldes.ttl).
 Used prefixes are:
 
 ```turtle
-@prefix dct: <http://purl.org/dc/terms/> .
 @prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+@prefix dct: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tree: <https://w3id.org/tree#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 ```
 
@@ -105,7 +100,7 @@ If the node is not going to contain new relations leading to new members, or new
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`,
 specialized to represent a feed that uses a chronological search tree to make a Linked Data Event Stream available in order.
 
-An `ldes:EventSource` can only be published for `ldes:EventStream` that have `ldes:timestampPath` set, and thus publishes its entities in chronological order.
+An `ldes:EventSource` can only be published for LDESs that have `ldes:timestampPath` set, and thus publishes its entities in chronological order.
 
 ## ldes:retentionPolicy ## {#retentionPolicy}
 
