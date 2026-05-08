@@ -22,7 +22,7 @@ Install [bikeshed](https://tabatkins.github.io/bikeshed/) and then run `bikeshed
 
 The `master` branch is published to the `workingdraft/` folder on the `gh-pages` branch. The documents in that folder reflect the current state of `master` and use release-local links such as `context.jsonld`, `vocabulary.html`, and `server-primer.html`.
 
-Tagged versions are published under `releases/<tag>/`. Each release contains a snapshot of the generated specification, vocabulary, server primer, JSON-LD context, vocabulary Turtle file, and shared assets. The root files on `gh-pages` redirect to the latest tagged release, while root `context.jsonld` and `vocabulary.ttl` are symlinks to the latest release copies.
+Official releases are done by the SEMIC team by creating a tag. Tagged versions are published under `releases/<tag>/`. Each release contains a snapshot of the generated specification, vocabulary, server primer, JSON-LD context, vocabulary Turtle file, and shared assets. The root files on `gh-pages` redirect to the latest tagged release, while root `context.jsonld` and `vocabulary.ttl` are symlinks to the latest release copies.
 
 ## Contributions
 
