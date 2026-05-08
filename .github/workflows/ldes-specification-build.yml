@@ -141,7 +141,7 @@ jobs:
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>LDES releases</title>
+            <title>Releases</title>
             <style>
               body {
                 color: #1f1f1f;
