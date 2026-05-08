@@ -51,6 +51,18 @@
       max-width: 154px;
     }
 
+    .ldes-document-logo {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .ldes-document-logo img {
+      display: block;
+      height: auto;
+      margin: 0 auto;
+      max-width: 180px;
+    }
+
     .head dl {
       margin-top: 1rem;
     }

@@ -23,6 +23,10 @@ This specification introduces terms used to describe event streams.
 While these terms can be used independently of the LDES specification,
 the [main LDES specification](index.html) is available in this release.
 
+<p class="ldes-document-logo">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+</p>
+
 # Terms # {#terms}
 
 This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.

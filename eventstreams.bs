@@ -30,6 +30,10 @@ LDES provides several key components:
 
 The document you’re reading now is the main specification that focuses on the consumer side, detailing how clients can efficiently replicate and synchronize with an event stream.
 
+<p class="ldes-document-logo">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+</p>
+
 # Overview and terminology # {#overview}
 
 A **Linked Data Event Stream (LDES)** (`ldes:EventStream`) is a collection of **members** that cannot be updated or removed once they are published, with each member being a set of RDF quads ([[!rdf-primer]]).

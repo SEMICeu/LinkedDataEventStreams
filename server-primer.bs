@@ -23,6 +23,10 @@ This server primer is a living document of derived normative rules based on [the
 
 A Linked Data Event Stream (LDES) is an append-only log consisting of *immutable* members. The term “member” could also be interpreted as “event”, “activity”, “observation”, “record”, or “immutable entity”. For example, “an observation states that at this timestamp a specific sensor observed 5°C”. However, since LDES extends the W3C TREE hypermedia specification, we use the term “member” for consistency.
 
+<p class="ldes-document-logo">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+</p>
+
 <img height="500" src="overview.svg" alt="An overview of the LDES specification.">
 
 # Serializations and HTTP Responses # {#serializations}

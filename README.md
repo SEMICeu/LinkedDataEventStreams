@@ -1,5 +1,9 @@
 # The Linked Data Event Streams specification
 
+<p align="right">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="140">
+</p>
+
 Linked Data Event Streams (LDES) is an initiative to, as a data publisher, find a balance between publishing your data using a as-complete-as-possible set of querying APIs and a data dump. We propose an event stream as the base API, and want to make it as light-weight as possible to host one.
 
 LDES includes:
