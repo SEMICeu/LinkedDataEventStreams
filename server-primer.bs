@@ -219,7 +219,7 @@ A root node MUST contain context information about the LDES. All these propertie
 - `ldes:sequencePath`: points to a SHACL property path (an rdf:List or an IRI)
 - `ldes:versionOfPath`: points to a SHACL property path (an rdf:List or an IRI)
 - `ldes:versionTimestampPath`: points to a SHACL property path (an rdf:List or an IRI)
-- `ldes:versionSequencePath` : points to a SHACL property path (an rdf:List or an IRI)
+- `ldes:versionSequencePath`: points to a SHACL property path (an rdf:List or an IRI)
 - `tree:shape`: point to a `sh:NodeShape`.
 - `ldes:versionCreatePath`: points to a SHACL property path (an rdf:List or an IRI)
 - `ldes:versionUpdatePath`: points to a SHACL property path (an rdf:List or an IRI)
