@@ -1,5 +1,9 @@
 # The Linked Data Event Streams specification
 
+<p align="right">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="140">
+</p>
+
 Linked Data Event Streams (LDES) is an initiative to, as a data publisher, find a balance between publishing your data using a as-complete-as-possible set of querying APIs and a data dump. We propose an event stream as the base API, and want to make it as light-weight as possible to host one.
 
 LDES includes:
@@ -13,6 +17,12 @@ The LDES specification uses the W3C [TREE hypermedia specification](https://w3id
 ## Build the spec
 
 Install [bikeshed](https://tabatkins.github.io/bikeshed/) and then run `bikeshed watch eventstreams.bs`
+
+## Release strategy
+
+The `master` branch is published to the `workingdraft/` folder on the `gh-pages` branch. The documents in that folder reflect the current state of `master` and use release-local links such as `context.jsonld`, `vocabulary.html`, and `server-primer.html`.
+
+Official releases are done by the SEMIC team by creating a tag. Tagged versions are published under `releases/<tag>/`. Each release contains a snapshot of the generated specification, vocabulary, server primer, JSON-LD context, vocabulary Turtle file, and shared assets. The root files on `gh-pages` redirect to the latest tagged release, while root `context.jsonld` and `vocabulary.ttl` are symlinks to the latest release copies.
 
 ## Contributions
 

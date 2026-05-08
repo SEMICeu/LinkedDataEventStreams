@@ -4,11 +4,15 @@ on:
   pull_request:
     paths: ["server-primer.bs", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
-    branches: [main]
-    paths: ["server-primer.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    branches: ["master"]
     tags: ["*"]
+    paths: ["server-primer.bs", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-server-primer-build.yml"]
 
   workflow_dispatch:
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -33,7 +37,7 @@ jobs:
           # output filename defaults to your input
           # with .html extension instead,
           # but if you want to customize it:
-          DESTINATION: server-primer.html
+          DESTINATION: ${{ startsWith(github.ref, 'refs/tags/') && 'server-primer.html' || 'workingdraft/server-primer.html' }}
 
       - name: Publish Bikeshed document with Matomo
         if: ${{ env.SEMICMATOMOID != '' }}
@@ -42,9 +46,45 @@ jobs:
           TOOLCHAIN: bikeshed
           GH_PAGES_BRANCH: gh-pages
           SOURCE: server-primer.bs
-          DESTINATION: server-primer.html
+          DESTINATION: ${{ startsWith(github.ref, 'refs/tags/') && 'server-primer.html' || 'workingdraft/server-primer.html' }}
           GH_PAGES_BUILD_OVERRIDE: |
             Text Macro: SEMICMATOMOID ${{ env.SEMICMATOMOID }}
+
+  copy-working-draft-assets:
+    name: Copy working draft assets
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Checkout source snapshot
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+          path: source-snapshot
+
+      - name: Copy working draft assets
+        run: |
+          set -euo pipefail
+          mkdir -p workingdraft/assets
+          cp -R source-snapshot/assets/. workingdraft/assets/
+          rm -rf source-snapshot
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
+            git config user.name "SEMIC EU archival [bot]"
+            git add workingdraft/assets
+            git commit -m "Update server primer working draft assets"
+            git push
+          else
+            echo "No changes to commit."
+          fi
 
   copy-tag-version:
     name: Copy tag snapshot
@@ -69,10 +109,18 @@ jobs:
           cp server-primer.html "${dest}/server-primer.html"
           mkdir -p "${dest}/assets"
           cp -R assets/. "${dest}/assets/"
+          cat > server-primer.html <<EOF
+          <!doctype html>
+          <meta charset="utf-8">
+          <title>Redirecting to LDES Server Primer ${tag}</title>
+          <meta http-equiv="refresh" content="0; url=${dest}/server-primer.html">
+          <link rel="canonical" href="${dest}/server-primer.html">
+          <p>Latest release: <a href="${dest}/server-primer.html">${dest}/server-primer.html</a></p>
+          EOF
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add "${dest}/server-primer.html" "${dest}/assets"
+            git add server-primer.html "${dest}/server-primer.html" "${dest}/assets"
             git commit -m "Add server primer snapshot for ${tag}"
             git push
           else

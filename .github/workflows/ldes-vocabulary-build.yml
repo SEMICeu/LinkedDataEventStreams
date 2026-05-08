@@ -2,13 +2,17 @@ name: LDES Vocabulary Build
 
 on:
   pull_request:
-    paths: ["vocabulary.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["vocabulary.bs", "vocabulary.ttl", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
-    branches: [main]
-    paths: ["vocabulary.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    branches: ["master"]
     tags: ["*"]
+    paths: ["vocabulary.bs", "vocabulary.ttl", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-vocabulary-build.yml"]
 
   workflow_dispatch:
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -18,6 +22,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
+      - name: Render PlantUML diagrams
+        run: java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg assets/*.puml
 
       - name: Publish Bikeshed document
         if: ${{ env.SEMICMATOMOID == '' }}
@@ -33,7 +52,7 @@ jobs:
           # output filename defaults to your input
           # with .html extension instead,
           # but if you want to customize it:
-          DESTINATION: vocabulary.html
+          DESTINATION: ${{ startsWith(github.ref, 'refs/tags/') && 'vocabulary.html' || 'workingdraft/vocabulary.html' }}
 
       - name: Publish Bikeshed document with Matomo
         if: ${{ env.SEMICMATOMOID != '' }}
@@ -42,9 +61,59 @@ jobs:
           TOOLCHAIN: bikeshed
           GH_PAGES_BRANCH: gh-pages
           SOURCE: vocabulary.bs
-          DESTINATION: vocabulary.html
+          DESTINATION: ${{ startsWith(github.ref, 'refs/tags/') && 'vocabulary.html' || 'workingdraft/vocabulary.html' }}
           GH_PAGES_BUILD_OVERRIDE: |
             Text Macro: SEMICMATOMOID ${{ env.SEMICMATOMOID }}
+
+  copy-working-draft-assets:
+    name: Copy working draft assets
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Checkout source snapshot
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+          path: source-snapshot
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
+      - name: Copy working draft assets
+        run: |
+          set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
+          mkdir -p workingdraft/assets
+          cp source-snapshot/vocabulary.ttl workingdraft/vocabulary.ttl
+          cp -R source-snapshot/assets/. workingdraft/assets/
+          rm -rf source-snapshot
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
+            git config user.name "SEMIC EU archival [bot]"
+            git add workingdraft/vocabulary.ttl workingdraft/assets
+            git commit -m "Update vocabulary working draft assets"
+            git push
+          else
+            echo "No changes to commit."
+          fi
 
   copy-tag-version:
     name: Copy tag snapshot
@@ -60,19 +129,50 @@ jobs:
           ref: gh-pages
           fetch-depth: 0
 
+      - name: Checkout source snapshot
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          path: source-snapshot
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
       - name: Copy vocabulary snapshot
         run: |
           set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           tag="${GITHUB_REF_NAME}"
           dest="releases/${tag}"
           mkdir -p "${dest}"
           cp vocabulary.html "${dest}/vocabulary.html"
+          cp source-snapshot/vocabulary.ttl "${dest}/vocabulary.ttl"
           mkdir -p "${dest}/assets"
-          cp -R assets/. "${dest}/assets/"
+          cp -R source-snapshot/assets/. "${dest}/assets/"
+          rm -f vocabulary.ttl
+          ln -s "${dest}/vocabulary.ttl" vocabulary.ttl
+          rm -rf source-snapshot
+          cat > vocabulary.html <<EOF
+          <!doctype html>
+          <meta charset="utf-8">
+          <title>Redirecting to LDES Vocabulary ${tag}</title>
+          <meta http-equiv="refresh" content="0; url=${dest}/vocabulary.html">
+          <link rel="canonical" href="${dest}/vocabulary.html">
+          <p>Latest release: <a href="${dest}/vocabulary.html">${dest}/vocabulary.html</a></p>
+          EOF
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add "${dest}/vocabulary.html" "${dest}/assets"
+            git add vocabulary.html vocabulary.ttl "${dest}/vocabulary.html" "${dest}/vocabulary.ttl" "${dest}/assets"
             git commit -m "Add vocabulary snapshot for ${tag}"
             git push
           else

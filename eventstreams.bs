@@ -23,12 +23,16 @@ Linked Data Event Streams (LDES) is an initiative designed to help data publishe
 
 LDES provides several key components:
 
- 1. A [consumer-oriented specification](https://w3id.org/ldes/specification) (this document) for implementing LDES clients and processors in a consumer pipeline.
- 2. A [vocabulary](https://w3id.org/ldes) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, retention policies and version-based create-update-delete semantics.
- 3. An example [JSON-LD context](https://w3id.org/ldes/context), which includes recommended JSON labels for use in JSON-LD documents. Note that this context may change over time and is not guaranteed for uptime or stability; for production environments, avoid referencing this URL as an external context.
- 4. A [server primer](server-primer) to guide data providers in building and publishing LDES-compliant streams.
+ 1. A [consumer-oriented specification](index.html) (this document) for implementing LDES clients and processors in a consumer pipeline.
+ 2. A [vocabulary](vocabulary.html) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, retention policies and version-based create-update-delete semantics.
+ 3. An example [JSON-LD context](context.jsonld), which includes recommended JSON labels for use in JSON-LD documents. Note that this context may change over time and is not guaranteed for uptime or stability; for production environments, avoid referencing this URL as an external context.
+ 4. A [server primer](server-primer.html) to guide data providers in building and publishing LDES-compliant streams.
 
 The document you’re reading now is the main specification that focuses on the consumer side, detailing how clients can efficiently replicate and synchronize with an event stream.
+
+<p class="ldes-document-logo">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+</p>
 
 # Overview and terminology # {#overview}
 
@@ -146,7 +150,7 @@ Note: In this section we do not mandate how exactly state management needs to be
 
 A client MUST ensure a member is only emitted once.
 
-Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.
+Note: Keeping a list of all emitted members forever will become problematic for large `ldes:EventStream` instances and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.
 
 For every `tree:Node`, a client SHOULD check whether it is immutable by first checking whether
  1. the triple `<> ldes:immutable true .` is set; then whether
@@ -155,7 +159,7 @@ For every `tree:Node`, a client SHOULD check whether it is immutable by first ch
 
 A client SHOULD ensure an immutable `tree:Node` is not fetched more than once.
 
-Note: Keeping a list of all immutable pages forever will become problematic for large LDESs.
+Note: Keeping a list of all immutable pages forever will become problematic for large `ldes:EventStream` instances.
 
 A client MUST ensure it can resume from a previous run.
 It SHOULD do so by keeping a frontier of pages that are not (yet) immutable.
@@ -280,8 +284,8 @@ _:b1 a tree:LessThanRelation ;
 
 A client MUST combine multiple relations to the same node using a logical AND.
 
-A client MUST check whether the `ldes:timestampPath` is used in the `tree:path`. 
-Only then can the relation be used for ordering.
+A client MUST check whether the `tree:path` matches the `ldes:timestampPath` and/or `ldes:sequencePath`.
+Only relations whose `tree:path` matches one of these ordering paths can be used for ordering.
 
 Note: A link to a `tree:Node` with only a relation that is not supported (e.g., a `tree:GeospatiallyContainsRelation`) will have to be prioritized right away, as following this link may result in members that are earlier than any other member found elsewhere.
 
@@ -321,7 +325,7 @@ When a consumer, such as the client in chronological mode, wants to establish th
 
 Using the property `tree:shape` on the LDES, a [[!SHACL]] `sh:NodeShape` can be linked that communicates an intention of the data provider to respect the shape for every member in the LDES.
 
-Note: This can be used by a client looking for specific members across multiple LDESs that wants to extend the initialization phase with a discovery or source selection phase. 
+Note: This can be used by a client looking for specific members across multiple `ldes:EventStream` instances that wants to extend the initialization phase with a discovery or source selection phase.
 
 When building a processor to validate the members of an LDES, the processor MUST pass each `tree:member` object as the target for the given `sh:NodeShape` to the SHACL validator that is being used.
 
@@ -442,7 +446,7 @@ When using the current time in calculations, the consumer MUST take into account
 The `ldes:timestampPath` points to the timestamp in the member that can be compared with the current time minus the durations.
 When the `ldes:versionTimestampPath` has been set, the two version durations must be compared with this timestamp.
 
-Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favor of the retention policy design just introduced.
+Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favour of the retention policy design just introduced.
 These retention policy types are:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.

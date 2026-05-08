@@ -51,6 +51,34 @@
       max-width: 154px;
     }
 
+    .ldes-document-logo {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .ldes-document-logo img {
+      display: block;
+      height: auto;
+      margin: 0 auto;
+      max-width: 180px;
+    }
+
+    .ldes-vocabulary-diagram {
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .ldes-vocabulary-diagram img {
+      height: auto;
+      max-width: 100%;
+    }
+
+    .ldes-vocabulary-diagram figcaption {
+      color: var(--semic-muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
     .head dl {
       margin-top: 1rem;
     }

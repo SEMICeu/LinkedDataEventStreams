@@ -21,23 +21,63 @@ Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary
 
 This specification introduces terms used to describe event streams.
 While these terms can be used independently of the LDES specification,
-the main LDES specification is available at [https://w3id.org/ldes/specification](https://w3id.org/ldes/specification).
+the [main LDES specification](index.html) is available in this release.
+
+<p class="ldes-document-logo">
+  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+</p>
 
 # Terms # {#terms}
 
 This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.
-There is also a [Turtle version available](https://w3id.org/ldes.ttl).
+There is also a [Turtle version available](vocabulary.ttl).
 
-Used prefixes are:
+Used prefixes are listed in the namespace table.
 
-```turtle
-@prefix ldes: <https://w3id.org/ldes#> .
-@prefix tree: <https://w3id.org/tree#> .
-@prefix dct: <http://purl.org/dc/terms/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-```
+<table class="simple" id="table-namespaces">
+  <caption>Namespaces</caption>
+  <thead>
+    <tr>
+      <th>Prefix</th>
+      <th>Namespace IRI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dct</code></td>
+      <td><code>http://purl.org/dc/terms/</code></td>
+    </tr>
+    <tr>
+      <td><code>dcat</code></td>
+      <td><code>http://www.w3.org/ns/dcat#</code></td>
+    </tr>
+    <tr>
+      <td><code>ldes</code></td>
+      <td><code>https://w3id.org/ldes#</code></td>
+    </tr>
+    <tr>
+      <td><code>rdf</code></td>
+      <td><code>http://www.w3.org/1999/02/22-rdf-syntax-ns#</code></td>
+    </tr>
+    <tr>
+      <td><code>rdfs</code></td>
+      <td><code>http://www.w3.org/2000/01/rdf-schema#</code></td>
+    </tr>
+    <tr>
+      <td><code>tree</code></td>
+      <td><code>https://w3id.org/tree#</code></td>
+    </tr>
+    <tr>
+      <td><code>xsd</code></td>
+      <td><code>http://www.w3.org/2001/XMLSchema#</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<figure class="ldes-vocabulary-diagram">
+  <img src="assets/ldes-vocabulary-overview.svg" alt="Overview of the LDES vocabulary classes and properties" width="1281" height="898">
+  <figcaption>Overview of the main classes and properties in the LDES vocabulary.</figcaption>
+</figure>
 
 ## ldes:EventStream ## {#EventStream}
 
@@ -107,7 +147,7 @@ If the node is not going to contain new relations leading to new members, or new
 The class `ldes:EventSource` is a subclass of `dcat:Distribution`,
 specialized to represent a feed that uses a chronological search tree to make a Linked Data Event Stream available in order.
 
-An `ldes:EventSource` can only be published for LDESs that have `ldes:timestampPath` set, and thus publishes its entities in chronological order.
+An `ldes:EventSource` can only be published for an `ldes:EventStream` that has `ldes:timestampPath` set, and thus publishes its entities in chronological order.
 
 ## ldes:retentionPolicy ## {#retentionPolicy}
 
