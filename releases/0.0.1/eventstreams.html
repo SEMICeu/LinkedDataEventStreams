@@ -12,7 +12,7 @@
  *   - .toc for the Table of Contents (<ol class="toc">)
  *     + <span class="secno"> for the section numbers
  *   - #toc for the Table of Contents (<nav id="toc">)
- *   - ul.index for Indices (<a href="#ref">term</a><span>, in -∫N.M</span>)
+ *   - ul.index for Indices (<a href="#ref">term</a><span>, in ¬ßN.M</span>)
  *   - table.index for Index Tables (e.g. for properties or elements)
  *
  * Structural Markup
@@ -1232,10 +1232,10 @@ Possible extra rowspan handling
     font-family: inherit;
 }
 .css::before, .property::before, .descriptor::before {
-    content: "‘«ˇ";
+    content: "‚Äò";
 }
 .css::after, .property::after, .descriptor::after {
-    content: "‘«÷";
+    content: "‚Äô";
 }
 .property, .descriptor {
     /* Don't wrap property and descriptor names */
@@ -1255,7 +1255,7 @@ pre .property::before, pre .property::after {
 [data-link-type="at-rule"]::before,
 [data-link-type="selector"]::before,
 [data-link-type="maybe"]::before {
-    content: "‘«ˇ";
+    content: "‚Äò";
 }
 [data-link-type="property"]::after,
 [data-link-type="propdesc"]::after,
@@ -1265,7 +1265,7 @@ pre .property::before, pre .property::after {
 [data-link-type="at-rule"]::after,
 [data-link-type="selector"]::after,
 [data-link-type="maybe"]::after {
-    content: "‘«÷";
+    content: "‚Äô";
 }
 
 [data-link-type].production::before,
@@ -1368,8 +1368,8 @@ dfn > a.self-link:hover {
     color: black;
 }
 
-a.self-link::before            { content: "-¬"; }
-.heading > a.self-link::before { content: "-∫"; }
+a.self-link::before            { content: "¬ß"; }
+.heading > a.self-link::before { content: "¬ß"; }
 dfn > a.self-link::before      { content: "#"; }</style>
 <style>/* style-syntax-highlighting */
 
@@ -1433,6 +1433,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 <style>
   :root {
     --semic-blue: #005ea8;
+    --heading-text: #005a9c;
     --semic-text: #1f1f1f;
     --semic-muted: #555;
     --semic-border: #d9d9d9;
@@ -1622,8 +1623,8 @@ All relation types from the TREE specification MAY be used.</p>
 </pre>
    </div>
    <p>An <code>tree:importStream</code> MAY be used to describe a publish-subscribe interface to subscribe to new members in the LDES.</p>
-   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. However, this may not always be the case: sometimes the back-end of an LDES server cannot guarantee that objects will be published chronologically. In that case, in the spirit of an LDES‘«÷ goal, the publisher should make sure as many pages as possible can be given an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header, and expose another kind of pagination.</p>
-   <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on ‘«£searching through a list of objects ordered in time‘«ÿ</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
+   <p class="note" role="note"><span>Note:</span> A 1-dimensional fragmentation based on creation time of the immutable objects is probably going to be the most interesting and highest priority fragmentation for an LDES, as only the latest page, once replicated, should be subscribed to for updates. However, this may not always be the case: sometimes the back-end of an LDES server cannot guarantee that objects will be published chronologically. In that case, in the spirit of an LDES‚Äô goal, the publisher should make sure as many pages as possible can be given an HTTP <code>Cache-Control: public, max-age=604800, immutable</code> header, and expose another kind of pagination.</p>
+   <p class="note" role="note"><span>Note:</span> Cfr. <a href="https://treecg.github.io/specification/#timesearch">the example in the TREE specification on ‚Äúsearching through a list of objects ordered in time‚Äù</a>, also a search form can optionally make a one dimensional feed of immutable objects more searchable.</p>
    <h2 class="heading settled" data-level="3" id="retention"><span class="secno">3. </span><span class="content">Retention policies</span><a class="self-link" href="#retention"></a></h2>
    <p>By default, an LDES MUST keep all data that has been added to the <code>tree:Collection</code> (or <code>ldes:EventStream</code>) as defined by the TREE specification.
 It MAY add a retention policy in which the server indicates data will be removed from the server.
@@ -1686,28 +1687,28 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
    <p> Conformance requirements are expressed with a combination of descriptive assertions and RFC 2119 terminology.
-            The key words ‘«£MUST‘«ÿ, ‘«£MUST NOT‘«ÿ, ‘«£REQUIRED‘«ÿ, ‘«£SHALL‘«ÿ, ‘«£SHALL NOT‘«ÿ, ‘«£SHOULD‘«ÿ, ‘«£SHOULD NOT‘«ÿ, ‘«£RECOMMENDED‘«ÿ, ‘«£MAY‘«ÿ, and ‘«£OPTIONAL‘«ÿ
+            The key words ‚ÄúMUST‚Äù, ‚ÄúMUST NOT‚Äù, ‚ÄúREQUIRED‚Äù, ‚ÄúSHALL‚Äù, ‚ÄúSHALL NOT‚Äù, ‚ÄúSHOULD‚Äù, ‚ÄúSHOULD NOT‚Äù, ‚ÄúRECOMMENDED‚Äù, ‚ÄúMAY‚Äù, and ‚ÄúOPTIONAL‚Äù
             in the normative parts of this document
             are to be interpreted as described in RFC 2119.
             However, for readability,
             these words do not appear in all uppercase letters in this specification. </p>
    <p> All of the text of this specification is normative
             except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119">[RFC2119]</a> </p>
-   <p> Examples in this specification are introduced with the words ‘«£for example‘«ÿ
+   <p> Examples in this specification are introduced with the words ‚Äúfor example‚Äù
             or are set apart from the normative text with <code>class="example"</code>, like this: </p>
    <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
-   <p> Informative notes begin with the word ‘«£Note‘«ÿ
+   <p> Informative notes begin with the word ‚ÄúNote‚Äù
             and are set apart from the normative text with <code>class="note"</code>, like this: </p>
    <p class="note" role="note"> Note, this is an informative note. </p>
   </div>
 <script>
 (function() {
   "use strict";
-  var collapseSidebarText = '<span aria-hidden="true">‘Â…</span> '
+  var collapseSidebarText = '<span aria-hidden="true">‚Üê</span> '
                           + '<span>Collapse Sidebar</span>';
-  var expandSidebarText   = '<span aria-hidden="true">‘Â∆</span> '
+  var expandSidebarText   = '<span aria-hidden="true">‚Üí</span> '
                           + '<span>Pop Out Sidebar</span>';
-  var tocJumpText         = '<span aria-hidden="true">‘ÂÊ</span> '
+  var tocJumpText         = '<span aria-hidden="true">‚Üë</span> '
                           + '<span>Jump to Table of Contents</span>';
 
   var sidebarMedia = window.matchMedia('screen and (min-width: 78em)');
@@ -1721,7 +1722,7 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
       on = !document.body.classList.contains('toc-sidebar');
     }
 
-    /* Don‘«÷t scroll to compensate for the ToC if we‘«÷re above it already. */
+    /* Don‚Äôt scroll to compensate for the ToC if we‚Äôre above it already. */
     var headY = 0;
     var head = document.querySelector('.head');
     if (head) {
@@ -1752,16 +1753,16 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
       }
       if (toggle.matches(':hover')) {
         /* Unfocus button when not using keyboard navigation,
-           because I don‘«÷t know where else to send the focus. */
+           because I don‚Äôt know where else to send the focus. */
         toggle.blur();
       }
     }
   }
 
   function createSidebarToggle() {
-    /* Create the sidebar toggle in JS; it shouldn‘«÷t exist when JS is off. */
+    /* Create the sidebar toggle in JS; it shouldn‚Äôt exist when JS is off. */
     var toggle = document.createElement('a');
-      /* This should probably be a button, but appearance isn‘«÷t standards-track.*/
+      /* This should probably be a button, but appearance isn‚Äôt standards-track.*/
     toggle.id = 'toc-toggle';
     toggle.class = 'toc-toggle';
     toggle.href = '#toc';
@@ -1777,7 +1778,7 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
     toggle.addEventListener('click', toggler, false);
 
 
-    /* Get <nav id=toc-nav>, or make it if we don‘«÷t have one. */
+    /* Get <nav id=toc-nav>, or make it if we don‚Äôt have one. */
     var tocNav = document.getElementById('toc-nav');
     if (!tocNav) {
       tocNav = document.createElement('p');
@@ -1785,7 +1786,7 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
       /* Prepend for better keyboard navigation */
       document.body.insertBefore(tocNav, document.body.firstChild);
     }
-    /* While we‘«÷re at it, make sure we have a Jump to Toc link. */
+    /* While we‚Äôre at it, make sure we have a Jump to Toc link. */
     var tocJump = document.getElementById('toc-jump');
     if (!tocJump) {
       tocJump = document.createElement('a');
@@ -1813,7 +1814,7 @@ When the <code>ldes:versionKey</code> is not set or empty, the key is empty, and
     }, false);
   }
   else {
-    console.warn("Can‘«÷t find Table of Contents. Please use <nav id='toc'> around the ToC.");
+    console.warn("Can‚Äôt find Table of Contents. Please use <nav id='toc'> around the ToC.");
   }
 
   /* Wrap tables in case they overflow */
