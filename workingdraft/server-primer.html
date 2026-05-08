@@ -1591,9 +1591,91 @@ Possible extra rowspan handling
       g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
     })();
   </script>
+<script>
+    (() => {
+      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const releasesBase = `${siteBase}releases/`;
+
+      const currentPath = new URL(window.location.href).pathname;
+      const documentName = (() => {
+        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
+        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
+        return lastSegment;
+      })();
+
+      const documentPath = documentName === "index.html" ? "" : documentName;
+      const linkTargets = {
+        latest: `${siteBase}${documentPath}`,
+        archivedVersions: releasesBase,
+      };
+
+      function setVersionLinks() {
+        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
+        if (!metadata) return;
+        metadata.classList.add("ldes-version-links");
+        removeVersionRows(metadata);
+
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = "";
+        currentUrl.search = "";
+
+        const rows = [
+          createVersionRow("This version:", currentUrl.toString(), true),
+          createVersionRow("Latest version:", linkTargets.latest),
+          createVersionRow("Archived versions:", linkTargets.archivedVersions),
+        ];
+        metadata.prepend(...rows.flat());
+      }
+
+      function createVersionRow(label, href, isThisVersion = false) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+
+        const definition = document.createElement("dd");
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = href;
+        if (isThisVersion) {
+          link.classList.add("u-url");
+        }
+        definition.append(link);
+
+        return [term, definition];
+      }
+
+      function removeVersionRows(metadata) {
+        const versionLabels = new Set([
+          "Previous version:",
+          "This version:",
+          "Next version:",
+          "Latest version:",
+          "Working draft:",
+          "Archived versions:",
+        ]);
+
+        for (const term of [...metadata.querySelectorAll("dt")]) {
+          if (!versionLabels.has(term.textContent.trim())) continue;
+          for (const definition of getRowDefinitions(term)) {
+            definition.remove();
+          }
+          term.remove();
+        }
+      }
+
+      function getRowDefinitions(term) {
+        const definitions = [];
+        for (let node = term.nextElementSibling; node && node.tagName.toLowerCase() === "dd"; node = node.nextElementSibling) {
+          definitions.push(node);
+        }
+        return definitions;
+      }
+
+      window.addEventListener("DOMContentLoaded", setVersionLinks);
+    })();
+  </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes/server-primer" rel="canonical">
-  <meta content="119d5078fb44c24fc90825384eabecea0f4624cc" name="revision">
+  <meta content="6ce64403dc89861a2a7802834d71d26916953e7c" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2158,9 +2240,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://semiceu.github.io/LinkedDataEventStreams/workingdraft/server-primer.html">https://semiceu.github.io/LinkedDataEventStreams/workingdraft/server-primer.html</a>
-     <dt>Latest version:
-     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/server-primer.html">https://semiceu.github.io/LinkedDataEventStreams/server-primer.html</a>
+     <dd><a class="u-url" href="https://w3id.org/ldes/server-primer">https://w3id.org/ldes/server-primer</a>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/">GitHub</a>
      <dd><a href="#issues-index">Inline In Spec</a>
