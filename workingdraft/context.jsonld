@@ -1,0 +1,30 @@
+{
+  "@context": {
+      "tree": "https://w3id.org/tree#",
+      "ldes": "https://w3id.org/ldes#",
+      "shape": { "@type":"@id", "@id":"tree:shape"},
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "EventStream": "ldes:EventStream",
+      "EventSource": "ldes:EventSource",
+      "RetentionPolicy": "ldes:RetentionPolicy",
+      "LatestVersionSubset": "ldes:LatestVersionSubset",
+      "DurationAgoPolicy": "ldes:DurationAgoPolicy",
+      "PointInTimePolicy": "ldes:PointInTimePolicy",
+      "node": {"@type": "@id", "@id": "tree:node"},
+      "member": {"@type": "@id", "@id": "tree:member", "@container":"@list"},
+      "relation": {"@type": "@id", "@id": "tree:relation"},
+      "view": {"@type": "@id", "@id": "tree:view"},
+      "path": {"@container": "@list", "@id": "tree:path", "@type": "@id"},
+      "value": {"@id":"tree:value"},
+      "immutable": {"@id": "ldes:immutable"},
+      "timestampPath": {"@id":"ldes:timestampPath", "@type":"@id", "@container":"@list"},
+      "versionOfPath": {"@id":"ldes:versionOfPath", "@type":"@id", "@container":"@list"},
+      "retentionPolicies": {"@id":"ldes:retentionPolicy", "@type": "@id", "@container":"@list"},
+      "amount": {"@id":"ldes:amount","@type":"xsd:nonNegativeInteger"},
+      "pointInTime": {"@id":"ldes:pointInTime","@type":"xsd:dateTime"},
+      "pollingInterval": {"@id":"ldes:pollingInterval", "@type":"xsd:integer"},
+      "versionKey": {"@id":"ldes:versionKey", "@type":"@id", "@container":"@list"},
+      "versionMaterializationOf": {"@id":"ldes:versionMaterializationOf", "@type":"@id"},
+      "versionMaterializationUntil": {"@id":"ldes:versionMaterializationUntil","@type":"xsd:dateTime"}
+    }
+}
