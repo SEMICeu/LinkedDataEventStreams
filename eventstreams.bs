@@ -150,7 +150,7 @@ Note: In this section we do not mandate how exactly state management needs to be
 
 A client MUST ensure a member is only emitted once.
 
-Note: Keeping a list of all emitted members forever will become problematic for large LDESs and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.
+Note: Keeping a list of all emitted members forever will become problematic for large `ldes:EventStream` instances and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.
 
 For every `tree:Node`, a client SHOULD check whether it is immutable by first checking whether
  1. the triple `<> ldes:immutable true .` is set; then whether
@@ -159,7 +159,7 @@ For every `tree:Node`, a client SHOULD check whether it is immutable by first ch
 
 A client SHOULD ensure an immutable `tree:Node` is not fetched more than once.
 
-Note: Keeping a list of all immutable pages forever will become problematic for large LDESs.
+Note: Keeping a list of all immutable pages forever will become problematic for large `ldes:EventStream` instances.
 
 A client MUST ensure it can resume from a previous run.
 It SHOULD do so by keeping a frontier of pages that are not (yet) immutable.
@@ -325,7 +325,7 @@ When a consumer, such as the client in chronological mode, wants to establish th
 
 Using the property `tree:shape` on the LDES, a [[!SHACL]] `sh:NodeShape` can be linked that communicates an intention of the data provider to respect the shape for every member in the LDES.
 
-Note: This can be used by a client looking for specific members across multiple LDESs that wants to extend the initialization phase with a discovery or source selection phase. 
+Note: This can be used by a client looking for specific members across multiple `ldes:EventStream` instances that wants to extend the initialization phase with a discovery or source selection phase.
 
 When building a processor to validate the members of an LDES, the processor MUST pass each `tree:member` object as the target for the given `sh:NodeShape` to the SHACL validator that is being used.
 
@@ -446,7 +446,7 @@ When using the current time in calculations, the consumer MUST take into account
 The `ldes:timestampPath` points to the timestamp in the member that can be compared with the current time minus the durations.
 When the `ldes:versionTimestampPath` has been set, the two version durations must be compared with this timestamp.
 
-Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favor of the retention policy design just introduced.
+Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favour of the retention policy design just introduced.
 These retention policy types are:
  1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
  2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
