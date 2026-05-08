@@ -1570,6 +1570,23 @@ Possible extra rowspan handling
       color: var(--semic-muted);
     }
 
+    .ldes-version-nav {
+      border-top: 1px solid var(--semic-border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+    }
+
+    .ldes-version-nav a {
+      font-size: 0.95rem;
+    }
+
+    .ldes-version-nav a[hidden] {
+      display: none;
+    }
+
     .semic-footer {
       border-top: 1px solid var(--semic-border);
       color: var(--semic-muted);
@@ -1591,9 +1608,91 @@ Possible extra rowspan handling
       g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
     })();
   </script>
+<script>
+    (() => {
+      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const releasesBase = `${siteBase}releases/`;
+      const workingDraftBase = `${siteBase}workingdraft/`;
+
+      const currentPath = new URL(window.location.href).pathname;
+      const releaseMatch = currentPath.match(/\/releases\/([^/]+)\/([^?#]*)?$/);
+      const documentName = (() => {
+        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
+        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
+        return lastSegment;
+      })();
+
+      const documentPath = documentName === "index.html" ? "" : documentName;
+      const linkTargets = {
+        latest: `${siteBase}${documentPath}`,
+        workingDraft: `${workingDraftBase}${documentPath}`,
+      };
+
+      async function urlExists(url) {
+        try {
+          const response = await fetch(url, { method: "HEAD" });
+          return response.ok;
+        } catch {
+          return false;
+        }
+      }
+
+      async function getReleases() {
+        try {
+          const response = await fetch(releasesBase);
+          if (!response.ok) return [];
+          const html = await response.text();
+          return [...html.matchAll(/href="([^"]+)\/"/g)]
+            .map((match) => decodeURIComponent(match[1]))
+            .filter((release) => release && release !== "assets");
+        } catch {
+          return [];
+        }
+      }
+
+      async function setVersionLinks() {
+        const nav = document.querySelector(".ldes-version-nav");
+        if (!nav) return;
+
+        const latest = nav.querySelector('[data-version-link="latest"]');
+        const workingDraft = nav.querySelector('[data-version-link="working-draft"]');
+        latest.href = linkTargets.latest;
+        workingDraft.href = linkTargets.workingDraft;
+
+        if (!(await urlExists(linkTargets.workingDraft))) {
+          workingDraft.hidden = true;
+        }
+
+        if (!releaseMatch) return;
+
+        const currentRelease = decodeURIComponent(releaseMatch[1]);
+        const releases = await getReleases();
+        const currentIndex = releases.indexOf(currentRelease);
+        if (currentIndex === -1) return;
+
+        const previous = nav.querySelector('[data-version-link="previous"]');
+        const next = nav.querySelector('[data-version-link="next"]');
+        const candidates = [
+          [previous, releases[currentIndex + 1]],
+          [next, releases[currentIndex - 1]],
+        ];
+
+        for (const [link, release] of candidates) {
+          if (!release) continue;
+          const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
+          if (await urlExists(href)) {
+            link.href = href;
+            link.hidden = false;
+          }
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", setVersionLinks);
+    })();
+  </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="f82a89cd0bbccfa7c067f15801895ab7a6cd47a3" name="revision">
+  <meta content="72764541a109a94042c7c0a4e86c5f64851bc3b1" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2183,6 +2282,12 @@ the editors have made this specification available under the
 which is available at https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document.
 </p>
+   <nav aria-label="Version navigation" class="ldes-version-nav">
+      <a data-version-link="previous" hidden href="#">Previous version</a>
+      <a data-version-link="next" hidden href="#">Next version</a>
+      <a data-version-link="latest" href="#">Latest version</a>
+      <a data-version-link="working-draft" href="#">Working draft</a>
+    </nav>
   </div>
   <section class="p-summary" data-fill-with="abstract">
    <h2 class="heading no-num no-ref no-toc settled" id="abstract"><span class="content">Abstract</span></h2>
