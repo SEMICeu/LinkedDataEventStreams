@@ -87,6 +87,23 @@
       color: var(--semic-muted);
     }
 
+    .ldes-version-nav {
+      border-top: 1px solid var(--semic-border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+    }
+
+    .ldes-version-nav a {
+      font-size: 0.95rem;
+    }
+
+    .ldes-version-nav a[hidden] {
+      display: none;
+    }
+
     .semic-footer {
       border-top: 1px solid var(--semic-border);
       color: var(--semic-muted);
@@ -110,6 +127,88 @@
     })();
   </script>
   <!-- End Matomo Code -->
+  <script>
+    (() => {
+      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const releasesBase = `${siteBase}releases/`;
+      const workingDraftBase = `${siteBase}workingdraft/`;
+
+      const currentPath = new URL(window.location.href).pathname;
+      const releaseMatch = currentPath.match(/\/releases\/([^/]+)\/([^?#]*)?$/);
+      const documentName = (() => {
+        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
+        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
+        return lastSegment;
+      })();
+
+      const documentPath = documentName === "index.html" ? "" : documentName;
+      const linkTargets = {
+        latest: `${siteBase}${documentPath}`,
+        workingDraft: `${workingDraftBase}${documentPath}`,
+      };
+
+      async function urlExists(url) {
+        try {
+          const response = await fetch(url, { method: "HEAD" });
+          return response.ok;
+        } catch {
+          return false;
+        }
+      }
+
+      async function getReleases() {
+        try {
+          const response = await fetch(releasesBase);
+          if (!response.ok) return [];
+          const html = await response.text();
+          return [...html.matchAll(/href="([^"]+)\/"/g)]
+            .map((match) => decodeURIComponent(match[1]))
+            .filter((release) => release && release !== "assets");
+        } catch {
+          return [];
+        }
+      }
+
+      async function setVersionLinks() {
+        const nav = document.querySelector(".ldes-version-nav");
+        if (!nav) return;
+
+        const latest = nav.querySelector('[data-version-link="latest"]');
+        const workingDraft = nav.querySelector('[data-version-link="working-draft"]');
+        latest.href = linkTargets.latest;
+        workingDraft.href = linkTargets.workingDraft;
+
+        if (!(await urlExists(linkTargets.workingDraft))) {
+          workingDraft.hidden = true;
+        }
+
+        if (!releaseMatch) return;
+
+        const currentRelease = decodeURIComponent(releaseMatch[1]);
+        const releases = await getReleases();
+        const currentIndex = releases.indexOf(currentRelease);
+        if (currentIndex === -1) return;
+
+        const previous = nav.querySelector('[data-version-link="previous"]');
+        const next = nav.querySelector('[data-version-link="next"]');
+        const candidates = [
+          [previous, releases[currentIndex + 1]],
+          [next, releases[currentIndex - 1]],
+        ];
+
+        for (const [link, release] of candidates) {
+          if (!release) continue;
+          const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
+          if (await urlExists(href)) {
+            link.href = href;
+            link.hidden = false;
+          }
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", setVersionLinks);
+    })();
+  </script>
 </head>
 <body class="h-entry">
   <div class="head">
@@ -121,6 +220,12 @@
     <div data-fill-with="spec-metadata"></div>
     <div data-fill-with="warning"></div>
     <p class="copyright" data-fill-with="copyright"></p>
+    <nav class="ldes-version-nav" aria-label="Version navigation">
+      <a href="#" data-version-link="previous" hidden>Previous version</a>
+      <a href="#" data-version-link="next" hidden>Next version</a>
+      <a href="#" data-version-link="latest">Latest version</a>
+      <a href="#" data-version-link="working-draft">Working draft</a>
+    </nav>
   </div>
   <section class="p-summary" data-fill-with="abstract"></section>
   <div data-fill-with="at-risk"></div>
