@@ -280,8 +280,8 @@ _:b1 a tree:LessThanRelation ;
 
 A client MUST combine multiple relations to the same node using a logical AND.
 
-A client MUST check whether the `ldes:timestampPath` is used in the `tree:path`. 
-Only then can the relation be used for ordering.
+A client MUST check whether the `tree:path` matches the `ldes:timestampPath` and/or `ldes:sequencePath`.
+Only relations whose `tree:path` matches one of these ordering paths can be used for ordering.
 
 Note: A link to a `tree:Node` with only a relation that is not supported (e.g., a `tree:GeospatiallyContainsRelation`) will have to be prioritized right away, as following this link may result in members that are earlier than any other member found elsewhere.
 
