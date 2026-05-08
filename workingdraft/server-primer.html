@@ -1593,7 +1593,7 @@ Possible extra rowspan handling
   </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes/server-primer" rel="canonical">
-  <meta content="7a7e299727f7688177d284ffcd854ba68ce6ee64" name="revision">
+  <meta content="9bc5c431c5b6e7647fa21301eee7226174b07a39" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2417,9 +2417,13 @@ Point-in-time start and version window
    <p>A server MUST, in that case, provide redirects to a new IRI, such as <code>2022-rebalanced</code>, from all old pages, including the page <code>2022</code> to <code>2022-rebalanced</code>.</p>
    <p class="note" role="note"><span class="marker">Note:</span> the semantics of <code>ldes:immutable</code> are that the members on this page and the relations should not be processed again. The page MAY still be rebalanced later on, or the page can become unavailable on disk (<code>410 Gone</code>).</p>
    <h2 class="heading settled" data-level="6" id="validating"><span class="secno">6. </span><span class="content">Validating the pages</span><a class="self-link" href="#validating"></a></h2>
-   <p>This section includes the rules to validate an implementation of a root node and any subsequent node.</p>
-   <p class="issue" id="issue-d3c7e4f1"><a class="self-link" href="#issue-d3c7e4f1"></a> we still need to build the SHACL shapes here.</p>
-   <p class="issue" id="issue-3643b8ee"><a class="self-link" href="#issue-3643b8ee"></a> we still need an UML image here.</p>
+   <p>This section includes explanation to validate an implementation of a root node and any subsequent node.</p>
+   <figure class="ldes-vocabulary-diagram">
+    
+  <img alt="Overview of the LDES vocabulary classes and properties" height="898" src="assets/ldes-vocabulary-overview.svg" width="1281">
+  
+    <figcaption>Overview of the main classes and properties in the LDES vocabulary.</figcaption>
+   </figure>
    <h3 class="heading settled" data-level="6.1" id="rootnode"><span class="secno">6.1. </span><span class="content">For the Root Node</span><a class="self-link" href="#rootnode"></a></h3>
    <p>A root node MUST link the event stream to the view using the <code>tree:view</code> property.</p>
    <p>A root node MUST contain context information about the LDES. All these properties in the domain of the event stream have a cardinality of 0 or 1:</p>
@@ -2518,8 +2522,6 @@ The default value is false. If it is not immutable, this SHOULD NOT be made expl
      <div class="issue"> We will try to generalize this in the future so that we can also integrate with <a href="https://jelly-rdf.github.io/dev">Jelly</a>. This binary serialization has the potential to raise performance drastically. <a class="issue-return" href="#issue-a8f72147" title="Jump to section">↵</a></div>
      <div class="issue"> we should still add examples of how to paginate here. <a class="issue-return" href="#issue-6264027d" title="Jump to section">↵</a></div>
      <div class="issue"> Discovery is yet to be further explained. More input from existing implementations is appreciated through the issue tracker. <a class="issue-return" href="#issue-e4b66bf2" title="Jump to section">↵</a></div>
-     <div class="issue"> we still need to build the SHACL shapes here. <a class="issue-return" href="#issue-d3c7e4f1" title="Jump to section">↵</a></div>
-     <div class="issue"> we still need an UML image here. <a class="issue-return" href="#issue-3643b8ee" title="Jump to section">↵</a></div>
     </div>
    </section>
   </main>
