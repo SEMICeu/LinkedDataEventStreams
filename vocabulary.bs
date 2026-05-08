@@ -21,12 +21,12 @@ Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary
 
 This specification introduces terms used to describe event streams.
 While these terms can be used independently of the LDES specification,
-the main LDES specification is available at [https://w3id.org/ldes/specification](https://w3id.org/ldes/specification).
+the [main LDES specification](index.html) is available in this release.
 
 # Terms # {#terms}
 
 This document introduces terms in the namespace `https://w3id.org/ldes#` with the preferred prefix `ldes:`.
-There is also a [Turtle version available](https://w3id.org/ldes.ttl).
+There is also a [Turtle version available](vocabulary.ttl).
 
 Used prefixes are:
 

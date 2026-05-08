@@ -23,10 +23,10 @@ Linked Data Event Streams (LDES) is an initiative designed to help data publishe
 
 LDES provides several key components:
 
- 1. A [consumer-oriented specification](https://w3id.org/ldes/specification) (this document) for implementing LDES clients and processors in a consumer pipeline.
- 2. A [vocabulary](https://w3id.org/ldes) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, retention policies and version-based create-update-delete semantics.
- 3. An example [JSON-LD context](https://w3id.org/ldes/context), which includes recommended JSON labels for use in JSON-LD documents. Note that this context may change over time and is not guaranteed for uptime or stability; for production environments, avoid referencing this URL as an external context.
- 4. A [server primer](server-primer) to guide data providers in building and publishing LDES-compliant streams.
+ 1. A [consumer-oriented specification](index.html) (this document) for implementing LDES clients and processors in a consumer pipeline.
+ 2. A [vocabulary](vocabulary.html) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, retention policies and version-based create-update-delete semantics.
+ 3. An example [JSON-LD context](context.jsonld), which includes recommended JSON labels for use in JSON-LD documents. Note that this context may change over time and is not guaranteed for uptime or stability; for production environments, avoid referencing this URL as an external context.
+ 4. A [server primer](server-primer.html) to guide data providers in building and publishing LDES-compliant streams.
 
 The document you’re reading now is the main specification that focuses on the consumer side, detailing how clients can efficiently replicate and synchronize with an event stream.
 
