@@ -203,11 +203,12 @@ Note: the semantics of `ldes:immutable` are that the members on this page and th
 
 # Validating the pages # {#validating}
 
-This section includes the rules to validate an implementation of a root node and any subsequent node.
+This section includes explanation to validate an implementation of a root node and any subsequent node.
 
-Issue: we still need to build the SHACL shapes here.
-
-Issue: we still need an UML image here.
+<figure class="ldes-vocabulary-diagram">
+  <img src="assets/ldes-vocabulary-overview.svg" alt="Overview of the LDES vocabulary classes and properties" width="1281" height="898">
+  <figcaption>Overview of the main classes and properties in the LDES vocabulary.</figcaption>
+</figure>
 
 ## For the Root Node ## {#rootnode}
 
