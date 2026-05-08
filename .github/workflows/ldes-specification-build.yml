@@ -2,10 +2,10 @@ name: LDES Specification Build
 
 on:
   pull_request:
-    paths: ["eventstreams.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["eventstreams.bs", "context.jsonld", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
     branches: [main]
-    paths: ["eventstreams.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["eventstreams.bs", "context.jsonld", "header.include", "footer.include", "logo.include", "assets/**"]
     tags: ["*"]
 
   workflow_dispatch:
@@ -66,6 +66,12 @@ jobs:
           ref: gh-pages
           fetch-depth: 0
 
+      - name: Checkout source snapshot
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          path: source-snapshot
+
       - name: Copy spec snapshot
         run: |
           set -euo pipefail
@@ -73,12 +79,16 @@ jobs:
           dest="releases/${tag}"
           mkdir -p "${dest}"
           cp index.html "${dest}/index.html"
+          cp source-snapshot/context.jsonld "${dest}/context.jsonld"
+          rm -f context.jsonld
+          ln -s "${dest}/context.jsonld" context.jsonld
+          rm -rf source-snapshot
           mkdir -p "${dest}/assets"
           cp -R assets/. "${dest}/assets/"
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add "${dest}/index.html" "${dest}/assets"
+            git add context.jsonld "${dest}/index.html" "${dest}/context.jsonld" "${dest}/assets"
             git commit -m "Add spec snapshot for ${tag}"
             git push
           else
