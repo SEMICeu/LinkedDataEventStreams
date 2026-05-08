@@ -23,21 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install GraphViz
-        run: sudo apt-get update && sudo apt-get install -y graphviz
-
-      - name: Download PlantUML
-        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
-
-      - name: Render PlantUML diagrams
-        run: java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg assets/*.puml
-
       - name: Publish Bikeshed document
         if: ${{ env.SEMICMATOMOID == '' }}
         uses: w3c/spec-prod@v2
