@@ -2,11 +2,11 @@ name: LDES Vocabulary Build
 
 on:
   pull_request:
-    paths: ["vocabulary.bs", "vocabulary.ttl", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["vocabulary.bs", "vocabulary.ttl", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
     branches: ["master"]
     tags: ["*"]
-    paths: ["vocabulary.bs", "vocabulary.ttl", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-vocabulary-build.yml"]
+    paths: ["vocabulary.bs", "vocabulary.ttl", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-vocabulary-build.yml"]
 
   workflow_dispatch:
 
@@ -103,12 +103,13 @@ jobs:
           java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           mkdir -p workingdraft/assets
           cp source-snapshot/vocabulary.ttl workingdraft/vocabulary.ttl
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft/vocabulary.ttl workingdraft/assets
+            git add workingdraft
             git commit -m "Update vocabulary working draft assets"
             git push
           else
@@ -156,6 +157,7 @@ jobs:
           mkdir -p "${dest}"
           cp vocabulary.html "${dest}/vocabulary.html"
           cp source-snapshot/vocabulary.ttl "${dest}/vocabulary.ttl"
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
           mkdir -p "${dest}/assets"
           cp -R source-snapshot/assets/. "${dest}/assets/"
           rm -f vocabulary.ttl
@@ -172,7 +174,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add vocabulary.html vocabulary.ttl "${dest}/vocabulary.html" "${dest}/vocabulary.ttl" "${dest}/assets"
+            git add vocabulary.html vocabulary.ttl "${dest}"
             git commit -m "Add vocabulary snapshot for ${tag}"
             git push
           else

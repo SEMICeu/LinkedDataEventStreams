@@ -2,11 +2,11 @@ name: LDES Specification Build
 
 on:
   pull_request:
-    paths: ["eventstreams.bs", "context.jsonld", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["eventstreams.bs", "context.jsonld", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
     branches: ["master"]
     tags: ["*"]
-    paths: ["eventstreams.bs", "context.jsonld", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-specification-build.yml"]
+    paths: ["eventstreams.bs", "context.jsonld", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-specification-build.yml"]
 
   workflow_dispatch:
 
@@ -81,12 +81,13 @@ jobs:
           set -euo pipefail
           mkdir -p workingdraft/assets
           cp source-snapshot/context.jsonld workingdraft/context.jsonld
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft/context.jsonld workingdraft/assets
+            git add workingdraft
             git commit -m "Update specification working draft assets"
             git push
           else
@@ -121,11 +122,12 @@ jobs:
           mkdir -p "${dest}"
           cp index.html "${dest}/index.html"
           cp source-snapshot/context.jsonld "${dest}/context.jsonld"
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
+          mkdir -p "${dest}/assets"
+          cp -R source-snapshot/assets/. "${dest}/assets/"
           rm -f context.jsonld
           ln -s "${dest}/context.jsonld" context.jsonld
           rm -rf source-snapshot
-          mkdir -p "${dest}/assets"
-          cp -R assets/. "${dest}/assets/"
           cat > index.html <<EOF
           <!doctype html>
           <meta charset="utf-8">
@@ -137,7 +139,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add index.html context.jsonld "${dest}/index.html" "${dest}/context.jsonld" "${dest}/assets"
+            git add index.html context.jsonld "${dest}"
             git commit -m "Add spec snapshot for ${tag}"
             git push
           else

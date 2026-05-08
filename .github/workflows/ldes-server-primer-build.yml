@@ -2,11 +2,11 @@ name: LDES Server Primer Build
 
 on:
   pull_request:
-    paths: ["server-primer.bs", "header.include", "footer.include", "logo.include", "assets/**"]
+    paths: ["server-primer.bs", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
     branches: ["master"]
     tags: ["*"]
-    paths: ["server-primer.bs", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-server-primer-build.yml"]
+    paths: ["server-primer.bs", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.webp", "header.include", "footer.include", "logo.include", "assets/**", ".github/workflows/ldes-server-primer-build.yml"]
 
   workflow_dispatch:
 
@@ -22,6 +22,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
+      - name: Render PlantUML diagrams
+        run: java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg assets/*.puml
 
       - name: Publish Bikeshed document
         if: ${{ env.SEMICMATOMOID == '' }}
@@ -70,16 +85,30 @@ jobs:
           ref: ${{ github.sha }}
           path: source-snapshot
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
       - name: Copy working draft assets
         run: |
           set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           mkdir -p workingdraft/assets
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft/assets
+            git add workingdraft
             git commit -m "Update server primer working draft assets"
             git push
           else
@@ -100,15 +129,36 @@ jobs:
           ref: gh-pages
           fetch-depth: 0
 
+      - name: Checkout source snapshot
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          path: source-snapshot
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
       - name: Copy server-primer snapshot
         run: |
           set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           tag="${GITHUB_REF_NAME}"
           dest="releases/${tag}"
           mkdir -p "${dest}"
           cp server-primer.html "${dest}/server-primer.html"
+          find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
           mkdir -p "${dest}/assets"
-          cp -R assets/. "${dest}/assets/"
+          cp -R source-snapshot/assets/. "${dest}/assets/"
+          rm -rf source-snapshot
           cat > server-primer.html <<EOF
           <!doctype html>
           <meta charset="utf-8">
@@ -120,7 +170,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add server-primer.html "${dest}/server-primer.html" "${dest}/assets"
+            git add server-primer.html "${dest}"
             git commit -m "Add server primer snapshot for ${tag}"
             git push
           else
