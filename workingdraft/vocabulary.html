@@ -1570,6 +1570,10 @@ Possible extra rowspan handling
       color: var(--semic-muted);
     }
 
+    .ldes-version-links [hidden] {
+      display: none;
+    }
+
     .semic-footer {
       border-top: 1px solid var(--semic-border);
       color: var(--semic-muted);
@@ -1591,9 +1595,187 @@ Possible extra rowspan handling
       g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
     })();
   </script>
+<script>
+    (() => {
+      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const releasesBase = `${siteBase}releases/`;
+      const workingDraftBase = `${siteBase}workingdraft/`;
+
+      const currentPath = new URL(window.location.href).pathname;
+      const releaseMatch = currentPath.match(/\/releases\/([^/]+)\/([^?#]*)?$/);
+      const documentName = (() => {
+        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
+        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
+        return lastSegment;
+      })();
+
+      const documentPath = documentName === "index.html" ? "" : documentName;
+      const linkTargets = {
+        latest: `${siteBase}${documentPath}`,
+        workingDraft: `${workingDraftBase}${documentPath}`,
+      };
+
+      async function urlExists(url) {
+        try {
+          const response = await fetch(url, { method: "HEAD" });
+          return response.ok;
+        } catch {
+          return false;
+        }
+      }
+
+      async function getReleases() {
+        try {
+          const response = await fetch(releasesBase);
+          if (!response.ok) return [];
+          const html = await response.text();
+          return [...html.matchAll(/href="([^"]+)\/"/g)]
+            .map((match) => decodeURIComponent(match[1]))
+            .filter((release) => release && release !== "assets");
+        } catch {
+          return [];
+        }
+      }
+
+      async function setVersionLinks() {
+        const versionLinks = buildVersionRows();
+        if (!versionLinks) return;
+
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = "";
+        currentUrl.search = "";
+
+        const thisVersion = versionLinks.querySelector('[data-version-link="this-version"]');
+        const latest = versionLinks.querySelector('[data-version-link="latest"]');
+        const workingDraft = versionLinks.querySelector('[data-version-link="working-draft"]');
+
+        thisVersion.href = currentUrl.toString();
+        thisVersion.textContent = currentUrl.toString();
+        latest.href = linkTargets.latest;
+        latest.textContent = linkTargets.latest;
+        workingDraft.href = linkTargets.workingDraft;
+        workingDraft.textContent = linkTargets.workingDraft;
+
+        if (!(await urlExists(linkTargets.workingDraft))) {
+          setVersionRowVisibility("working-draft", true);
+        }
+
+        if (!releaseMatch) return;
+
+        const currentRelease = decodeURIComponent(releaseMatch[1]);
+        const releases = await getReleases();
+        const currentIndex = releases.indexOf(currentRelease);
+        if (currentIndex === -1) return;
+
+        const previous = versionLinks.querySelector('[data-version-link="previous"]');
+        const next = versionLinks.querySelector('[data-version-link="next"]');
+        const candidates = [
+          [previous, releases[currentIndex + 1]],
+          [next, releases[currentIndex - 1]],
+        ];
+
+        for (const [link, release] of candidates) {
+          if (!release) continue;
+          const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
+          if (await urlExists(href)) {
+            link.href = href;
+            link.textContent = href;
+            setVersionRowVisibility(link.dataset.versionLink, false);
+          }
+        }
+      }
+
+      function buildVersionRows() {
+        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
+        if (!metadata) return null;
+        metadata.classList.add("ldes-version-links");
+
+        const thisTerm = findMetadataTerm(metadata, "This version:") || createTerm("This version:");
+        if (!thisTerm.parentElement) {
+          metadata.prepend(thisTerm, createDefinition("this-version"));
+        }
+
+        const thisDefinition = getRowDefinitions(thisTerm)[0] || createDefinition("this-version");
+        if (!thisDefinition.parentElement) {
+          thisTerm.after(thisDefinition);
+        }
+
+        const thisLink = thisDefinition.querySelector("a") || document.createElement("a");
+        thisLink.dataset.versionLink = "this-version";
+        if (!thisLink.parentElement) {
+          thisDefinition.replaceChildren(thisLink);
+        }
+
+        const previousRow = createVersionRow("previous", "Previous version:", true);
+        const nextRow = createVersionRow("next", "Next version:", true);
+        const latestRow = createVersionRow("latest", "Latest version:", false);
+        const workingDraftRow = createVersionRow("working-draft", "Working draft:", false);
+
+        thisTerm.before(...previousRow);
+        getRowEnd(thisTerm).after(...nextRow, ...latestRow, ...workingDraftRow);
+
+        return metadata;
+      }
+
+      function createVersionRow(linkName, label, hidden) {
+        const term = createTerm(label, linkName, hidden);
+        const definition = createDefinition(linkName, hidden);
+        return [term, definition];
+      }
+
+      function createTerm(label, linkName, hidden = false) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        if (linkName) {
+          term.dataset.versionRow = linkName;
+        }
+        term.hidden = hidden;
+        return term;
+      }
+
+      function createDefinition(linkName, hidden = false) {
+        const definition = document.createElement("dd");
+        const link = document.createElement("a");
+        link.href = "#";
+        link.dataset.versionLink = linkName;
+        definition.dataset.versionRow = linkName;
+        definition.hidden = hidden;
+        definition.append(link);
+        return definition;
+      }
+
+      function findMetadataTerm(metadata, label) {
+        return [...metadata.querySelectorAll("dt")]
+          .find((term) => term.textContent.trim() === label);
+      }
+
+      function getRowDefinitions(term) {
+        const definitions = [];
+        for (let node = term.nextElementSibling; node && node.tagName.toLowerCase() === "dd"; node = node.nextElementSibling) {
+          definitions.push(node);
+        }
+        return definitions;
+      }
+
+      function getRowEnd(term) {
+        const definitions = getRowDefinitions(term);
+        return definitions[definitions.length - 1] || term;
+      }
+
+      function setVersionRowVisibility(linkName, hidden) {
+        document
+          .querySelectorAll(`[data-version-row="${linkName}"]`)
+          .forEach((element) => {
+            element.hidden = hidden;
+          });
+      }
+
+      window.addEventListener("DOMContentLoaded", setVersionLinks);
+    })();
+  </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes" rel="canonical">
-  <meta content="119d5078fb44c24fc90825384eabecea0f4624cc" name="revision">
+  <meta content="69017adc5fb194ec586e74588ce71d28be37b7c5" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
