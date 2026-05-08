@@ -5,7 +5,14 @@ Level: 1
 Status: LS
 URL: https://w3id.org/ldes/specification
 Markup Shorthands: markdown yes
+Local Boilerplate: header yes, footer yes, logo yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
+Editor: Sander Van Dooren
+!Author: <a href="https://pietercolpaert.be">Pieter Colpaert</a>
+!Owners: Sander Van Dooren (DIGIT)
+!Owners: Anastasia Sofou (DIGIT)
+!Owners: <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
+!Owners: George Lobo (DIGIT)
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
 Abstract: A Linked Data Event Stream (LDES) is an append-only collection of members described using the Resource Description Framework (RDF). The specification says how a client must replicate the history of an event stream, and how it can then remain synchronized as new members are published.
 </pre>

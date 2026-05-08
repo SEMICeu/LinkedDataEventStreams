@@ -5,7 +5,14 @@ Level: 1
 Status: LD
 URL: https://w3id.org/ldes/server-primer
 Markup Shorthands: markdown yes
+Local Boilerplate: header yes, footer yes, logo yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
+Editor: Sander Van Dooren
+!Author: <a href="https://pietercolpaert.be">Pieter Colpaert</a>
+!Owners: Sander Van Dooren (DIGIT)
+!Owners: Anastasia Sofou (DIGIT)
+!Owners: <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
+!Owners: George Lobo (DIGIT)
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
 Abstract: This Server Primer for Linked Data Event Streams (LDES) provides practical guidance for data publishers on implementing and hosting an LDES server. LDES aims to help publishers balance between offering rich querying APIs and simple data dumps by proposing an event stream as the base API. This primer focuses on lightweight, scalable approaches and best practices for setting up and maintaining an LDES server.
 </pre>

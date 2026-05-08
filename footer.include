@@ -1,0 +1,16 @@
+    <section data-fill-with="references"></section>
+    <section data-fill-with="index"></section>
+    <section data-fill-with="property-index"></section>
+    <section data-fill-with="idl-index"></section>
+    <section data-fill-with="cddl-index"></section>
+    <section data-fill-with="issues-index"></section>
+  </main>
+  <footer class="semic-footer">
+    <p>
+      This specification is maintained by
+      <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>,
+      the Semantic Interoperability Community of Interoperable Europe.
+    </p>
+  </footer>
+</body>
+</html>

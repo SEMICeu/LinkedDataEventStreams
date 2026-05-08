@@ -2,10 +2,10 @@ name: LDES Specification Build
 
 on:
   pull_request:
-    paths: ["eventstreams.bs"]
+    paths: ["eventstreams.bs", "header.include", "footer.include", "logo.include", "assets/**"]
   push:
     branches: [main]
-    paths: ["eventstreams.bs"]
+    paths: ["eventstreams.bs", "header.include", "footer.include", "logo.include", "assets/**"]
     tags: ["*"]
 
   workflow_dispatch:
@@ -16,6 +16,8 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    env:
+      SEMICMATOMOID: ${{ secrets.SEMICMATOMOID }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -23,6 +25,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Publish Bikeshed document
+        if: ${{ env.SEMICMATOMOID == '' }}
         # You may pin to the exact commit or the version.
         uses: w3c/spec-prod@v2
         with:
@@ -37,6 +40,17 @@ jobs:
           # with .html extension instead,
           # but if you want to customize it:
           DESTINATION: index.html
+
+      - name: Publish Bikeshed document with Matomo
+        if: ${{ env.SEMICMATOMOID != '' }}
+        uses: w3c/spec-prod@v2
+        with:
+          TOOLCHAIN: bikeshed
+          GH_PAGES_BRANCH: gh-pages
+          SOURCE: eventstreams.bs
+          DESTINATION: index.html
+          GH_PAGES_BUILD_OVERRIDE: |
+            Text Macro: SEMICMATOMOID ${{ env.SEMICMATOMOID }}
 
   copy-tag-version:
     name: Copy tag snapshot
@@ -59,10 +73,12 @@ jobs:
           dest="versions/${tag}"
           mkdir -p "${dest}"
           cp index.html "${dest}/index.html"
+          mkdir -p "${dest}/assets"
+          cp -R assets/. "${dest}/assets/"
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add "${dest}/index.html"
+            git add "${dest}/index.html" "${dest}/assets"
             git commit -m "Add spec snapshot for ${tag}"
             git push
           else
