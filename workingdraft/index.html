@@ -1599,10 +1599,8 @@ Possible extra rowspan handling
     (() => {
       const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
       const releasesBase = `${siteBase}releases/`;
-      const workingDraftBase = `${siteBase}workingdraft/`;
 
       const currentPath = new URL(window.location.href).pathname;
-      const releaseMatch = currentPath.match(/\/releases\/([^/]+)\/([^?#]*)?$/);
       const documentName = (() => {
         const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
         if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
@@ -1612,141 +1610,60 @@ Possible extra rowspan handling
       const documentPath = documentName === "index.html" ? "" : documentName;
       const linkTargets = {
         latest: `${siteBase}${documentPath}`,
-        workingDraft: `${workingDraftBase}${documentPath}`,
+        archivedVersions: releasesBase,
       };
 
-      async function urlExists(url) {
-        try {
-          const response = await fetch(url, { method: "HEAD" });
-          return response.ok;
-        } catch {
-          return false;
-        }
-      }
-
-      async function getReleases() {
-        try {
-          const response = await fetch(releasesBase);
-          if (!response.ok) return [];
-          const html = await response.text();
-          return [...html.matchAll(/href="([^"]+)\/"/g)]
-            .map((match) => decodeURIComponent(match[1]))
-            .filter((release) => release && release !== "assets");
-        } catch {
-          return [];
-        }
-      }
-
-      async function setVersionLinks() {
-        const versionLinks = buildVersionRows();
-        if (!versionLinks) return;
+      function setVersionLinks() {
+        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
+        if (!metadata) return;
+        metadata.classList.add("ldes-version-links");
+        removeVersionRows(metadata);
 
         const currentUrl = new URL(window.location.href);
         currentUrl.hash = "";
         currentUrl.search = "";
 
-        const thisVersion = versionLinks.querySelector('[data-version-link="this-version"]');
-        const latest = versionLinks.querySelector('[data-version-link="latest"]');
-        const workingDraft = versionLinks.querySelector('[data-version-link="working-draft"]');
-
-        thisVersion.href = currentUrl.toString();
-        thisVersion.textContent = currentUrl.toString();
-        latest.href = linkTargets.latest;
-        latest.textContent = linkTargets.latest;
-        workingDraft.href = linkTargets.workingDraft;
-        workingDraft.textContent = linkTargets.workingDraft;
-
-        if (!(await urlExists(linkTargets.workingDraft))) {
-          setVersionRowVisibility("working-draft", true);
-        }
-
-        if (!releaseMatch) return;
-
-        const currentRelease = decodeURIComponent(releaseMatch[1]);
-        const releases = await getReleases();
-        const currentIndex = releases.indexOf(currentRelease);
-        if (currentIndex === -1) return;
-
-        const previous = versionLinks.querySelector('[data-version-link="previous"]');
-        const next = versionLinks.querySelector('[data-version-link="next"]');
-        const candidates = [
-          [previous, releases[currentIndex + 1]],
-          [next, releases[currentIndex - 1]],
+        const rows = [
+          createVersionRow("This version:", currentUrl.toString(), true),
+          createVersionRow("Latest version:", linkTargets.latest),
+          createVersionRow("Archived versions:", linkTargets.archivedVersions),
         ];
-
-        for (const [link, release] of candidates) {
-          if (!release) continue;
-          const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
-          if (await urlExists(href)) {
-            link.href = href;
-            link.textContent = href;
-            setVersionRowVisibility(link.dataset.versionLink, false);
-          }
-        }
+        metadata.prepend(...rows.flat());
       }
 
-      function buildVersionRows() {
-        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
-        if (!metadata) return null;
-        metadata.classList.add("ldes-version-links");
+      function createVersionRow(label, href, isThisVersion = false) {
+        const term = document.createElement("dt");
+        term.textContent = label;
 
-        const thisTerm = findMetadataTerm(metadata, "This version:") || createTerm("This version:");
-        if (!thisTerm.parentElement) {
-          metadata.prepend(thisTerm, createDefinition("this-version"));
+        const definition = document.createElement("dd");
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = href;
+        if (isThisVersion) {
+          link.classList.add("u-url");
         }
+        definition.append(link);
 
-        const thisDefinition = getRowDefinitions(thisTerm)[0] || createDefinition("this-version");
-        if (!thisDefinition.parentElement) {
-          thisTerm.after(thisDefinition);
-        }
-
-        const thisLink = thisDefinition.querySelector("a") || document.createElement("a");
-        thisLink.dataset.versionLink = "this-version";
-        if (!thisLink.parentElement) {
-          thisDefinition.replaceChildren(thisLink);
-        }
-
-        const previousRow = createVersionRow("previous", "Previous version:", true);
-        const nextRow = createVersionRow("next", "Next version:", true);
-        const latestRow = createVersionRow("latest", "Latest version:", false);
-        const workingDraftRow = createVersionRow("working-draft", "Working draft:", false);
-
-        thisTerm.before(...previousRow);
-        getRowEnd(thisTerm).after(...nextRow, ...latestRow, ...workingDraftRow);
-
-        return metadata;
-      }
-
-      function createVersionRow(linkName, label, hidden) {
-        const term = createTerm(label, linkName, hidden);
-        const definition = createDefinition(linkName, hidden);
         return [term, definition];
       }
 
-      function createTerm(label, linkName, hidden = false) {
-        const term = document.createElement("dt");
-        term.textContent = label;
-        if (linkName) {
-          term.dataset.versionRow = linkName;
+      function removeVersionRows(metadata) {
+        const versionLabels = new Set([
+          "Previous version:",
+          "This version:",
+          "Next version:",
+          "Latest version:",
+          "Working draft:",
+          "Archived versions:",
+        ]);
+
+        for (const term of [...metadata.querySelectorAll("dt")]) {
+          if (!versionLabels.has(term.textContent.trim())) continue;
+          for (const definition of getRowDefinitions(term)) {
+            definition.remove();
+          }
+          term.remove();
         }
-        term.hidden = hidden;
-        return term;
-      }
-
-      function createDefinition(linkName, hidden = false) {
-        const definition = document.createElement("dd");
-        const link = document.createElement("a");
-        link.href = "#";
-        link.dataset.versionLink = linkName;
-        definition.dataset.versionRow = linkName;
-        definition.hidden = hidden;
-        definition.append(link);
-        return definition;
-      }
-
-      function findMetadataTerm(metadata, label) {
-        return [...metadata.querySelectorAll("dt")]
-          .find((term) => term.textContent.trim() === label);
       }
 
       function getRowDefinitions(term) {
@@ -1755,19 +1672,6 @@ Possible extra rowspan handling
           definitions.push(node);
         }
         return definitions;
-      }
-
-      function getRowEnd(term) {
-        const definitions = getRowDefinitions(term);
-        return definitions[definitions.length - 1] || term;
-      }
-
-      function setVersionRowVisibility(linkName, hidden) {
-        document
-          .querySelectorAll(`[data-version-row="${linkName}"]`)
-          .forEach((element) => {
-            element.hidden = hidden;
-          });
       }
 
       window.addEventListener("DOMContentLoaded", setVersionLinks);
@@ -2343,6 +2247,8 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <dd><a class="u-url" href="https://semiceu.github.io/LinkedDataEventStreams/workingdraft/">https://semiceu.github.io/LinkedDataEventStreams/workingdraft/</a>
      <dt>Latest version:
      <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/">https://semiceu.github.io/LinkedDataEventStreams/</a>
+     <dt>Archived versions:
+     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/releases/">https://semiceu.github.io/LinkedDataEventStreams/releases/</a>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/">GitHub</a>
      <dt class="editor">Editors:
