@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
-          dest="versions/${tag}"
+          dest="releases/${tag}"
           mkdir -p "${dest}"
           cp index.html "${dest}/index.html"
           mkdir -p "${dest}/assets"
