@@ -23,6 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
+      - name: Render PlantUML diagrams
+        run: java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg assets/*.puml
+
       - name: Publish Bikeshed document
         if: ${{ env.SEMICMATOMOID == '' }}
         uses: w3c/spec-prod@v2
@@ -70,9 +85,22 @@ jobs:
           ref: ${{ github.sha }}
           path: source-snapshot
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
       - name: Copy working draft assets
         run: |
           set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           mkdir -p workingdraft/assets
           cp source-snapshot/vocabulary.ttl workingdraft/vocabulary.ttl
           cp -R source-snapshot/assets/. workingdraft/assets/
@@ -107,19 +135,32 @@ jobs:
           ref: ${{ github.ref }}
           path: source-snapshot
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install GraphViz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Download PlantUML
+        run: curl -L -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar
+
       - name: Copy vocabulary snapshot
         run: |
           set -euo pipefail
+          java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
           tag="${GITHUB_REF_NAME}"
           dest="releases/${tag}"
           mkdir -p "${dest}"
           cp vocabulary.html "${dest}/vocabulary.html"
           cp source-snapshot/vocabulary.ttl "${dest}/vocabulary.ttl"
+          mkdir -p "${dest}/assets"
+          cp -R source-snapshot/assets/. "${dest}/assets/"
           rm -f vocabulary.ttl
           ln -s "${dest}/vocabulary.ttl" vocabulary.ttl
           rm -rf source-snapshot
-          mkdir -p "${dest}/assets"
-          cp -R assets/. "${dest}/assets/"
           cat > vocabulary.html <<EOF
           <!doctype html>
           <meta charset="utf-8">

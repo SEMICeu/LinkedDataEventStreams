@@ -74,6 +74,11 @@ Used prefixes are listed in the namespace table.
   </tbody>
 </table>
 
+<figure class="ldes-vocabulary-diagram">
+  <img src="assets/ldes-vocabulary-overview.svg" alt="Overview of the LDES vocabulary classes and properties" width="1281" height="898">
+  <figcaption>Overview of the main classes and properties in the LDES vocabulary.</figcaption>
+</figure>
+
 ## ldes:EventStream ## {#EventStream}
 
 The class `ldes:EventStream` is a subclass of `tree:Collection`, which in turn is a subclass of `dcat:Dataset`,
