@@ -24,7 +24,7 @@ While these terms can be used independently of the LDES specification,
 the [main LDES specification](index.html) is available in this release.
 
 <p class="ldes-document-logo">
-  <img src="assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
+  <img src="https://semiceu.github.io/LinkedDataEventStreams/assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
 </p>
 
 # Terms # {#terms}

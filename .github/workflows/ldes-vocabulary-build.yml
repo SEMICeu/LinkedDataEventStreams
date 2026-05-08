@@ -101,15 +101,18 @@ jobs:
         run: |
           set -euo pipefail
           java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p workingdraft/assets
           cp source-snapshot/vocabulary.ttl workingdraft/vocabulary.ttl
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
+          rm -f workingdraft/assets/logo-ldes.svg
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft
+            git add assets/logo-ldes.svg workingdraft
             git commit -m "Update vocabulary working draft assets"
             git push
           else
@@ -158,8 +161,11 @@ jobs:
           cp vocabulary.html "${dest}/vocabulary.html"
           cp source-snapshot/vocabulary.ttl "${dest}/vocabulary.ttl"
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p "${dest}/assets"
           cp -R source-snapshot/assets/. "${dest}/assets/"
+          rm -f "${dest}/assets/logo-ldes.svg"
           rm -f vocabulary.ttl
           ln -s "${dest}/vocabulary.ttl" vocabulary.ttl
           rm -rf source-snapshot
@@ -174,7 +180,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add vocabulary.html vocabulary.ttl "${dest}"
+            git add vocabulary.html vocabulary.ttl assets/logo-ldes.svg "${dest}"
             git commit -m "Add vocabulary snapshot for ${tag}"
             git push
           else

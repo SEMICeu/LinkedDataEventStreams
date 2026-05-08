@@ -79,15 +79,18 @@ jobs:
       - name: Copy working draft assets
         run: |
           set -euo pipefail
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p workingdraft/assets
           cp source-snapshot/context.jsonld workingdraft/context.jsonld
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
+          rm -f workingdraft/assets/logo-ldes.svg
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft
+            git add assets/logo-ldes.svg workingdraft
             git commit -m "Update specification working draft assets"
             git push
           else
@@ -123,11 +126,79 @@ jobs:
           cp index.html "${dest}/index.html"
           cp source-snapshot/context.jsonld "${dest}/context.jsonld"
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p "${dest}/assets"
           cp -R source-snapshot/assets/. "${dest}/assets/"
+          rm -f "${dest}/assets/logo-ldes.svg"
           rm -f context.jsonld
           ln -s "${dest}/context.jsonld" context.jsonld
           rm -rf source-snapshot
+          {
+            cat <<EOF
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>LDES releases</title>
+            <style>
+              body {
+                color: #1f1f1f;
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+                margin: 0 auto;
+                max-width: 48rem;
+                padding: 3rem 1.5rem;
+              }
+              header {
+                border-bottom: 1px solid #d9d9d9;
+                margin-bottom: 2rem;
+                padding-bottom: 1.5rem;
+                text-align: center;
+              }
+              img {
+                height: auto;
+                max-width: 180px;
+              }
+              h1 {
+                color: #005ea8;
+                font-size: 2rem;
+                font-weight: 600;
+                margin: 1.5rem 0 0;
+              }
+              ul {
+                list-style: none;
+                padding: 0;
+              }
+              li {
+                border-bottom: 1px solid #d9d9d9;
+              }
+              a {
+                color: #005ea8;
+                display: block;
+                padding: 0.75rem 0;
+              }
+            </style>
+          </head>
+          <body>
+            <header>
+              <img src="https://semiceu.github.io/LinkedDataEventStreams/assets/logo-ldes.svg" alt="Linked Data Event Streams">
+              <h1>LDES releases</h1>
+            </header>
+            <main>
+              <ul>
+          EOF
+            find releases -mindepth 1 -maxdepth 1 -type d ! -name assets -printf '%f\n' | sort -Vr | while read -r release; do
+              printf '        <li><a href="%s/">%s</a></li>\n' "$release" "$release"
+            done
+            cat <<EOF
+              </ul>
+            </main>
+          </body>
+          </html>
+          EOF
+          } > releases/index.html
           cat > index.html <<EOF
           <!doctype html>
           <meta charset="utf-8">
@@ -139,7 +210,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add index.html context.jsonld "${dest}"
+            git add index.html context.jsonld assets/logo-ldes.svg releases/index.html "${dest}"
             git commit -m "Add spec snapshot for ${tag}"
             git push
           else

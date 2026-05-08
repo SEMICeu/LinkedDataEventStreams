@@ -101,14 +101,17 @@ jobs:
         run: |
           set -euo pipefail
           java -Djava.awt.headless=true -jar /tmp/plantuml.jar -tsvg source-snapshot/assets/*.puml
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p workingdraft/assets
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} workingdraft/ \;
           cp -R source-snapshot/assets/. workingdraft/assets/
+          rm -f workingdraft/assets/logo-ldes.svg
           rm -rf source-snapshot
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add workingdraft
+            git add assets/logo-ldes.svg workingdraft
             git commit -m "Update server primer working draft assets"
             git push
           else
@@ -156,8 +159,11 @@ jobs:
           mkdir -p "${dest}"
           cp server-primer.html "${dest}/server-primer.html"
           find source-snapshot -maxdepth 1 -type f \( -iname "*.svg" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} "${dest}/" \;
+          mkdir -p assets
+          cp source-snapshot/assets/logo-ldes.svg assets/logo-ldes.svg
           mkdir -p "${dest}/assets"
           cp -R source-snapshot/assets/. "${dest}/assets/"
+          rm -f "${dest}/assets/logo-ldes.svg"
           rm -rf source-snapshot
           cat > server-primer.html <<EOF
           <!doctype html>
@@ -170,7 +176,7 @@ jobs:
           if git status --porcelain | grep . >/dev/null; then
             git config user.email "semic-eu+github-actions[bot]@users.noreply.github.com"
             git config user.name "SEMIC EU archival [bot]"
-            git add server-primer.html "${dest}"
+            git add server-primer.html assets/logo-ldes.svg "${dest}"
             git commit -m "Add server primer snapshot for ${tag}"
             git push
           else
