@@ -87,20 +87,7 @@
       color: var(--semic-muted);
     }
 
-    .ldes-version-nav {
-      border-top: 1px solid var(--semic-border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem 1rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-    }
-
-    .ldes-version-nav a {
-      font-size: 0.95rem;
-    }
-
-    .ldes-version-nav a[hidden] {
+    .ldes-version-links [hidden] {
       display: none;
     }
 
@@ -170,16 +157,26 @@
       }
 
       async function setVersionLinks() {
-        const nav = document.querySelector(".ldes-version-nav");
-        if (!nav) return;
+        const versionLinks = buildVersionRows();
+        if (!versionLinks) return;
 
-        const latest = nav.querySelector('[data-version-link="latest"]');
-        const workingDraft = nav.querySelector('[data-version-link="working-draft"]');
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = "";
+        currentUrl.search = "";
+
+        const thisVersion = versionLinks.querySelector('[data-version-link="this-version"]');
+        const latest = versionLinks.querySelector('[data-version-link="latest"]');
+        const workingDraft = versionLinks.querySelector('[data-version-link="working-draft"]');
+
+        thisVersion.href = currentUrl.toString();
+        thisVersion.textContent = currentUrl.toString();
         latest.href = linkTargets.latest;
+        latest.textContent = linkTargets.latest;
         workingDraft.href = linkTargets.workingDraft;
+        workingDraft.textContent = linkTargets.workingDraft;
 
         if (!(await urlExists(linkTargets.workingDraft))) {
-          workingDraft.hidden = true;
+          setVersionRowVisibility("working-draft", true);
         }
 
         if (!releaseMatch) return;
@@ -189,8 +186,8 @@
         const currentIndex = releases.indexOf(currentRelease);
         if (currentIndex === -1) return;
 
-        const previous = nav.querySelector('[data-version-link="previous"]');
-        const next = nav.querySelector('[data-version-link="next"]');
+        const previous = versionLinks.querySelector('[data-version-link="previous"]');
+        const next = versionLinks.querySelector('[data-version-link="next"]');
         const candidates = [
           [previous, releases[currentIndex + 1]],
           [next, releases[currentIndex - 1]],
@@ -201,9 +198,95 @@
           const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
           if (await urlExists(href)) {
             link.href = href;
-            link.hidden = false;
+            link.textContent = href;
+            setVersionRowVisibility(link.dataset.versionLink, false);
           }
         }
+      }
+
+      function buildVersionRows() {
+        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
+        if (!metadata) return null;
+        metadata.classList.add("ldes-version-links");
+
+        const thisTerm = findMetadataTerm(metadata, "This version:") || createTerm("This version:");
+        if (!thisTerm.parentElement) {
+          metadata.prepend(thisTerm, createDefinition("this-version"));
+        }
+
+        const thisDefinition = getRowDefinitions(thisTerm)[0] || createDefinition("this-version");
+        if (!thisDefinition.parentElement) {
+          thisTerm.after(thisDefinition);
+        }
+
+        const thisLink = thisDefinition.querySelector("a") || document.createElement("a");
+        thisLink.dataset.versionLink = "this-version";
+        if (!thisLink.parentElement) {
+          thisDefinition.replaceChildren(thisLink);
+        }
+
+        const previousRow = createVersionRow("previous", "Previous version:", true);
+        const nextRow = createVersionRow("next", "Next version:", true);
+        const latestRow = createVersionRow("latest", "Latest version:", false);
+        const workingDraftRow = createVersionRow("working-draft", "Working draft:", false);
+
+        thisTerm.before(...previousRow);
+        getRowEnd(thisTerm).after(...nextRow, ...latestRow, ...workingDraftRow);
+
+        return metadata;
+      }
+
+      function createVersionRow(linkName, label, hidden) {
+        const term = createTerm(label, linkName, hidden);
+        const definition = createDefinition(linkName, hidden);
+        return [term, definition];
+      }
+
+      function createTerm(label, linkName, hidden = false) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        if (linkName) {
+          term.dataset.versionRow = linkName;
+        }
+        term.hidden = hidden;
+        return term;
+      }
+
+      function createDefinition(linkName, hidden = false) {
+        const definition = document.createElement("dd");
+        const link = document.createElement("a");
+        link.href = "#";
+        link.dataset.versionLink = linkName;
+        definition.dataset.versionRow = linkName;
+        definition.hidden = hidden;
+        definition.append(link);
+        return definition;
+      }
+
+      function findMetadataTerm(metadata, label) {
+        return [...metadata.querySelectorAll("dt")]
+          .find((term) => term.textContent.trim() === label);
+      }
+
+      function getRowDefinitions(term) {
+        const definitions = [];
+        for (let node = term.nextElementSibling; node && node.tagName.toLowerCase() === "dd"; node = node.nextElementSibling) {
+          definitions.push(node);
+        }
+        return definitions;
+      }
+
+      function getRowEnd(term) {
+        const definitions = getRowDefinitions(term);
+        return definitions[definitions.length - 1] || term;
+      }
+
+      function setVersionRowVisibility(linkName, hidden) {
+        document
+          .querySelectorAll(`[data-version-row="${linkName}"]`)
+          .forEach((element) => {
+            element.hidden = hidden;
+          });
       }
 
       window.addEventListener("DOMContentLoaded", setVersionLinks);
@@ -220,12 +303,6 @@
     <div data-fill-with="spec-metadata"></div>
     <div data-fill-with="warning"></div>
     <p class="copyright" data-fill-with="copyright"></p>
-    <nav class="ldes-version-nav" aria-label="Version navigation">
-      <a href="#" data-version-link="previous" hidden>Previous version</a>
-      <a href="#" data-version-link="next" hidden>Next version</a>
-      <a href="#" data-version-link="latest">Latest version</a>
-      <a href="#" data-version-link="working-draft">Working draft</a>
-    </nav>
   </div>
   <section class="p-summary" data-fill-with="abstract"></section>
   <div data-fill-with="at-risk"></div>
