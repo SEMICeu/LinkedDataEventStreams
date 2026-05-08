@@ -1570,20 +1570,7 @@ Possible extra rowspan handling
       color: var(--semic-muted);
     }
 
-    .ldes-version-nav {
-      border-top: 1px solid var(--semic-border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem 1rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-    }
-
-    .ldes-version-nav a {
-      font-size: 0.95rem;
-    }
-
-    .ldes-version-nav a[hidden] {
+    .ldes-version-links [hidden] {
       display: none;
     }
 
@@ -1651,16 +1638,26 @@ Possible extra rowspan handling
       }
 
       async function setVersionLinks() {
-        const nav = document.querySelector(".ldes-version-nav");
-        if (!nav) return;
+        const versionLinks = buildVersionRows();
+        if (!versionLinks) return;
 
-        const latest = nav.querySelector('[data-version-link="latest"]');
-        const workingDraft = nav.querySelector('[data-version-link="working-draft"]');
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = "";
+        currentUrl.search = "";
+
+        const thisVersion = versionLinks.querySelector('[data-version-link="this-version"]');
+        const latest = versionLinks.querySelector('[data-version-link="latest"]');
+        const workingDraft = versionLinks.querySelector('[data-version-link="working-draft"]');
+
+        thisVersion.href = currentUrl.toString();
+        thisVersion.textContent = currentUrl.toString();
         latest.href = linkTargets.latest;
+        latest.textContent = linkTargets.latest;
         workingDraft.href = linkTargets.workingDraft;
+        workingDraft.textContent = linkTargets.workingDraft;
 
         if (!(await urlExists(linkTargets.workingDraft))) {
-          workingDraft.hidden = true;
+          setVersionRowVisibility("working-draft", true);
         }
 
         if (!releaseMatch) return;
@@ -1670,8 +1667,8 @@ Possible extra rowspan handling
         const currentIndex = releases.indexOf(currentRelease);
         if (currentIndex === -1) return;
 
-        const previous = nav.querySelector('[data-version-link="previous"]');
-        const next = nav.querySelector('[data-version-link="next"]');
+        const previous = versionLinks.querySelector('[data-version-link="previous"]');
+        const next = versionLinks.querySelector('[data-version-link="next"]');
         const candidates = [
           [previous, releases[currentIndex + 1]],
           [next, releases[currentIndex - 1]],
@@ -1682,9 +1679,95 @@ Possible extra rowspan handling
           const href = `${releasesBase}${encodeURIComponent(release)}/${documentPath}`;
           if (await urlExists(href)) {
             link.href = href;
-            link.hidden = false;
+            link.textContent = href;
+            setVersionRowVisibility(link.dataset.versionLink, false);
           }
         }
+      }
+
+      function buildVersionRows() {
+        const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
+        if (!metadata) return null;
+        metadata.classList.add("ldes-version-links");
+
+        const thisTerm = findMetadataTerm(metadata, "This version:") || createTerm("This version:");
+        if (!thisTerm.parentElement) {
+          metadata.prepend(thisTerm, createDefinition("this-version"));
+        }
+
+        const thisDefinition = getRowDefinitions(thisTerm)[0] || createDefinition("this-version");
+        if (!thisDefinition.parentElement) {
+          thisTerm.after(thisDefinition);
+        }
+
+        const thisLink = thisDefinition.querySelector("a") || document.createElement("a");
+        thisLink.dataset.versionLink = "this-version";
+        if (!thisLink.parentElement) {
+          thisDefinition.replaceChildren(thisLink);
+        }
+
+        const previousRow = createVersionRow("previous", "Previous version:", true);
+        const nextRow = createVersionRow("next", "Next version:", true);
+        const latestRow = createVersionRow("latest", "Latest version:", false);
+        const workingDraftRow = createVersionRow("working-draft", "Working draft:", false);
+
+        thisTerm.before(...previousRow);
+        getRowEnd(thisTerm).after(...nextRow, ...latestRow, ...workingDraftRow);
+
+        return metadata;
+      }
+
+      function createVersionRow(linkName, label, hidden) {
+        const term = createTerm(label, linkName, hidden);
+        const definition = createDefinition(linkName, hidden);
+        return [term, definition];
+      }
+
+      function createTerm(label, linkName, hidden = false) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        if (linkName) {
+          term.dataset.versionRow = linkName;
+        }
+        term.hidden = hidden;
+        return term;
+      }
+
+      function createDefinition(linkName, hidden = false) {
+        const definition = document.createElement("dd");
+        const link = document.createElement("a");
+        link.href = "#";
+        link.dataset.versionLink = linkName;
+        definition.dataset.versionRow = linkName;
+        definition.hidden = hidden;
+        definition.append(link);
+        return definition;
+      }
+
+      function findMetadataTerm(metadata, label) {
+        return [...metadata.querySelectorAll("dt")]
+          .find((term) => term.textContent.trim() === label);
+      }
+
+      function getRowDefinitions(term) {
+        const definitions = [];
+        for (let node = term.nextElementSibling; node && node.tagName.toLowerCase() === "dd"; node = node.nextElementSibling) {
+          definitions.push(node);
+        }
+        return definitions;
+      }
+
+      function getRowEnd(term) {
+        const definitions = getRowDefinitions(term);
+        return definitions[definitions.length - 1] || term;
+      }
+
+      function setVersionRowVisibility(linkName, hidden) {
+        document
+          .querySelectorAll(`[data-version-row="${linkName}"]`)
+          .forEach((element) => {
+            element.hidden = hidden;
+          });
       }
 
       window.addEventListener("DOMContentLoaded", setVersionLinks);
@@ -1692,7 +1775,7 @@ Possible extra rowspan handling
   </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes" rel="canonical">
-  <meta content="72764541a109a94042c7c0a4e86c5f64851bc3b1" name="revision">
+  <meta content="69017adc5fb194ec586e74588ce71d28be37b7c5" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2137,12 +2220,6 @@ the editors have made this specification available under the
 which is available at https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document.
 </p>
-   <nav aria-label="Version navigation" class="ldes-version-nav">
-      <a data-version-link="previous" hidden href="#">Previous version</a>
-      <a data-version-link="next" hidden href="#">Next version</a>
-      <a data-version-link="latest" href="#">Latest version</a>
-      <a data-version-link="working-draft" href="#">Working draft</a>
-    </nav>
   </div>
   <section class="p-summary" data-fill-with="abstract">
    <h2 class="heading no-num no-ref no-toc settled" id="abstract"><span class="content">Abstract</span></h2>
