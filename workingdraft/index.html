@@ -1534,23 +1534,57 @@ Possible extra rowspan handling
       const releasesBase = "https://w3id.org/ldes/releases/";
 
       const currentPath = new URL(window.location.href).pathname;
-      const documentName = (() => {
-        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
-        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
-        return lastSegment;
-      })();
-
-      let documentPath = documentName === "index.html" ? "" : documentName;
-      documentPath = documentPath.substring(0, documentPath.indexOf(".html"));
-      let latest = `${siteBase}${documentPath}`;
-      if (documentPath === '') {
-        latest += 'specification';
-      }
+      const pathSegments = currentPath.split("/").filter(Boolean);
+      const documentSlug = getDocumentSlug(currentPath, pathSegments);
+      const latestPath = getLatestPath(documentSlug);
       const linkTargets = {
-        latest: latest,
+        thisVersion: getThisVersionPath(pathSegments, latestPath),
+        latest: `${siteBase}${latestPath}`,
         archivedVersions: releasesBase,
-        workingDraft: `${siteBase}workingdraft/${documentPath}`,
+        workingDraft: `${siteBase}workingdraft/${getWorkingDraftPath(documentSlug)}`,
       };
+
+      function getDocumentSlug(path, segments) {
+        if (path.endsWith("/")) return "index";
+        if (segments[segments.length - 1] === "workingdraft") return "index";
+
+        const releasesIndex = segments.indexOf("releases");
+        if (releasesIndex !== -1 && releasesIndex === segments.length - 2) {
+          return "index";
+        }
+
+        const lastSegment = segments[segments.length - 1] || "index";
+        return lastSegment.replace(/\.html$/, "");
+      }
+
+      function getLatestPath(documentSlug) {
+        const paths = {
+          index: "specification",
+          vocabulary: "vocabulary",
+          "server-primer": "server-primer",
+        };
+
+        return paths[documentSlug] || documentSlug;
+      }
+
+      function getWorkingDraftPath(documentSlug) {
+        return documentSlug === "index" ? "" : getLatestPath(documentSlug);
+      }
+
+      function getThisVersionPath(segments, latestPath) {
+        const workingDraftIndex = segments.indexOf("workingdraft");
+        if (workingDraftIndex !== -1) {
+          return `workingdraft/${getWorkingDraftPath(documentSlug)}`;
+        }
+
+        const releasesIndex = segments.indexOf("releases");
+        if (releasesIndex !== -1 && segments[releasesIndex + 1]) {
+          const release = segments[releasesIndex + 1];
+          return `releases/${release}/${getWorkingDraftPath(documentSlug)}`;
+        }
+
+        return latestPath;
+      }
 
       function setVersionLinks() {
         const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
@@ -1558,12 +1592,8 @@ Possible extra rowspan handling
         metadata.classList.add("ldes-version-links");
         removeVersionRows(metadata);
 
-        const currentUrl = new URL(window.location.href);
-        currentUrl.hash = "";
-        currentUrl.search = "";
-
         const rows = [
-          createVersionRow("This version:", siteBase + currentPath.substring(0, currentPath.indexOf(".html")), true),
+          createVersionRow("This version:", `${siteBase}${linkTargets.thisVersion}`, true),
           createVersionRow("Latest version:", linkTargets.latest),
           createVersionRow("Archived versions:", linkTargets.archivedVersions),
           createVersionRow("Working draft:", linkTargets.workingDraft),
@@ -1614,7 +1644,7 @@ Possible extra rowspan handling
   </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="4974c85c3fab8443acd60085542f11e5f99bd27d" name="revision">
+  <meta content="7837f73008fe7e4eb18216ba659bc0adc1cda96f" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
