@@ -1489,98 +1489,31 @@ Possible extra rowspan handling
 	}
 </style>
 <style>
-    :root {
-      --semic-blue: #005ea8;
-      --semic-text: #1f1f1f;
-      --semic-muted: #555;
-      --semic-border: #d9d9d9;
-    }
+  :root {
+    --semic-blue: #005ea8;
+    --heading-text: #005a9c;
+    --semic-text: #1f1f1f;
+    --semic-muted: #555;
+    --semic-border: #d9d9d9;
+  }
 
-    body {
-      color: var(--semic-text);
-    }
+  #semic-logo {
+    display: block;
+    height: auto;
+    max-width: 154px;
+  }
 
-    a {
-      color: var(--semic-blue);
-    }
+  .head dl {
+    margin-top: 1rem;
+  }
 
-    .head {
-      border-bottom: 1px solid var(--semic-border);
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-    }
-
-    .head h1 {
-      color: var(--heading-text);
-      letter-spacing: 0;
-    }
-
-    .head h2 {
-      color: var(--semic-muted);
-    }
-
-    .head hr {
-      display: none;
-    }
-
-    .head .logo {
-      float: right;
-      margin: 0.2rem 0 1rem 1.5rem;
-    }
-
-    #semic-logo {
-      display: block;
-      height: auto;
-      max-width: 154px;
-    }
-
-    .ldes-document-logo {
-      margin: 1.5rem 0;
-      text-align: center;
-    }
-
-    .ldes-document-logo img {
-      display: block;
-      height: auto;
-      margin: 0 auto;
-      max-width: 180px;
-    }
-
-    .ldes-vocabulary-diagram {
-      margin: 2rem 0;
-      text-align: center;
-    }
-
-    .ldes-vocabulary-diagram img {
-      height: auto;
-      max-width: 100%;
-    }
-
-    .ldes-vocabulary-diagram figcaption {
-      color: var(--semic-muted);
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-
-    .head dl {
-      margin-top: 1rem;
-    }
-
-    .head dt {
-      color: var(--semic-muted);
-    }
-
-    .ldes-version-links [hidden] {
-      display: none;
-    }
-
-    .semic-footer {
-      border-top: 1px solid var(--semic-border);
-      color: var(--semic-muted);
-      font-size: 0.9rem;
-      margin-top: 3rem;
-      padding-top: 1rem;
-    }
+  .semic-footer {
+    border-top: 1px solid var(--semic-border);
+    color: var(--semic-muted);
+    font-size: 0.9rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+  }
   </style>
 <script>
     var _paq = window._paq = window._paq || [];
@@ -1597,21 +1530,61 @@ Possible extra rowspan handling
   </script>
 <script>
     (() => {
-      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
-      const releasesBase = `${siteBase}releases/`;
+      const siteBase = "https://w3id.org/ldes/";
+      const releasesBase = "https://w3id.org/ldes/releases/";
 
       const currentPath = new URL(window.location.href).pathname;
-      const documentName = (() => {
-        const lastSegment = currentPath.split("/").filter(Boolean).pop() || "";
-        if (!lastSegment || !lastSegment.endsWith(".html")) return "index.html";
-        return lastSegment;
-      })();
-
-      const documentPath = documentName === "index.html" ? "" : documentName;
+      const pathSegments = currentPath.split("/").filter(Boolean);
+      const documentSlug = getDocumentSlug(currentPath, pathSegments);
+      const latestPath = getLatestPath(documentSlug);
       const linkTargets = {
-        latest: `${siteBase}${documentPath}`,
+        thisVersion: getThisVersionPath(pathSegments, latestPath),
+        latest: `${siteBase}${latestPath}`,
         archivedVersions: releasesBase,
+        workingDraft: `${siteBase}workingdraft/${getWorkingDraftPath(documentSlug)}`,
       };
+
+      function getDocumentSlug(path, segments) {
+        if (path.endsWith("/")) return "index";
+        if (segments[segments.length - 1] === "workingdraft") return "index";
+
+        const releasesIndex = segments.indexOf("releases");
+        if (releasesIndex !== -1 && releasesIndex === segments.length - 2) {
+          return "index";
+        }
+
+        const lastSegment = segments[segments.length - 1] || "index";
+        return lastSegment.replace(/\.html$/, "");
+      }
+
+      function getLatestPath(documentSlug) {
+        const paths = {
+          index: "specification",
+          vocabulary: "vocabulary",
+          "server-primer": "server-primer",
+        };
+
+        return paths[documentSlug] || documentSlug;
+      }
+
+      function getWorkingDraftPath(documentSlug) {
+        return documentSlug === "index" ? "" : getLatestPath(documentSlug);
+      }
+
+      function getThisVersionPath(segments, latestPath) {
+        const workingDraftIndex = segments.indexOf("workingdraft");
+        if (workingDraftIndex !== -1) {
+          return `workingdraft/${getWorkingDraftPath(documentSlug)}`;
+        }
+
+        const releasesIndex = segments.indexOf("releases");
+        if (releasesIndex !== -1 && segments[releasesIndex + 1]) {
+          const release = segments[releasesIndex + 1];
+          return `releases/${release}/${getWorkingDraftPath(documentSlug)}`;
+        }
+
+        return latestPath;
+      }
 
       function setVersionLinks() {
         const metadata = document.querySelector('[data-fill-with="spec-metadata"] dl');
@@ -1619,14 +1592,11 @@ Possible extra rowspan handling
         metadata.classList.add("ldes-version-links");
         removeVersionRows(metadata);
 
-        const currentUrl = new URL(window.location.href);
-        currentUrl.hash = "";
-        currentUrl.search = "";
-
         const rows = [
-          createVersionRow("This version:", currentUrl.toString(), true),
+          createVersionRow("This version:", `${siteBase}${linkTargets.thisVersion}`, true),
           createVersionRow("Latest version:", linkTargets.latest),
           createVersionRow("Archived versions:", linkTargets.archivedVersions),
+          createVersionRow("Working draft:", linkTargets.workingDraft),
         ];
         metadata.prepend(...rows.flat());
       }
@@ -1649,12 +1619,7 @@ Possible extra rowspan handling
 
       function removeVersionRows(metadata) {
         const versionLabels = new Set([
-          "Previous version:",
-          "This version:",
-          "Next version:",
-          "Latest version:",
-          "Working draft:",
-          "Archived versions:",
+          "This version:"
         ]);
 
         for (const term of [...metadata.querySelectorAll("dt")]) {
@@ -1678,8 +1643,8 @@ Possible extra rowspan handling
     })();
   </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
-  <link href="https://w3id.org/ldes" rel="canonical">
-  <meta content="69017adc5fb194ec586e74588ce71d28be37b7c5" name="revision">
+  <link href="https://w3id.org/ldes/vocabulary" rel="canonical">
+  <meta content="7837f73008fe7e4eb18216ba659bc0adc1cda96f" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2094,16 +2059,12 @@ dfn > a.self-link::before      { content: "#"; }
 </p>
    <h1 class="no-ref p-name" id="title">Linked Data Event Streams Vocabulary</h1>
    <h2 class="heading no-num no-ref no-toc settled" id="profile-and-date"><span class="content">
-      <time class="dt-updated" datetime="2026-05-08">8 May 2026</time>
+      <time class="dt-updated" datetime="2026-05-09">9 May 2026</time>
     </span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://semiceu.github.io/LinkedDataEventStreams/workingdraft/vocabulary.html">https://semiceu.github.io/LinkedDataEventStreams/workingdraft/vocabulary.html</a>
-     <dt>Latest version:
-     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/vocabulary.html">https://semiceu.github.io/LinkedDataEventStreams/vocabulary.html</a>
-     <dt>Archived versions:
-     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/releases/">https://semiceu.github.io/LinkedDataEventStreams/releases/</a>
+     <dd><a class="u-url" href="https://w3id.org/ldes/vocabulary">https://w3id.org/ldes/vocabulary</a>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/">GitHub</a>
      <dt class="editor">Editors:
@@ -2115,14 +2076,14 @@ dfn > a.self-link::before      { content: "#"; }
      <dd>Sander Van Dooren (DIGIT)
      <dd>Anastasia Sofou (DIGIT)
      <dd><a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
-     <dd>George Lobo (DIGIT)
+     <dd>Georges Lobo (DIGIT)
     </dl>
    </div>
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a>
 To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 8 May 2026,
+In addition, as of 9 May 2026,
 the editors have made this specification available under the
 <a href="https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0.
