@@ -6,51 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style data-fill-with="stylesheet"></style>
   <style>
+  :root {
+    --semic-blue: #005ea8;
+    --heading-text: #005a9c;
+    --semic-text: #1f1f1f;
+    --semic-muted: #555;
+    --semic-border: #d9d9d9;
+  }
 
-    #semic-logo {
-      display: block;
-      height: auto;
-      max-width: 154px;
-    }
+  #semic-logo {
+    display: block;
+    height: auto;
+    max-width: 154px;
+  }
 
-    .ldes-document-logo {
-      margin: 1.5rem 0;
-      text-align: center;
-    }
+  .head dl {
+    margin-top: 1rem;
+  }
 
-    .ldes-document-logo img {
-      display: block;
-      height: auto;
-      margin: 0 auto;
-      max-width: 180px;
-    }
-
-    .ldes-vocabulary-diagram {
-      margin: 2rem 0;
-      text-align: center;
-    }
-
-    .ldes-vocabulary-diagram img {
-      height: auto;
-      max-width: 100%;
-    }
-
-    .ldes-vocabulary-diagram figcaption {
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-
-    .head dl {
-      margin-top: 1rem;
-    }
-
-    .semic-footer {
-      border-top: 1px solid #312828;
-      color: #373943;
-      font-size: 0.9rem;
-      margin-top: 3rem;
-      padding-top: 1rem;
-    }
+  .semic-footer {
+    border-top: 1px solid var(--semic-border);
+    color: var(--semic-muted);
+    font-size: 0.9rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+  }
   </style>
   <!-- Matomo -->
   <script bs-macros include-if="text macro: SEMICMATOMOID">
@@ -69,7 +49,7 @@
   <!-- End Matomo Code -->
   <script>
     (() => {
-      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const siteBase = "https://w3id.org/ldes/";
       const releasesBase = `${siteBase}releases/`;
 
       const currentPath = new URL(window.location.href).pathname;

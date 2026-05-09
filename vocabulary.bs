@@ -3,7 +3,7 @@ Title: Linked Data Event Streams Vocabulary
 Shortname: LDES Vocabulary
 Level: 1
 Status: LS
-URL: https://w3id.org/ldes
+URL: https://w3id.org/ldes/vocabulary
 Markup Shorthands: markdown yes
 Local Boilerplate: header yes, footer yes, logo yes
 Editor: Pieter Colpaert, https://pietercolpaert.be
