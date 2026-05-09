@@ -50,7 +50,7 @@
   <script>
     (() => {
       const siteBase = "https://w3id.org/ldes/";
-      const releasesBase = `${siteBase}releases/`;
+      const releasesBase = "https://w3id.org/ldes/releases/";
 
       const currentPath = new URL(window.location.href).pathname;
       const documentName = (() => {
@@ -59,10 +59,16 @@
         return lastSegment;
       })();
 
-      const documentPath = documentName === "index.html" ? "" : documentName;
+      let documentPath = documentName === "index.html" ? "" : documentName;
+      documentPath = documentPath.substring(0, documentPath.indexOf(".html"));
+      let latest = `${siteBase}${documentPath}`;
+      if (documentPath === '') {
+        latest += 'specification';
+      }
       const linkTargets = {
-        latest: `${siteBase}${documentPath}`,
+        latest: latest,
         archivedVersions: releasesBase,
+        workingDraft: `${siteBase}workingdraft/${documentPath}`,
       };
 
       function setVersionLinks() {
@@ -76,9 +82,10 @@
         currentUrl.search = "";
 
         const rows = [
-          createVersionRow("This version:", currentUrl.toString(), true),
+          createVersionRow("This version:", siteBase + currentPath.substring(0, currentPath.indexOf(".html")), true),
           createVersionRow("Latest version:", linkTargets.latest),
           createVersionRow("Archived versions:", linkTargets.archivedVersions),
+          createVersionRow("Working draft:", linkTargets.workingDraft),
         ];
         metadata.prepend(...rows.flat());
       }
@@ -101,12 +108,7 @@
 
       function removeVersionRows(metadata) {
         const versionLabels = new Set([
-          "Previous version:",
-          "This version:",
-          "Next version:",
-          "Latest version:",
-          "Working draft:",
-          "Archived versions:",
+          "This version:"
         ]);
 
         for (const term of [...metadata.querySelectorAll("dt")]) {
