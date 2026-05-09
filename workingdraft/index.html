@@ -1489,94 +1489,31 @@ Possible extra rowspan handling
 	}
 </style>
 <style>
-    :root {
-      --semic-blue: #005ea8;
-      --semic-text: #1f1f1f;
-      --semic-muted: #555;
-      --semic-border: #d9d9d9;
-    }
+  :root {
+    --semic-blue: #005ea8;
+    --heading-text: #005a9c;
+    --semic-text: #1f1f1f;
+    --semic-muted: #555;
+    --semic-border: #d9d9d9;
+  }
 
-    body {
-      color: var(--semic-text);
-    }
+  #semic-logo {
+    display: block;
+    height: auto;
+    max-width: 154px;
+  }
 
-    a {
-      color: var(--semic-blue);
-    }
+  .head dl {
+    margin-top: 1rem;
+  }
 
-    .head {
-      border-bottom: 1px solid var(--semic-border);
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-    }
-
-    .head h1 {
-      color: var(--heading-text);
-      letter-spacing: 0;
-    }
-
-    .head h2 {
-      color: var(--semic-muted);
-    }
-
-    .head hr {
-      display: none;
-    }
-
-    .head .logo {
-      float: right;
-      margin: 0.2rem 0 1rem 1.5rem;
-    }
-
-    #semic-logo {
-      display: block;
-      height: auto;
-      max-width: 154px;
-    }
-
-    .ldes-document-logo {
-      margin: 1.5rem 0;
-      text-align: center;
-    }
-
-    .ldes-document-logo img {
-      display: block;
-      height: auto;
-      margin: 0 auto;
-      max-width: 180px;
-    }
-
-    .ldes-vocabulary-diagram {
-      margin: 2rem 0;
-      text-align: center;
-    }
-
-    .ldes-vocabulary-diagram img {
-      height: auto;
-      max-width: 100%;
-    }
-
-    .ldes-vocabulary-diagram figcaption {
-      color: var(--semic-muted);
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-
-    .head dl {
-      margin-top: 1rem;
-    }
-
-    .head dt {
-      color: var(--semic-muted);
-    }
-
-    .semic-footer {
-      border-top: 1px solid var(--semic-border);
-      color: var(--semic-muted);
-      font-size: 0.9rem;
-      margin-top: 3rem;
-      padding-top: 1rem;
-    }
+  .semic-footer {
+    border-top: 1px solid var(--semic-border);
+    color: var(--semic-muted);
+    font-size: 0.9rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+  }
   </style>
 <script>
     var _paq = window._paq = window._paq || [];
@@ -1593,7 +1530,7 @@ Possible extra rowspan handling
   </script>
 <script>
     (() => {
-      const siteBase = "https://semiceu.github.io/LinkedDataEventStreams/";
+      const siteBase = "https://w3id.org/ldes/";
       const releasesBase = `${siteBase}releases/`;
 
       const currentPath = new URL(window.location.href).pathname;
@@ -1675,7 +1612,7 @@ Possible extra rowspan handling
   </script>
   <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
   <link href="https://w3id.org/ldes/specification" rel="canonical">
-  <meta content="6ce64403dc89861a2a7802834d71d26916953e7c" name="revision">
+  <meta content="8e4eff998e7105958d8e13698b8d29cf40e7c48b" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -2235,16 +2172,12 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </p>
    <h1 class="no-ref p-name" id="title">Linked Data Event Streams</h1>
    <h2 class="heading no-num no-ref no-toc settled" id="profile-and-date"><span class="content">
-      <time class="dt-updated" datetime="2026-05-08">8 May 2026</time>
+      <time class="dt-updated" datetime="2026-05-09">9 May 2026</time>
     </span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://semiceu.github.io/LinkedDataEventStreams/workingdraft/">https://semiceu.github.io/LinkedDataEventStreams/workingdraft/</a>
-     <dt>Latest version:
-     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/">https://semiceu.github.io/LinkedDataEventStreams/</a>
-     <dt>Archived versions:
-     <dd><a href="https://semiceu.github.io/LinkedDataEventStreams/releases/">https://semiceu.github.io/LinkedDataEventStreams/releases/</a>
+     <dd><a class="u-url" href="https://w3id.org/ldes/specification">https://w3id.org/ldes/specification</a>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/SEMICeu/LinkedDataEventStreams/issues/">GitHub</a>
      <dt class="editor">Editors:
@@ -2256,14 +2189,14 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <dd>Sander Van Dooren (DIGIT)
      <dd>Anastasia Sofou (DIGIT)
      <dd><a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
-     <dd>George Lobo (DIGIT)
+     <dd>Georges Lobo (DIGIT)
     </dl>
    </div>
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a>
 To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 8 May 2026,
+In addition, as of 9 May 2026,
 the editors have made this specification available under the
 <a href="https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at https://www.openwebfoundation.org/the-agreements/the-owf-1-0-agreements-granted-claims/owfa-1-0.
