@@ -12,7 +12,7 @@ Editor: Sander Van Dooren
 !Owners: Sander Van Dooren (DIGIT)
 !Owners: Anastasia Sofou (DIGIT)
 !Owners: <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
-!Owners: George Lobo (DIGIT)
+!Owners: Georges Lobo (DIGIT)
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
 Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary, which provides terms for describing append-only, immutable collections of events as Linked Data. The vocabulary extends existing standards such as the TREE and DCAT vocabularies to support event streams, versioning, retention policies, and transactional semantics.
 </pre>
