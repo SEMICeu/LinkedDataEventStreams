@@ -1,0 +1,113 @@
+@startuml ldes-vocabulary-overview
+!pragma layout smetana
+
+title LDES vocabulary overview
+
+skinparam backgroundColor transparent
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam roundCorner 6
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #005EA8
+  ArrowColor #005EA8
+  FontColor #1F1F1F
+}
+skinparam note {
+  BackgroundColor #F7F9FC
+  BorderColor #D9D9D9
+}
+
+class "dcat:Dataset" as DcatDataset <<external>>
+class "dcat:Distribution" as DcatDistribution <<external>>
+class "tree:Collection" as TreeCollection <<external>>
+class "tree:Node" as TreeNode <<external>>
+class "tree:Relation" as TreeRelation <<external>>
+class "sh:NodeShape" as NodeShape <<external>>
+class "Member IRI" as Member <<resource>>
+
+class "ldes:EventStream" as EventStream {
+  ldes:timestampPath : SHACL property path [0..1]
+  ldes:sequencePath : SHACL property path [0..1]
+  ldes:pollingInterval : xsd:integer [0..1]
+  ldes:versionOfPath : SHACL property path [0..1]
+  ldes:versionTimestampPath : SHACL property path [0..1]
+  ldes:versionSequencePath : SHACL property path [0..1]
+}
+
+class "ldes:EventSource" as EventSource {
+  chronological feed for an ldes:EventStream
+}
+
+class "ldes:RetentionPolicy" as RetentionPolicy {
+  ldes:startingFrom : xsd:dateTime [0..1]
+  ldes:fullLogDuration : xsd:duration [0..1]
+  ldes:versionAmount : xsd:integer [0..1]
+  ldes:versionDuration : xsd:duration [0..1]
+  ldes:versionDeleteDuration : xsd:duration [0..1]
+}
+
+class "versioning terms" as VersioningTerms {
+  ldes:versionCreatePath
+  ldes:versionUpdatePath
+  ldes:versionDeletePath
+  ldes:versionCreateObject
+  ldes:versionUpdateObject
+  ldes:versionDeleteObject
+}
+
+class "transaction terms" as TransactionTerms {
+  ldes:transactionPath
+  ldes:transactionFinalizedPath
+  ldes:transactionFinalizedObject
+}
+
+class "former retention policy terms" as FormerRetentionTerms {
+  ldes:DurationAgoPolicy
+  ldes:LatestVersionSubset
+  ldes:PointInTimePolicy
+  ldes:amount
+  ldes:pointInTime
+}
+
+class "ordered relation" as OrderedRelation {
+  tree:path : SHACL property path
+  tree:value : literal
+}
+
+TreeCollection --|> DcatDataset
+EventStream --|> TreeCollection
+EventSource --|> DcatDistribution
+OrderedRelation --|> TreeRelation
+
+EventSource --> EventStream : publishes source for
+EventStream --> TreeNode : tree:view [0..1]
+EventStream --> Member : tree:member [0..*]
+EventStream --> NodeShape : tree:shape [0..1]
+EventStream --> VersioningTerms : optional version semantics
+EventStream --> TransactionTerms : optional transaction semantics
+
+TreeNode --> Member : tree:member [0..*]
+TreeNode --> TreeRelation : tree:relation [0..*]
+TreeNode --> RetentionPolicy : ldes:retentionPolicy [0..1]
+TreeNode --> RetentionPolicy : tree:viewDescription [0..1]
+TreeNode --> "xsd:boolean" : ldes:immutable [0..1]
+
+TreeRelation --> TreeNode : tree:node [1]
+OrderedRelation --> EventStream : path matches ordering path
+
+RetentionPolicy .. FormerRetentionTerms : supersedes
+
+note right of EventStream
+  Ordered streams use ldes:timestampPath
+  and/or ldes:sequencePath.
+end note
+
+note bottom of TreeNode
+  Root and subsequent nodes contain
+  members and relations. Immutable nodes
+  can be skipped after processing.
+end note
+
+@enduml
