@@ -195,6 +195,22 @@ Exclusive upper bound of the `ldes:timestampPath` value of the members that can 
 
 **Range:** `xsd:dateTime` with a timezone
 
+### ldes:pageNumber ### {#pageNumber}
+
+The number of the page that the relation points to, in an LDES that has neither an `ldes:timestampPath` nor an `ldes:sequencePath`. It is the lower bound of the numbers of the pages that can be reached from there. Numbers are ascending in the order of the log, and are not changed when pages are removed.
+
+**Domain:** `ldes:Relation`, or the root `ldes:Page` itself
+
+**Range:** `xsd:nonNegativeInteger`
+
+### ldes:pageNumberUntil ### {#pageNumberUntil}
+
+Exclusive upper bound of the numbers of the pages that can be reached by following the relation. Defaults to `ldes:pageNumber` plus one.
+
+**Domain:** `ldes:Relation`
+
+**Range:** `xsd:nonNegativeInteger`
+
 ### ldes:sequenceFrom ### {#sequenceFrom}
 
 Inclusive lower bound of the `ldes:sequencePath` value of the members that can be found by following the relation.

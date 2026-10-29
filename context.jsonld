@@ -13,6 +13,8 @@
       "relation": {"@type": "@id", "@id": "ldes:relation"},
       "timeFrom": {"@id": "ldes:timeFrom", "@type": "xsd:dateTime"},
       "timeUntil": {"@id": "ldes:timeUntil", "@type": "xsd:dateTime"},
+      "pageNumber": {"@id": "ldes:pageNumber", "@type": "xsd:nonNegativeInteger"},
+      "pageNumberUntil": {"@id": "ldes:pageNumberUntil", "@type": "xsd:nonNegativeInteger"},
       "sequenceFrom": {"@id": "ldes:sequenceFrom"},
       "sequenceUntil": {"@id": "ldes:sequenceUntil"},
       "memberGraph": {"@id": "ldes:memberGraph", "@type": "xsd:boolean"},

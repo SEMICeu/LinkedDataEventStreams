@@ -98,7 +98,7 @@ Issue: The figure above is inherited from LDES 1.0 and still shows a TREE search
 An LDES has a **chronological order** that is the order of the members as they appear in the log. This is also the default order followed by the versions.
 However, a more specific **version order** can be set, in which versions will not appear in the same order as their intended meaning (for example, version 2 might be published chronologically before version 1).
 
-Every member has an **ordering key**: the value of its `ldes:timestampPath`, optionally followed by the value of its `ldes:sequencePath`.
+Every member has an **ordering key**: the value of its `ldes:timestampPath`, optionally followed by the value of its `ldes:sequencePath`. When neither is set, the order is **implicit**, and the key is the number of the page in which the member is found, followed by its index in that page.
 The members in the log, and thus in every page, are ordered ascending by this key.
 
 <div class="example" highlight="turtle">
@@ -188,7 +188,7 @@ A member message does not describe the page or the LDES.
 
 An LDES does not allow empty messages (i.e., messages without quads), which [[!rdf-messages]] would allow. A client MUST return an error when it encounters an empty message.
 
-The member messages within a page are ordered ascending by their [ordering key](#ordering-keys). Members with equal keys can appear in any order.
+The member messages within a page are ordered ascending by their [ordering key](#ordering-keys), which in implicit order is the order of the messages. Members with equal keys can appear in any order.
 A client can thus read a page as a stream, and does not need to buffer or sort the members of a page.
 
 A page can be a member-less page, containing only a description message, for example to provide relations to other pages.
@@ -277,7 +277,7 @@ When a message does not satisfy the declared rule, the client MUST return an err
 
 Issue: Do we need combinations (e.g., `ldes:memberType` within `ldes:memberGraph`) or a more general mechanism, such as a [[!SHACL]] node shape with a target selecting the member?
 
-Issue: When the published messages have no member identifier at all (e.g., a pure sensor feed), a client could use the ordering key as the identity of the member, provided it is unique. Do we want to specify this fallback, or require producers to set `ldes:memberGraph`, `ldes:memberType`, `ldes:memberPath`, or `ldes:member`?
+Issue: When the published messages have no member identifier at all (e.g., a pure sensor feed), a client could use the ordering key as the identity of the member, provided it is unique. In implicit order, the key (page number, index) is always unique. Do we want to specify this fallback, or require producers to set `ldes:memberGraph`, `ldes:memberType`, `ldes:memberPath`, or `ldes:member`?
 
 ## Using the member identifier ## {#using-member-identifier}
 
@@ -287,9 +287,9 @@ The member identifier is used by the client in the [state](#state-management) (t
 
 A client MUST implement the ascending ordered mode defined in this chapter. It MAY also have any other mode not specified in this document.
 
-An `ldes:EventStream` has an `ldes:timestampPath` and/or an `ldes:sequencePath`. If it has neither, the client MUST return an error.
+An `ldes:EventStream` has an `ldes:timestampPath` and/or an `ldes:sequencePath`. If it has neither, the order of the log is implicit, and the pages are numbered (see [ordering keys](#ordering-keys)).
 
-Issue: LDES 1.0 also described an unordered mode for streams without ordering path. That mode required a client to remember every page and/or member it had ever seen. This draft proposes that all LDESs are ordered, so that every client needs only a small state. Is that acceptable for the use cases that today have no `ldes:timestampPath`?
+Issue: LDES 1.0 also described an unordered mode for streams without ordering path. That mode required a client to remember every page and/or member it had ever seen. This draft proposes that all LDESs are ordered, so that every client needs only a small state: either by `ldes:timestampPath` and/or `ldes:sequencePath`, or implicitly by the order of the log, using page numbers in the relations. Alternatives that were considered are bounds on the position of the member in the log (which changes when members are removed by a retention policy) and an `rdf:List` of pages or `next` links (which introduce a second pagination construct next to `ldes:relation`, and need a state of page IRIs). Open points: producers must never renumber pages, and must only remove whole pages when applying a retention policy.
 
 A client SHOULD check whether an `ldes:pollingInterval` was set on the LDES. If it is, the client SHOULD use this amount of seconds (`xsd:integer`) to set the time to keep between synchronization runs.
 
@@ -324,7 +324,7 @@ A client MUST ensure a member is only emitted once.
 
 A client MUST keep a **bookmark** in its state, consisting of:
  * `bookmarkKey`: the [ordering key](#ordering-keys) of the last emitted member, or *none* if no member was emitted yet;
- * `bookmarkMembers`: the set of member identifiers of all emitted members whose ordering key is equal to `bookmarkKey`.
+ * `bookmarkMembers`: the set of member identifiers of all emitted members whose ordering key is equal to `bookmarkKey`. In implicit order every key is unique, and this set is empty.
 
 Because members are emitted in ascending order of their key, every member with a key smaller than `bookmarkKey` has already been emitted. The `bookmarkMembers` set only needs to hold the members that share exactly the last key, and is therefore typically a handful of identifiers.
 A client MUST NOT need to keep a list of all emitted members or all visited pages.
@@ -339,7 +339,7 @@ A client MUST have a mechanism to communicate this context information and stati
 
 A client MAY keep the `ETag` of a page, by IRI, when this is set in the response, for pages that were not immutable. These are the only pages that can be re-fetched in the next run.
 
-A page can be skipped without fetching it when its relation has an upper bound that is smaller than or equal to the `bookmarkKey` (see [traversal](#traversal)). This replaces the visited-pages list of earlier versions, and is why pages do not need to be remembered.
+A page can be skipped without fetching it when its relation has an upper bound that is smaller than or equal to the `bookmarkKey` (see [traversal](#traversal)). In implicit order, this means that every page with a number before the page of the bookmark is skipped. This replaces the visited-pages list of earlier versions, and is why pages do not need to be remembered.
 A client MAY additionally use the triple `<> ldes:immutable true`, or the `Cache-Control: immutable` HTTP response header, to avoid revalidating a page in the same run.
 
 ## HTTP requests and responses ## {#http-requests-responses}
@@ -411,8 +411,9 @@ The **ordering key** of a member is obtained as follows:
  * When `ldes:timestampPath` is set, the **timestamp** is the single `xsd:dateTime` literal that is found by evaluating the path with the member identifier as the focus node. The literal has a timezone. If there is no such literal, or more than one, or if it has no timezone, the client MUST return an error.
  * When `ldes:sequencePath` is set, the **sequence** is the single `xsd`-typed literal found by evaluating this path with the member identifier as the focus node. If there is no such literal, or more than one, the client MUST return an error.
  * The key is the pair (timestamp, sequence) when both paths are set, the timestamp when only the `ldes:timestampPath` is set, and the sequence when only the `ldes:sequencePath` is set.
+ * When neither path is set, the order is implicit, and the key is the pair (page number, index). The **page number** is the number of the page in which the member message was found: the `ldes:pageNumber` of the relation that led to the page or, for the root page, the `ldes:pageNumber` stated about `<>` in its description message, and 0 when that is absent. The **index** is the 0-based index of the message among the member messages of the page. If the number of a page that has member messages cannot be determined, the client MUST return an error.
 
-Two keys are compared by first comparing timestamps as points on the time line, and, when equal, by comparing the sequences using the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare).
+In implicit order, two keys are compared by comparing the page numbers, and, when equal, the indexes, as integers. Otherwise, two keys are compared by first comparing timestamps as points on the time line, and, when equal, by comparing the sequences using the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare).
 A client in the ascending mode MUST be able to evaluate [SHACL property paths](https://www.w3.org/TR/shacl/#property-paths) to find the matching objects, as this functionality is required for interpreting the paths in the LDES and SHACL specifications.
 
 ## Relations ## {#relations}
@@ -423,11 +424,14 @@ A **relation** is a resource with exactly one `ldes:page`, whose object is the I
  * [`ldes:timeFrom`](https://w3id.org/ldes#timeFrom): an `xsd:dateTime` **with timezone**. The members found by following this relation have a timestamp that is later than or equal to this value.
  * [`ldes:timeUntil`](https://w3id.org/ldes#timeUntil): an `xsd:dateTime` **with timezone**. The members found by following this relation have a timestamp that is earlier than this value.
  * [`ldes:sequenceFrom`](https://w3id.org/ldes#sequenceFrom): an `xsd`-typed literal. The members found by following this relation have a sequence that is greater than or equal to this value. When the `ldes:timestampPath` is also set, this property is always accompanied by an `ldes:timeFrom`.
+ * [`ldes:pageNumber`](https://w3id.org/ldes#pageNumber): an `xsd:nonNegativeInteger`, only used when neither `ldes:timestampPath` nor `ldes:sequencePath` is set. It is the number of the page that the relation points to, and the lower bound of the numbers of all pages that can be reached from there.
+ * [`ldes:pageNumberUntil`](https://w3id.org/ldes#pageNumberUntil): an optional `xsd:nonNegativeInteger`, exclusive upper bound of the numbers of the pages that can be reached from there. When absent, it is the `ldes:pageNumber` plus one: only this page.
  * [`ldes:sequenceUntil`](https://w3id.org/ldes#sequenceUntil): an `xsd`-typed literal. The members found by following this relation have a sequence that is smaller than this value. When the `ldes:timestampPath` is also set, this property is always accompanied by an `ldes:timeUntil`. A client MUST return an error when a sequence bound is not accompanied by the timestamp bound on the same side while the `ldes:timestampPath` is set.
 
 The interval is thus closed at the lower end and open at the upper end: `[from, until)`.
 The **lower key** of a relation is its lower bound, and its **upper key** its upper bound. An absent bound means the lowest, respectively highest, possible key; an absent sequence bound in combination with a timestamp bound means the lowest possible sequence.
 An absent lower bound means “from the very first member”, and an absent upper bound means “until the latest member that will ever be published”.
+In implicit order, `(ldes:pageNumber, 0)` is the lower bound, and `(ldes:pageNumberUntil, 0)` the upper bound; for a relation without `ldes:pageNumberUntil`, the upper bound is `(ldes:pageNumber + 1, 0)`. Page numbers are ascending in the order of the log. A page keeps its number when pages before it are removed: a number is not a position.
 When both a timestamp and sequence bound are given, they together form a key that is compared as described in [ordering keys](#ordering-keys): `(timeFrom, sequenceFrom)` is the lower bound, and `(timeUntil, sequenceUntil)` the upper bound.
 
 The interval holds for all members in the referred page, and in all pages that can be reached from it.
@@ -453,6 +457,17 @@ A description message with a link to the page of 2026, a link to a page for the 
 Note: Compared to LDES 1.0, the bounds replace the relation types such as `tree:GreaterThanRelation`, together with `tree:path` and `tree:value`: two relations ANDed to the same page become one relation with two bounds.
 
 Issue: Should `ldes:timeFrom`/`ldes:timeUntil` and `ldes:sequenceFrom`/`ldes:sequenceUntil` be merged into one pair `ldes:from`/`ldes:until` whose datatype determines which path is meant? Shorter, but ambiguous when the sequence is also an `xsd:dateTime`. Also, the ordering key (timestamp, sequence) as a pair is a draft decision.
+
+<div class="example" highlight="turtle">
+An LDES in implicit order, with a root page that links to page 0, page 1 and the latest page 2. The root page itself has no members (page number 0 by default), and the latest page is the only page that can still grow:
+```turtle
+<> ldes:relation
+     [ ldes:page <page-0> ; ldes:pageNumber 0 ] ,
+     [ ldes:page <page-1> ; ldes:pageNumber 1 ] ,
+     [ ldes:page <page-2> ; ldes:pageNumber 2 ] .
+```
+A page that covers pages 0 to 99 uses `ldes:pageNumber 0 ; ldes:pageNumberUntil 100`.
+</div>
 
 ### Other kinds of relations ### {#other-relations}
 
@@ -481,7 +496,7 @@ A client MUST execute the following steps:
  1. Dereference `I` as described in [initialization](#initialization), or, when a state exists, dereference the IRI of the root page. Make this page an open page by reading its description message, if any, and by adding its relations as unopened relations (see step 4).
  2. While there are sources, take the source with the smallest lower key. When there is a tie, an open page MUST be chosen over an unopened relation.
  3. If the source is an **open page**, take its next member message (which was already read to know the lower key of the page). Determine its member identifier and ordering key. Then:
-     * if the key is smaller than `bookmarkKey`, or equal to `bookmarkKey` and the member identifier is in `bookmarkMembers`, skip the member;
+     * if the key is smaller than `bookmarkKey`, or equal to `bookmarkKey` and either the order is implicit or the member identifier is in `bookmarkMembers`, skip the member;
      * otherwise, emit the member, and update the bookmark: if the key is larger than `bookmarkKey`, set `bookmarkKey` to the key and `bookmarkMembers` to `{identifier}`; if it is equal, add the identifier to `bookmarkMembers`.
  4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, if any, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
  5. When there are no sources left, the synchronization run is finished. The client MUST signal this to the processors further in the pipeline.
@@ -547,6 +562,7 @@ Issue: The consequences of this proposal need to be discussed: (1) the dataset i
 When a consumer, such as the client in ascending mode, wants to establish the chronological order, it MUST derive this from the following two properties on the LDES (if set):
  * `ldes:timestampPath`: this is a SHACL property path that sets the chronological time with an `xsd:dateTime` literal with timezone within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), which XSD literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
+ * When neither is set, the order of the log is the order in which the members were published: the page number of the page, followed by the index in the page.
 
 ## The member’s SHACL shape ## {#shape}
 

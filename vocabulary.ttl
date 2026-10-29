@@ -219,6 +219,17 @@ ldes:timeUntil a rdf:Property ;
                rdfs:domain ldes:Relation ;
                rdfs:range xsd:dateTime .
 
+ldes:pageNumber a rdf:Property ;
+                rdfs:label "page number"@en ;
+                rdfs:comment "In an event stream without timestampPath and sequencePath: the number of the page a relation points to, or of the root page itself. Lower bound of the numbers of the pages that can be reached. Numbers are ascending in the order of the log and are stable."@en ;
+                rdfs:range xsd:nonNegativeInteger .
+
+ldes:pageNumberUntil a rdf:Property ;
+                     rdfs:label "page number until"@en ;
+                     rdfs:comment "Exclusive upper bound of the numbers of the pages that can be reached by following the relation. Defaults to ldes:pageNumber plus one."@en ;
+                     rdfs:domain ldes:Relation ;
+                     rdfs:range xsd:nonNegativeInteger .
+
 ldes:sequenceFrom a rdf:Property ;
                   rdfs:label "sequence from"@en ;
                   rdfs:comment "Inclusive lower bound of the sequence (ldes:sequencePath) of the members that can be found by following the relation."@en ;

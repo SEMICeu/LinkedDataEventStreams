@@ -117,12 +117,14 @@ Recommended context properties on the `ldes:EventStream`:
 # Paginating Your Event Stream # {#paginating}
 
 Instead of a one- or two-dimensional pagination scheme, LDES lets you describe the pages you want and build the structure you need, using relations that point to intervals of the ordering key. We recommend the following:
- * You MUST set the chronological order of your event stream using `ldes:timestampPath` and/or `ldes:sequencePath`.
+ * You SHOULD set the chronological order of your event stream using `ldes:timestampPath` and/or `ldes:sequencePath`. When you set neither, the order is the order of the log, and you MUST number your pages: see below.
  * Every relation MUST point to one page using `ldes:page`, and SHOULD state the interval of the members that can be found there using `ldes:timeFrom` and `ldes:timeUntil` (or `ldes:sequenceFrom` and `ldes:sequenceUntil`). The lower bound is inclusive and the upper bound is exclusive.
  * All `xsd:dateTime` literals you publish MUST come with a timezone.
  * Give a relation to a page that is full and will not receive new members both bounds. This allows a client that has already seen these members to skip the page without a request.
  * Start with 1 root page that contains links to member pages. If that gets too large, you can introduce another level.
  * You SHOULD use relative IRIs when referring to other pages.
+
+When you set neither path, the order is implicit. Every relation MUST then state `ldes:pageNumber` (and, for a page that leads to a range of pages, `ldes:pageNumberUntil`). You MUST number the pages ascending in the order of the log, and you MUST NOT renumber pages: a page keeps its number when earlier pages are removed. You MUST only append members to the last page, and when you apply a retention policy, you MUST remove whole pages, never members from the middle of a page. The root page has page number 0 unless you state `<> ldes:pageNumber N` in its description message.
 
 Issue: we should still add examples of how to paginate here.
 
@@ -341,7 +343,7 @@ Relations in LDES are used to describe how pages are connected within the event 
 
 On all relations, exactly one `ldes:page` MUST be present. The object MUST be an IRI.
 
-A relation SHOULD state the interval of the ordering key of the members that can be found by following it, using `ldes:timeFrom` (inclusive) and `ldes:timeUntil` (exclusive), each an `xsd:dateTime` with a timezone, and/or `ldes:sequenceFrom` and `ldes:sequenceUntil`. When both the `ldes:timestampPath` and `ldes:sequencePath` are set, a sequence bound MUST be accompanied by the timestamp bound on the same side.
+A relation SHOULD state the interval of the ordering key of the members that can be found by following it, using `ldes:timeFrom` (inclusive) and `ldes:timeUntil` (exclusive), each an `xsd:dateTime` with a timezone, and/or `ldes:sequenceFrom` and `ldes:sequenceUntil`. In implicit order, a relation MUST state `ldes:pageNumber`. When both the `ldes:timestampPath` and `ldes:sequencePath` are set, a sequence bound MUST be accompanied by the timestamp bound on the same side.
 
 The interval of a relation MUST hold for all members in the referred page, and in all pages that can be reached from it.
 
