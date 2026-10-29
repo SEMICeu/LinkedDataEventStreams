@@ -452,11 +452,23 @@ A description message with a link to the page of 2026, a link to a page for the 
 ```
 </div>
 
-Note: Compared to LDES 1.0, only relations on the ordering path(s) exist. There are no relation types such as `GreaterThanRelation`, no `tree:path` and no `tree:value`: two relations ANDed to the same node become one relation with two bounds.
+Note: Compared to LDES 1.0, the bounds replace the relation types such as `tree:GreaterThanRelation`, together with `tree:path` and `tree:value`: two relations ANDed to the same page become one relation with two bounds.
 
 Issue: Should `ldes:timeFrom`/`ldes:timeUntil` and `ldes:sequenceFrom`/`ldes:sequenceUntil` be merged into one pair `ldes:from`/`ldes:until` whose datatype determines which path is meant? Shorter, but ambiguous when the sequence is also an `xsd:dateTime`. Also, the ordering key (timestamp, sequence) as a pair is a draft decision.
 
-Issue: Relations that are not about the ordering (e.g., geospatial) were dropped. This keeps the algorithm simple. “SHACL based relations” from the 2026 trajectory could come back as an extension that is guaranteed to be ignorable by a client following only intervals.
+### Other kinds of relations ### {#other-relations}
+
+A relation can have additional types and properties, for example the relation types of the [TREE specification](https://w3id.org/tree/specification) such as `tree:GeospatiallyContainsRelation` or `tree:PrefixRelation`, with their `tree:path` and `tree:value`. The relation still has exactly one `ldes:page`.
+
+A client is not required to understand these additional types and properties. A client that encounters a relation that it does not understand MUST follow its `ldes:page`. It does so as for any relation: using the bounds of this specification when there are any, and otherwise as a relation without bounds, whose lower key is the lowest possible key and whose upper key is the highest. The link then has to be dereferenced before a member of a later key can be emitted, as members that precede any other member might be found there.
+
+Additional properties can only narrow what can be found by following the relation. A client that ignores them therefore never misses a member, and can still use the bounds.
+
+A client MAY implement additional kinds of relations, and use them to skip a link, as long as it does not skip a link that can still lead to members that have not been emitted.
+
+Note: The LDES vocabulary aligns `ldes:Page`, `ldes:relation` and `ldes:page` with their TREE counterparts using subclass and subproperty axioms. After OWL 2 RL reasoning, a TREE client can thus traverse the pages of an LDES, see the [vocabulary](vocabulary.html#tree-alignment).
+
+Issue: Should a client be allowed to treat the interval bounds as one more kind of relation that is “understood”, so that an unknown relation type together with bounds is handled consistently with a relation with only bounds? This draft says it is, as additional properties only narrow the result.
 
 ## Traversal ## {#traversal}
 

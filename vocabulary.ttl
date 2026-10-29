@@ -179,7 +179,7 @@ ldes:pollingInterval a rdf:Property ;
 ldes:Page a rdfs:Class ;
           rdfs:label "Page"@en ;
           rdfs:comment "A page of an LDES view, published as an RDF Message log when it contains members. The description message contains a triple stating `<> a ldes:Page`."@en ;
-          skos:closeMatch tree:Node .
+          rdfs:subClassOf tree:Node .
 
 ldes:shape a rdf:Property ;
            rdfs:label "shape"@en ;
@@ -190,22 +190,22 @@ ldes:shape a rdf:Property ;
 
 ldes:Relation a rdfs:Class ;
               rdfs:label "Relation"@en ;
-              rdfs:comment "A link from a page to another page, annotated with the interval of the ordering key of the members that can be found by following it."@en ;
-              skos:closeMatch tree:Relation .
+              rdfs:comment "A link from a page to another page, annotated with the interval of the ordering key of the members that can be found by following it. Can have additional types and properties, such as the TREE relation types, which a client does not have to understand."@en ;
+              rdfs:subClassOf tree:Relation .
 
 ldes:relation a rdf:Property ;
               rdfs:label "relation"@en ;
               rdfs:comment "Links a page to a relation."@en ;
               rdfs:domain ldes:Page ;
               rdfs:range ldes:Relation ;
-              skos:closeMatch tree:relation .
+              rdfs:subPropertyOf tree:relation .
 
 ldes:page a rdf:Property ;
           rdfs:label "page"@en ;
           rdfs:comment "The page to be dereferenced when following this relation."@en ;
           rdfs:domain ldes:Relation ;
           rdfs:range ldes:Page ;
-          skos:closeMatch tree:node .
+          rdfs:subPropertyOf tree:node .
 
 ldes:timeFrom a rdf:Property ;
               rdfs:label "time from"@en ;

@@ -155,17 +155,17 @@ If the node is not going to contain new relations leading to new members, or new
 
 ## ldes:Page ## {#Page}
 
-A page of a view, published as an RDF Message log when it contains members. The description message of a page contains `<> rdf:type ldes:Page`. Aligned with `tree:Node`.
+A page of a view, published as an RDF Message log when it contains members. The description message of a page contains `<> rdf:type ldes:Page`. A subclass of `tree:Node`.
 
 ## Relations between pages ## {#relations}
 
 ### ldes:Relation ### {#Relation}
 
-A link from a page to another page, annotated with an interval of the ordering key of the members that can be found by following it. Aligned with `tree:Relation`.
+A link from a page to another page, annotated with an interval of the ordering key of the members that can be found by following it. Can have additional types and properties, such as the relation types of TREE. A subclass of `tree:Relation`.
 
 ### ldes:relation ### {#relation}
 
-Links a page to a relation. Aligned with `tree:relation`.
+Links a page to a relation. A subproperty of `tree:relation`.
 
 **Domain:** `ldes:Page`
 
@@ -173,7 +173,7 @@ Links a page to a relation. Aligned with `tree:relation`.
 
 ### ldes:page ### {#pageProperty}
 
-The page to dereference when following the relation. Aligned with `tree:node`.
+The page to dereference when following the relation. A subproperty of `tree:node`.
 
 **Domain:** `ldes:Relation`
 
@@ -339,7 +339,19 @@ If the object at `ldes:transactionFinalizedPath` equals this value, the member i
 
 # Alignment with TREE # {#tree-alignment}
 
-LDES 2.0 no longer uses the TREE vocabulary. The following table lists the alignments, which are also published as `skos:closeMatch` in the [Turtle version](vocabulary.ttl). A close match is not an equivalence: the LDES terms have the stricter semantics defined in the [main specification](index.html).
+LDES 2.0 no longer uses the TREE vocabulary within its pages. The following table lists the alignments, as published in the [Turtle version](vocabulary.ttl).
+
+The alignment of the terms that are needed to traverse an LDES is made with `rdfs:subClassOf` and `rdfs:subPropertyOf` axioms, which are in the profile of OWL 2 RL. After an OWL 2 RL reasoner has processed an LDES page together with `vocabulary.ttl`, a [TREE](https://w3id.org/tree/specification) client sees:
+ * every `ldes:Page` as a `tree:Node`;
+ * every `ldes:relation` as a `tree:relation` to a `tree:Relation`, with the `ldes:page` as its `tree:node`.
+
+Such a relation has no more specific TREE type, so a TREE client will follow it without being able to prune: the TREE specification states that a client follows a relation of a type it does not know. To also allow a TREE client to prune, a producer can add TREE relation types, `tree:path` and `tree:value` to the same relation, see [relations](index.html#relations) in the main specification.
+
+The other terms are aligned using `skos:closeMatch`, as an inference cannot capture the difference in semantics:
+ * `tree:view` cannot be inferred, as nothing in an LDES page points from the LDES to the root page: the IRI of the LDES dereferences to it. A TREE client will have to be given the root page.
+ * `ldes:member` and `ldes:shape` are not declared to be subproperties of `tree:member` and `tree:shape`, as the domain of those properties is `tree:Collection`, which is a `dcat:Dataset`. A reasoner would then infer that the `ldes:EventStream`, which is a `dcat:Distribution`, is a dataset too. Members that are found using indirect membership cannot be inferred as `tree:member` in any case.
+
+Issue: Do we want the subproperty axioms for `ldes:member` and `ldes:shape` as well, accepting that a reasoner will derive that the LDES is also a `tree:Collection`? Or a separate, optional alignment file?
 
 <table class="simple">
   <thead><tr><th>LDES 2.0</th><th>TREE</th></tr></thead>

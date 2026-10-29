@@ -347,4 +347,6 @@ A relation SHOULD state the interval of the ordering key of the members that can
 
 The interval of a relation MUST hold for all members in the referred page, and in all pages that can be reached from it.
 
+You MAY add other kinds of relations to a relation, such as the relation types of the TREE specification with their `tree:path` and `tree:value`, for example to allow clients that implement them to skip pages. A relation MUST still have exactly one `ldes:page`. You SHOULD always also state the bounds when you can: a client that does not understand a relation MUST follow it, and a relation without bounds is followed before any member of a later key can be emitted. Only add properties that narrow what can be found by following the relation.
+
 Avoid orphan relations. Intervals of different relations MAY overlap, but this causes the client to read more pages. A relation without an upper bound is never skipped by a client, so only use this for the latest page.
