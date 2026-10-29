@@ -316,6 +316,19 @@ The client MUST proceed processing the root page as any other page, i.e., by exe
 
 For every subsequent run, a client MUST consult the state and continue from there.
 
+## Supporting LDES 1.0 and LDES 2.0 ## {#compatibility}
+
+LDES 2.0 uses the same namespace and the same class `ldes:EventStream` as LDES 1.0, and it has no explicit version marker. A client that wants to support both versions MAY use the following signals to decide which version it is reading, in this order:
+ 1. **Media type and syntax:** a response that announces the LDES `profile` or a message media type, or that uses message delimiters (such as `MESSAGE` in TriG, or NDJSON-LD), is an LDES 2.0 page. LDES 1.0 has no such syntax.
+ 2. **Content of the first statements:**
+    * when they contain `tree:view`, `tree:member`, `tree:relation` or `tree:viewDescription`, it is an LDES 1.0 page;
+    * when they contain `ldes:relation`, `ldes:page` or `ldes:member`, and none of the properties above, it is an LDES 2.0 page.
+ 3. **Neither:** a page that only has context information about the LDES, without relations or members, is an empty LDES in both versions. The client MAY process it as either.
+
+A client that only supports LDES 2.0 SHOULD return an error when the first message contains `tree:view`, `tree:member`, `tree:relation` or `tree:viewDescription`. A document without message delimiters is read as one message, and the client would otherwise conclude that an LDES 1.0 is empty.
+
+Note: As an LDES 2.0 is a distribution and not the dataset, it has its own IRI. The same members can thus be published as an LDES 1.0 and as an LDES 2.0 under different IRIs, which a dataset can link using `dcat:distribution`.
+
 ## State management ## {#state-management}
 
 Note: In this section we do not mandate how exactly state management needs to be done, but provide the functionalities that must be implemented. The state is designed to stay small, no matter how long the event stream becomes.
