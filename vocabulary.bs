@@ -1,7 +1,7 @@
 <pre class='metadata'>
 Title: Linked Data Event Streams Vocabulary
 Shortname: LDES Vocabulary
-Level: 1
+Level: 2
 Status: LS
 URL: https://w3id.org/ldes/vocabulary
 Markup Shorthands: markdown yes
@@ -14,7 +14,7 @@ Editor: Sander Van Dooren
 !Owners: <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
 !Owners: Georges Lobo (DIGIT)
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
-Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary, which provides terms for describing append-only, immutable collections of events as Linked Data. The vocabulary extends existing standards such as the TREE and DCAT vocabularies to support event streams, versioning, retention policies, and transactional semantics.
+Abstract:  This document defines the Linked Data Event Streams (LDES) Vocabulary, which provides terms for describing append-only, immutable collections of events as Linked Data. The vocabulary extends existing standards such as DCAT to support event streams built from RDF Messages, interval-based relations between pages, direct and indirect membership, versioning, retention policies, and transactional semantics. Where terms have an equivalent in the TREE vocabulary, an alignment is given.
 </pre>
 
 # Introduction # {#introduction}
@@ -79,10 +79,21 @@ Used prefixes are listed in the namespace table.
   <figcaption>Overview of the main classes and properties in the LDES vocabulary.</figcaption>
 </figure>
 
+Issue: The diagram above is from LDES 1.0 and still shows TREE terms. It needs to be redrawn for LDES 2.0.
+
 ## ldes:EventStream ## {#EventStream}
 
-The class `ldes:EventStream` is a subclass of `tree:Collection`, which in turn is a subclass of `dcat:Dataset`,
-specialized such that all members are immutable, making the collection append-only.
+The class `ldes:EventStream` is a subclass of `dcat:Distribution`: an ordered log of immutable members, published as one specific view of a `dcat:Dataset`, which makes the log append-only. Each member is published as an RDF Message. The IRI of the LDES always dereferences to its root `ldes:Page`. In a DCAT-AP catalog, `dcat:accessURL` of the distribution is used for the entry point, but not within the pages of the LDES. It is loosely aligned with `tree:Collection`, but unlike that class it is not the dataset itself.
+
+Issue: Making the LDES a distribution instead of the dataset is a change compared to LDES 1.0 that still needs to be discussed.
+
+## ldes:shape ## {#shape}
+
+Links the event stream to a `sh:NodeShape` that every member is intended to conform to. Aligned with `tree:shape`.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `sh:NodeShape`
 
 ## ldes:timestampPath ## {#timestampPath}
 
@@ -91,6 +102,14 @@ The path to the `xsd:dateTime` literal in each member that defines the order of 
 **Domain:** `ldes:EventStream`
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
+
+## ldes:defaultTimezone ## {#defaultTimezone}
+
+The timezone to use for the `xsd:dateTime` literals of the event stream, in the members and in the relations, that do not have a timezone. A client adds it to these literals in the members it emits, and it has priority over a timezone that the client is configured with.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `xsd:string`, in the lexical form of a timezone of `xsd:dateTime`: `Z`, or `+hh:mm` or `-hh:mm` between `-14:00` and `+14:00`
 
 ## ldes:sequencePath ## {#sequencePath}
 
@@ -137,23 +156,126 @@ The number of seconds the client should keep between synchronization run calls.
 
 ## ldes:immutable ## {#immutable}
 
-If the node is not going to contain new relations leading to new members, or new members itself, it can be set to immutable.
+If the page is not going to contain new relations leading to new members, or new members itself, it can be set to immutable. This can be stated in the description message of the page itself (`<> ldes:immutable true`), or in the description message of a page that has a relation to it (`<P2> ldes:immutable true` in `P1`).
 
-**Domain:** `tree:Node`
+**Domain:** `ldes:Page`
 **Range:** `xsd:boolean`
 
-## ldes:EventSource ## {#EventSource}
+## ldes:Page ## {#Page}
 
-The class `ldes:EventSource` is a subclass of `dcat:Distribution`,
-specialized to represent a feed that uses a chronological search tree to make a Linked Data Event Stream available in order.
+A page of a view, published as an RDF Message log when it contains members. It does not have to be stated explicitly: it follows from the domain of `ldes:relation`. A subclass of `tree:Node`.
 
-An `ldes:EventSource` can only be published for an `ldes:EventStream` that has `ldes:timestampPath` set, and thus publishes its entities in chronological order.
+## Relations between pages ## {#relations}
+
+### ldes:Relation ### {#Relation}
+
+A link from a page to another page, annotated with an interval of the ordering key of the members that can be found by following it. Can have additional types and properties, such as the relation types of TREE. A subclass of `tree:Relation`.
+
+### ldes:relation ### {#relation}
+
+Links a page to a relation. A subproperty of `tree:relation`.
+
+**Domain:** `ldes:Page`
+
+**Range:** `ldes:Relation`
+
+### ldes:page ### {#pageProperty}
+
+The page to dereference when following the relation. A subproperty of `tree:node`.
+
+**Domain:** `ldes:Relation`
+
+**Range:** `ldes:Page`
+
+### ldes:timeFrom ### {#timeFrom}
+
+Inclusive lower bound of the `ldes:timestampPath` value of the members that can be found by following the relation.
+
+**Domain:** `ldes:Relation`
+
+**Range:** `xsd:dateTime` with a timezone
+
+### ldes:timeUntil ### {#timeUntil}
+
+Exclusive upper bound of the `ldes:timestampPath` value of the members that can be found by following the relation.
+
+**Domain:** `ldes:Relation`
+
+**Range:** `xsd:dateTime` with a timezone
+
+### ldes:pageNumber ### {#pageNumber}
+
+The number of the page that the relation points to, in an LDES that has neither an `ldes:timestampPath` nor an `ldes:sequencePath`. It is the lower bound of the numbers of the pages that can be reached from there. Numbers are ascending in the order of the log, and are not changed when pages are removed.
+
+**Domain:** `ldes:Relation`, or the root `ldes:Page` itself
+
+**Range:** `xsd:nonNegativeInteger`
+
+### ldes:pageNumberUntil ### {#pageNumberUntil}
+
+Exclusive upper bound of the numbers of the pages that can be reached by following the relation. Defaults to `ldes:pageNumber` plus one.
+
+**Domain:** `ldes:Relation`
+
+**Range:** `xsd:nonNegativeInteger`
+
+### ldes:sequenceFrom ### {#sequenceFrom}
+
+Inclusive lower bound of the `ldes:sequencePath` value of the members that can be found by following the relation.
+
+**Domain:** `ldes:Relation`
+
+**Range:** an `xsd`-typed literal
+
+### ldes:sequenceUntil ### {#sequenceUntil}
+
+Exclusive upper bound of the `ldes:sequencePath` value of the members that can be found by following the relation.
+
+**Domain:** `ldes:Relation`
+
+**Range:** an `xsd`-typed literal
+
+## Membership ## {#membership}
+
+How the member identifier is found in each member message. At most one of the indirect membership properties can be set on an `ldes:EventStream`. When none is set, direct membership applies.
+
+### ldes:member ### {#member}
+
+Direct membership: a triple `<ES> ldes:member ?m` in the member message states which entity is the member. Aligned with `tree:member`.
+
+**Domain:** `ldes:EventStream`
+
+### ldes:memberGraph ### {#memberGraph}
+
+Indirect membership: when `true`, the member identifier is the name of the only named graph in each member message.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `xsd:boolean`
+
+### ldes:memberType ### {#memberType}
+
+Indirect membership: the member identifier is the only subject in each member message that has this `rdf:type`.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `rdfs:Class`
+
+### ldes:memberPath ### {#memberPath}
+
+Indirect membership: the member identifier is the only subject in each member message from which this path leads to a value.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
 ## ldes:retentionPolicy ## {#retentionPolicy}
 
 Links to a retention policy.
 
-**Domain:** Preferably on the root node. Alternatively, it can occur on any entity linked from the root node using `tree:viewDescription`.
+**Domain:** `ldes:EventStream`
+
+Issue: In LDES 1.0 the domain was the root node or a view description. Moving the retention policy to the LDES is a change that needs to be discussed.
 
 **Range:** `ldes:RetentionPolicy`
 
@@ -201,18 +323,6 @@ The view keeps its full log for a certain duration.
 
 **Range:** `xsd:duration`
 
-### Former retention policy terms ### {#former-retentionpolicies}
-
- * `ldes:DurationAgoPolicy`: A retention policy class that uses an `xsd:duration` literal to document a sliding window of data.
- * `ldes:LatestVersionSubset`: A retention policy class that selects a number of versions based on `ldes:versionOfPath`.
- * `ldes:amount`: The number of versions to keep. This MUST be a number greater than 0.
-     - Domain: `ldes:LatestVersionSubset`
-     - Range: `xsd:integer`
- * `ldes:PointInTimePolicy`: A retention policy class that indicates members are kept starting from a certain point in time.
- * `ldes:pointInTime`: The point in time from which members will be available starting from this root node.
-     - Domain: `ldes:PointInTimePolicy`
-     - Range: `xsd:dateTime` including an explicit timezone
-
 ## Terms for versioning and transactions on top of ldes:EventStream ## {#versioning-transactions}
 
 ### ldes:versionCreatePath ### {#versionCreatePath}
@@ -250,3 +360,33 @@ Path indicating whether the transaction has been finalized.
 ### ldes:transactionFinalizedObject ### {#transactionFinalizedObject}
 
 If the object at `ldes:transactionFinalizedPath` equals this value, the member indicates the transaction has been finalized.
+
+# Alignment with TREE # {#tree-alignment}
+
+LDES 2.0 no longer uses the TREE vocabulary within its pages. The following table lists the alignments, as published in the [Turtle version](vocabulary.ttl).
+
+The alignment of the terms that are needed to traverse an LDES is made with `rdfs:subClassOf` and `rdfs:subPropertyOf` axioms, which are in the profile of OWL 2 RL. After an OWL 2 RL reasoner has processed an LDES page together with `vocabulary.ttl`, a [TREE](https://w3id.org/tree/specification) client sees:
+ * every `ldes:Page` as a `tree:Node`;
+ * every `ldes:relation` as a `tree:relation` to a `tree:Relation`, with the `ldes:page` as its `tree:node`.
+
+Such a relation has no more specific TREE type, so a TREE client will follow it without being able to prune: the TREE specification states that a client follows a relation of a type it does not know. To also allow a TREE client to prune, a producer can add TREE relation types, `tree:path` and `tree:value` to the same relation, see [relations](index.html#relations) in the main specification.
+
+The other terms are aligned using `skos:closeMatch`, as an inference cannot capture the difference in semantics:
+ * `tree:view` cannot be inferred, as nothing in an LDES page points from the LDES to the root page: the IRI of the LDES dereferences to it. A TREE client will have to be given the root page.
+ * `ldes:member` and `ldes:shape` are not declared to be subproperties of `tree:member` and `tree:shape`, as the domain of those properties is `tree:Collection`, which is a `dcat:Dataset`. A reasoner would then infer that the `ldes:EventStream`, which is a `dcat:Distribution`, is a dataset too. Members that are found using indirect membership cannot be inferred as `tree:member` in any case.
+
+Issue: Do we want the subproperty axioms for `ldes:member` and `ldes:shape` as well, accepting that a reasoner will derive that the LDES is also a `tree:Collection`? Or a separate, optional alignment file?
+
+<table class="simple">
+  <thead><tr><th>LDES 2.0</th><th>TREE</th></tr></thead>
+  <tbody>
+    <tr><td><code>ldes:EventStream</code></td><td><code>tree:Collection</code> (loosely; an <code>ldes:EventStream</code> is a <code>dcat:Distribution</code>)</td></tr>
+    <tr><td><code>ldes:Page</code></td><td><code>tree:Node</code></td></tr>
+    <tr><td>(the LDES IRI dereferences to the root page)</td><td><code>tree:view</code> (removed)</td></tr>
+    <tr><td><code>ldes:shape</code></td><td><code>tree:shape</code></td></tr>
+    <tr><td><code>ldes:member</code></td><td><code>tree:member</code></td></tr>
+    <tr><td><code>ldes:Relation</code>, <code>ldes:relation</code>, <code>ldes:page</code></td><td><code>tree:Relation</code>, <code>tree:relation</code>, <code>tree:node</code></td></tr>
+    <tr><td><code>ldes:timeFrom</code>, <code>ldes:timeUntil</code>, <code>ldes:sequenceFrom</code>, <code>ldes:sequenceUntil</code></td><td><code>tree:GreaterThanOrEqualToRelation</code> and <code>tree:LessThanRelation</code> with <code>tree:path</code> and <code>tree:value</code></td></tr>
+    <tr><td>(the LDES itself)</td><td><code>tree:viewDescription</code> and <code>ldes:EventSource</code> (removed)</td></tr>
+  </tbody>
+</table>

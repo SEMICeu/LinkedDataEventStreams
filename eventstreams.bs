@@ -1,7 +1,7 @@
 <pre class='metadata'>
 Title: Linked Data Event Streams
 Shortname: LDES
-Level: 1
+Level: 2
 Status: LS
 URL: https://w3id.org/ldes/specification
 Markup Shorthands: markdown yes
@@ -14,21 +14,40 @@ Editor: Sander Van Dooren
 !Owners: <a href="https://interoperable-europe.ec.europa.eu/collection/semic-support-centre">SEMIC</a>
 !Owners: Georges Lobo (DIGIT)
 Repository: https://github.com/SEMICeu/LinkedDataEventStreams
-Abstract: A Linked Data Event Stream (LDES) is an append-only collection of members described using the Resource Description Framework (RDF). The specification says how a client must replicate the history of an event stream, and how it can then remain synchronized as new members are published.
+Abstract: A Linked Data Event Stream (LDES) is an append-only, ordered log of members described using the Resource Description Framework (RDF). Each member is an RDF Message, and the log is published over HTTP as one or more pages, of which the pages with members are RDF Message logs. The specification says how a client must replicate the history of an event stream, and how it can then remain synchronized as new members are published.
+</pre>
+
+<pre class="biblio">
+{
+  "rdf-messages": {
+    "title": "RDF Messages",
+    "href": "https://w3c-cg.github.io/rsp/spec/messages.html",
+    "publisher": "W3C RDF Stream Processing Community Group",
+    "status": "CG-DRAFT"
+  }
+}
 </pre>
 
 # Introduction # {#introduction}
+
+Issue: This is the first draft of LDES 2.0 (`Level: 2`). Compared to LDES 1.0, it drops the dependency on the TREE hypermedia specification (alignments with TREE remain in the [vocabulary](vocabulary.html)), builds an LDES from RDF Messages ([[!rdf-messages]]): each member is a message, and each page with members is an RDF Message log, which is why it removes the member extraction algorithm in favour of reading RDF Message logs, requires publication over HTTP, disallows empty messages, replaces TREE relations with a succinct interval-based relation, introduces indirect membership, replaces the traversal algorithm with one that needs only a very small state, makes an LDES one specific view that is a DCAT distribution, and moves the retention policy to the LDES. Open questions are flagged as issues throughout this document.
 
 Linked Data Event Streams (LDES) is an initiative designed to help data publishers strike a balance between offering rich, queryable APIs and providing static data dumps. By proposing an event stream as the foundational API, LDES aims to make it as lightweight and straightforward as possible to host and maintain such a stream.
 
 LDES provides several key components:
 
  1. A [consumer-oriented specification](index.html) (this document) for implementing LDES clients and processors in a consumer pipeline.
- 2. A [vocabulary](vocabulary.html) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, retention policies and version-based create-update-delete semantics.
+ 2. A [vocabulary](vocabulary.html) that introduces terms for describing an `ldes:EventStream`, such as for indicating the chronological order, the relations between pages, how to identify members, retention policies and version-based create-update-delete semantics.
  3. An example [JSON-LD context](context.jsonld), which includes recommended JSON labels for use in JSON-LD documents. Note that this context may change over time and is not guaranteed for uptime or stability; for production environments, avoid referencing this URL as an external context.
  4. A [server primer](server-primer.html) to guide data providers in building and publishing LDES-compliant streams.
 
 The document you’re reading now is the main specification that focuses on the consumer side, detailing how clients can efficiently replicate and synchronize with an event stream.
+
+This specification builds on RDF Messages ([[!rdf-messages]]) as its lower-level building block: every member is an RDF Message, and every page with members is an RDF Message log. This specification defines a profile for these message logs: how the messages are ordered, how the identifier of the member in each message is found, and how the logs are paginated and described.
+
+Note: An LDES as a whole is not an *RDF Message Stream* in the sense of [[!rdf-messages]], which is the sequence of messages that is happening now, for example over a WebSocket, or the replay of an RDF Message log. An LDES is a log that is paginated and that can still be updated. A client that synchronizes an LDES, however, does emit an RDF Message Stream.
+
+Issue: The exact relation between an LDES and the concepts of [[!rdf-messages]] (stream, log, profile) is to be discussed, and the definitions in the RSP specification are still being written.
 
 <p class="ldes-document-logo">
   <img src="https://semiceu.github.io/LinkedDataEventStreams/assets/logo-ldes.svg" alt="Linked Data Event Streams" width="180">
@@ -36,146 +55,311 @@ The document you’re reading now is the main specification that focuses on the 
 
 # Overview and terminology # {#overview}
 
-A **Linked Data Event Stream (LDES)** (`ldes:EventStream`) is a collection of **members** that cannot be updated or removed once they are published, with each member being a set of RDF quads ([[!rdf-primer]]).
-This way, the collection of members becomes an append-only log or **event stream**.
+A **Linked Data Event Stream (LDES)** (`ldes:EventStream`) is an ordered, paginated **log of members**, in which each member is an **RDF Message** ([[!rdf-messages]]), i.e., an RDF Dataset that is to be interpreted atomically.
+Members cannot be updated or removed once they are published.
+This way, the log becomes an append-only log or **event stream**.
+An LDES is published over HTTP as multiple resources, so the LDES as a whole is not a single **RDF Message log** (the static representation of a stream of messages in one file): each of its pages that contains members is.
+
+An LDES is one specific publication of the members of an event stream, with one pagination and one [retention policy](#retention).
+If the same members are hosted elsewhere, or are published using another structure or retention policy, that is a different LDES with its own IRI.
+In DCAT terms, an LDES is a `dcat:Distribution` of a `dcat:Dataset`, and not the dataset itself, see [the LDES as a DCAT distribution](#dcat).
+
+Issue: In LDES 1.0, the `ldes:EventStream` was the dataset (a `tree:Collection`), and every view on it was a separate entity (a `tree:view`, a `tree:viewDescription`, an `ldes:EventSource`). This caused a lot of confusion about which IRI carries which information. This draft proposes to keep it simple: the LDES is the view, and is a `dcat:Distribution` of a dataset, so that an LDES can be added to a data portal as any other distribution. To be discussed.
 
 An **LDES client** is a piece of software used by a **consumer** that accepts the URL to an entry point, and returns a stream of members of the corresponding `ldes:EventStream`.
 The data stream emits the history that is available from this entry point, and once the consumer has caught up with the stream, it remains synchronized as new members are published.
 The client can be used in a **consumer pipeline** with other **processors** in the pipeline that can benefit from the **context information** provided by the client.
 
-An **LDES server** is an HTTP server with a view of the members that can be consumed by an LDES client.
+An **LDES server** is an HTTP server that hosts an LDES that can be consumed by an LDES client.
 A **producer** can choose to do this by hosting static pages as well as hosting a dynamic server application.
 
 <img width="800" src="provider-consumer.svg" alt="The meaning of the words consumer, client, producer, server, etc.">
 
-An LDES is published using one or more HTTP resources, reusing the concepts from the [W3C TREE hypermedia specification](https://w3id.org/tree/specification).
-When more resources are used, these pages, or **nodes** (`tree:Node`), will be structured according to a **search tree**.
-Therefore, we use the terms **root node** for the first page and **subsequent node** for each next page in the structure.
+An LDES is published over HTTP, by default as a set of resources called **pages** (`ldes:Page`). The [server primer](server-primer.html) describes the ways in which an LDES can be published.
+Each page that contains members is itself an [**RDF Message log**](#pages): a sequence of RDF Messages that a client can process in a streaming fashion, without having to hold the full page in memory. A page without members, for example one that only has relations, can use any RDF serialization.
+This is what allows pages to be much bigger than in a document-based serialization.
 
-A **synchronization run** is one complete invocation of the client’s traversal logic, visiting all nodes that are relevant given the current state. During this synchronization run, the client emits the newly found members.
+The pages of an LDES are connected by **relations** (`ldes:relation`), starting from the **root page**, which is the page that the IRI of the LDES dereferences to, and whose description message describes the LDES.
+Every page other than the root page is called a **subsequent page**.
+The IRI of the LDES (`<ES>`) and the IRI of the page that is currently being read (`<>`) denote different things: the former identifies the complete log, the latter one page of it. The IRI of the LDES always dereferences to the root page. A hash-identifier or a `303 See Other` redirect is used to keep both IRIs apart.
+The relations of a page point to other pages and describe, as an **interval** of the order of the stream, which members can be found when following the relation.
 
-A **root node** will contain all [context information](#context-information).
-The **root node** and any **subsequent node** will contain members and relations to other nodes.
+A page can start with a **description message**: it describes the page, its relations, and, in the root page, also the [context information](#context-information). A page without relations or other statements about the page itself has no description message.
+Every other message in a page is a **member message**.
 
-A `tree:Node` is considered **immutable** when re-fetching it does not result in new members.
+A **synchronization run** is one complete invocation of the client’s traversal logic, visiting all pages that are relevant given the current state. During this synchronization run, the client emits the newly found members.
 
-<img width="800" src="searchtree.svg" alt="A search tree visualization">
+A page is considered **immutable** when re-fetching it does not result in new members.
 
-An LDES has a **chronological order** that is the order of the members as they appear in the log. This is also the default order followed by the versions. 
+<img width="800" src="searchtree.svg" alt="A visualization of pages connected by relations">
+
+Issue: The figure above is inherited from LDES 1.0 and still shows a TREE search tree. It needs to be redrawn with intervals on the relations and with message-based pages.
+
+An LDES has a **chronological order** that is the order of the members as they appear in the log. This is also the default order followed by the versions.
 However, a more specific **version order** can be set, in which versions will not appear in the same order as their intended meaning (for example, version 2 might be published chronologically before version 1).
 
+Every member has an **ordering key**: the value of its `ldes:timestampPath`, optionally followed by the value of its `ldes:sequencePath`. When neither is set, the order is **implicit**, and the key is the number of the page in which the member is found, followed by its index in that page.
+The members in the log, and thus in every page, are ordered ascending by this key.
+
 <div class="example" highlight="turtle">
-An example root node with one member from a sensor observation dataset in the [[!turtle]] format:
+An example root page with one member from a sensor observation dataset in the TriG message serialization of [[!rdf-messages]]:
 ```turtle
+# Message 1: the description message of the root page
 ex:Observations a ldes:EventStream ;
                 # defines the chronological order
                 ldes:timestampPath sosa:resultTime ;
-                ldes:pollingInterval 60; # Each minute, new results are expected
-                tree:shape ex:shape1.shacl ;
-                tree:view <> ;
-                tree:member ex:Observation1 .
+                ldes:pollingInterval 60 ; # Each minute, new results are expected
+                ldes:shape ex:shape1.shacl ;
+                # the member is the subject of the only triple with the timestampPath
+                ldes:memberPath sosa:resultTime .
 
+<> ldes:relation [
+       ldes:page <2025> ;
+       ldes:timeUntil "2026-01-01T00:00:00Z"^^xsd:dateTime
+   ] .
+
+MESSAGE
+# Message 2: a member message
 ex:Observation1 a sosa:Observation ;
                 sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime ;
                 sosa:hasSimpleResult "..." .
 ```
 </div>
 
-
-A **view** is a specific publication of the members of the LDES. Multiple views can exist. The property `tree:view` connects the collection to the current page, or points to one specific root node after dereferencing the `ldes:EventStream` identifier.
-
-A [**retention policy**](#retention) can be documented on the root node that indicates not all members are being published in this view, but only a documented subset.
-
-Root node and subsequent nodes can contain [**relations**](#traversing-search-tree) to other nodes (using `tree:relation`) of the search tree.
-They can also contain **members** using the `tree:member` property, pointing to a [**focus node**](https://www.w3.org/TR/shacl/#focusNodes) from which the full set of quads for this member can be found. The term focus node is borrowed from [[!SHACL]].
- 
-Note: In an `ldes:EventStream`, the object of the `tree:member` triple can only be an IRI as this IRI will be used in the state to check whether the member has already been emitted or not.
-
 <div class="example" highlight="turtle">
-An example root node including 1 member from a base registry of addresses in the [[!trig]] format:
+An example root page with 1 member from a base registry of addresses. The member is identified using indirect membership, as the only named graph in the message:
 ```turtle
+# Message 1: the description message of the root page
 ex:AddressRecords a ldes:EventStream ;
-                  ldes:pollingInterval 86400; # Each day, new addresses are expected
+                  ldes:pollingInterval 86400 ; # Each day, new addresses are expected
                   ldes:timestampPath dcterms:created ;
                   ldes:versionOfPath dcterms:isVersionOf ;
-                  tree:shape ex:shape2.shacl ;
-                  tree:view <> ;
-                  tree:member ex:AddressRecord1-activity1 .
+                  ldes:shape ex:shape2.shacl ;
+                  ldes:memberGraph true .
 
-ex:AddressRecord1-activity1 dcterms:created "2026-01-01T00:00:00Z"^^xsd:dateTime ;
-                            adms:versionNotes "First version of this address" ;
-                            dcterms:isVersionOf ex:AddressRecord1 .
-                           
+MESSAGE
+# Message 2: a member message with the named graph as the member identifier
 ex:AddressRecord1-activity1 {
+    ex:AddressRecord1-activity1 dcterms:created "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+                                adms:versionNotes "First version of this address" ;
+                                dcterms:isVersionOf ex:AddressRecord1 .
     ex:AddressRecord1 dcterms:title "Streetname X, ZIP Municipality, Country" .
 }
 ```
 </div>
 
+A [**retention policy**](#retention) can be documented on the LDES that indicates not all members are being published in this LDES, but only a documented subset.
+
+Issue: In LDES 1.0, the retention policy was described on the root node or on a `tree:viewDescription` entity, as it was a property of a view and not of the event stream. Since the LDES is now the view, the retention policy is now described at the level of the LDES. This is a big change that needs to be discussed, also with regard to how the retention policy relates to the dataset in DCAT, which can have distributions with different retention policies.
+
+# The LDES and RDF Messages # {#pages}
+
+An LDES is a log of RDF Messages ([[!rdf-messages]]), published over HTTP as one or more resources, the pages. A page with members is an RDF Message log, which is a static representation of a sequence of RDF Messages in one file. A client MUST be able to read RDF Message logs in the serializations listed under [HTTP requests and responses](#http-requests-responses).
+
+The message boundary of the RDF Message log delimits the members. 
+
+Note: RDF Messages deprecate the Member Extraction Algorithm of LDES 1.0, as well as the TREE profile that was introduced for performance.
+
+## Polling and starting late ## {#polling}
+
+A client consumes an LDES over HTTP. It MUST be able to poll the LDES, and MUST be able to start at any later moment and still retrieve all members that are available according to the [retention policy](#retention), without having been connected to the LDES from the start.
+
+An LDES can be made available in different ways, such as paginated or as one document, and can additionally push updates over a streaming protocol. These ways are described in the [server primer](server-primer.html#publishing). The structure of the messages, described below, is the same in all of them.
+A client MAY use a notification over a streaming protocol to lower its latency, but MUST NOT depend on it.
+
+Issue: Do we want to define the notification over a streaming protocol in this specification, or in a separate specification that builds on the RDF Message streaming protocols?
+
+## Structure of the pages ## {#log-structure}
+
+A page of an LDES that contains member messages is an RDF Message log as defined by [[!rdf-messages]].
+A page without member messages can be in any RDF serialization: a client interprets it as an RDF Message log with exactly one message, the description message.
+
+A page has at most one **description message**, which is the first message of the page (see the issue below). A client recognises the first message as the description message when it has the page IRI `<>` (after following redirects) as the subject of a triple, or when it describes the LDES using a subject with `rdf:type ldes:EventStream`. No explicit triple stating that `<>` is an `ldes:Page` is needed: this follows from the use of `ldes:relation`, of which the domain is `ldes:Page`. The description message contains:
+ * the relations of the page using `ldes:relation` (see [relations](#relations));
+ * optionally, `ldes:immutable true` (see [state management](#state-management)), either about the page itself (`<> ldes:immutable true`), or about a page that it has a relation to (`<P2> ldes:immutable true`), so that a page can be marked immutable by the page that links to it, even before it is fetched;
+ * in the root page, the [context information](#context-information), which is described on the LDES (`<ES>`), and not on the page. The IRI of the LDES always dereferences to the root page.
+
+If the first message is not a description message, the page has no description message, and thus no relations: every message is a member message.
+
+The description message thus describes two different entities: the LDES, which has an IRI that is different from the IRI of the page, and the current page `<>`.
+
+Every message that is not the description message is a **member message**: a client MUST interpret it as exactly one member of the `ldes:EventStream`, see [members and membership](#membership).
+A member message does not describe the page or the LDES.
+
+An LDES does not allow empty messages (i.e., messages without quads), which [[!rdf-messages]] would allow. A client MUST return an error when it encounters an empty message.
+
+The member messages within a page are ordered ascending by their [ordering key](#ordering-keys), which in implicit order is the order of the messages. Members with equal keys can appear in any order.
+A client can thus read a page as a stream, and does not need to buffer or sort the members of a page.
+
+A page can be a member-less page, containing only a description message, for example to provide relations to other pages.
+
+Blank node identifiers are scoped to the message in which they occur, as defined in [[!rdf-messages]].
+
+Note: The rules a server follows to produce these pages are listed in the [server primer](server-primer.html#pages).
+
+Issue: The structure of the pages of an LDES needs to be decided. This draft takes inspiration from the [TREE profile](https://treecg.github.io/specification/profile): the leading “hypermedia block” that precedes the members becomes the description message, the order of the original document is retained, and members are emitted from the moment they have been extracted. The difference is that RDF Messages have an explicit delimiter, so that no `tree:member` triple is needed to start a new bundle of quads, and the hypermedia does not have to wait until the end of the file.
+
+Issue: It is still open whether the description message has to be the first message of a page, or whether there will be a way to flag any message as context information (the description message) rather than a member, so that it can occur anywhere in the page. A message is now recognised as the description message by its content, but a client then cannot know there is no description message before it has read the full page. The draft algorithm assumes the first, so that a client knows all relations before it has to decide to emit a member (see [synchronization algorithm](#synchronization-algorithm)). With a flag, relations (e.g., a link to the next page) can be appended at the end of a growing page, but a client cannot emit members of a page before it has read the full page, or has to track the relations found so far.
+
+### Discovering the LDES profile ### {#profile-discovery}
+
+Also following the TREE profile, a response can announce that it is an LDES page:
+ * using the `profile` parameter of the media type of the response, for example `Content-Type: application/n-quads;profile="https://w3id.org/ldes/specification"`;
+ * or using an `.ldes` infix in the suffix of the file, for example `https://example.org/2026-01.ldes.nq`.
+
+A client MAY set this `profile` parameter in the `Accept` request header. A client MUST NOT require that the profile is announced, as it can also be derived from the content of the first message. The server primer describes when a server announces it.
+
+Issue: [[!rdf-messages]] does not yet define Media Types and does not yet define the profile mechanism (section 3 is still a TODO). Until it does, a client and server must rely on content negotiation for the message serializations listed under [HTTP requests and responses](#http-requests-responses), and the profile is recognised using the `ldes:EventStream` type, and the relations, in the description message.
+
+# Members and membership # {#membership}
+
+A **member** of an `ldes:EventStream` is identified by an IRI, the **member identifier**. The **member data** is the full set of quads of the member message in which the member identifier was found.
+When a path (e.g., `ldes:timestampPath`, `ldes:versionOfPath`) or a SHACL shape has to be evaluated for a member, the **focus node** is the member identifier, and the data graph is the union graph of all graphs in the member message.
+
+Note: This replaces the member extraction algorithm of LDES 1.0, which required recursive blank node traversals and named graph lookups to cut the member data out of a page. That algorithm has been removed: the message boundary of the RDF Message log now delimits the member.
+
+A client MUST determine the member identifier of every member message using the rules in this chapter.
+The [emitted member](#members) consists of the member identifier together with all quads of the message.
+
+## Direct membership ## {#direct-membership}
+
+With **direct membership**, the member message states explicitly which entity is the member, using the triple `<ES> ldes:member ?m`, with `ES` the IRI of the `ldes:EventStream`.
+The message contains exactly one such triple, and `?m` is an IRI. A client MUST return an error for the page otherwise.
+
+<div class="example" highlight="turtle">
+```turtle
+MESSAGE
+ex:Observations ldes:member ex:Observation1 .
+ex:Observation1 a sosa:Observation ;
+                sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime .
+```
+</div>
+
+Direct membership is used when none of the properties of [indirect membership](#indirect-membership) is set on the `ldes:EventStream`.
+
+## Indirect membership ## {#indirect-membership}
+
+With **indirect membership**, the `ldes:EventStream` declares in the root page how the member identifier can be derived from the structure of every member message, so that the message does not need to repeat it.
+At most one of the following properties is set on the `ldes:EventStream`. If more than one is set, a client MUST return an error.
+
+: `ldes:memberGraph true`
+:: The member identifier is the name of the only named graph in the message. The message contains exactly one named graph, and its name is an IRI. The triples in the default graph are part of the member data, and belong to the same member.
+
+: `ldes:memberType <C>`
+:: The member identifier is the only subject in the message that has `rdf:type <C>`, in any graph. The message contains exactly one such subject, and it is an IRI.
+
+: `ldes:memberPath <P>`
+:: `<P>` is a [[!SHACL]] property path. The member identifier is the only subject in the message from which `<P>` leads to a value. The message contains exactly one such subject, and it is an IRI. When `<P>` is the same as the `ldes:timestampPath`, this means “the subject of the only triple using the timestamp path”, which is guaranteed to exist when the stream is ordered by `ldes:timestampPath`.
+
+<div class="example" highlight="turtle">
+Three ways of identifying `ex:Observation1` as the member without repeating it with `ldes:member`.
+```turtle
+# 1: the only named graph
+ex:Obs1 ldes:memberGraph true .
+ex:Observation1 {
+  ex:Observation1 sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime .
+}
+
+# 2: the only subject of a certain type
+ex:Obs2 ldes:memberType sosa:Observation .
+ex:Observation1 a sosa:Observation ;
+                ex:detail _:b .
+_:b ex:value 5 .
+
+# 3: the only subject with a property from the timestamp path
+ex:Obs3 ldes:timestampPath sosa:resultTime ;
+        ldes:memberPath sosa:resultTime .
+ex:Observation1 sosa:resultTime "2026-01-01T00:00:00Z"^^xsd:dateTime .
+```
+</div>
+
+When a message does not satisfy the declared rule, the client MUST return an error for that page, as the member cannot be identified.
+
+Issue: Do we need combinations (e.g., `ldes:memberType` within `ldes:memberGraph`) or a more general mechanism, such as a [[!SHACL]] node shape with a target selecting the member?
+
+Issue: When the published messages have no member identifier at all (e.g., a pure sensor feed), a client could use the ordering key as the identity of the member, provided it is unique. In implicit order, the key (page number, index) is always unique. Do we want to specify this fallback, or require producers to set `ldes:memberGraph`, `ldes:memberType`, `ldes:memberPath`, or `ldes:member`?
+
+## Using the member identifier ## {#using-member-identifier}
+
+The member identifier is used by the client in the [state](#state-management) (to deduplicate members that share the same ordering key), for evaluating `ldes:timestampPath` and `ldes:sequencePath` to obtain the [ordering key](#ordering-keys), and as the focus node for [SHACL validation](#shape) and for [versions and transactions](#versions-transactions).
+
 # Synchronization algorithm # {#synchronization-algorithm}
 
-There are multiple modes in which a client MAY operate.
-The client MUST have an unordered mode and/or an ordered ascending mode. 
-It MAY also have any other mode not specified in this document.
-Ordered modes are only possible with `ldes:EventStreams` that have a `ldes:timestampPath` and/or `ldes:sequencePath`.
+A client MUST implement the ascending ordered mode defined in this chapter. It MAY also have any other mode not specified in this document.
+
+An `ldes:EventStream` has an `ldes:timestampPath` and/or an `ldes:sequencePath`. If it has neither, the order of the log is implicit, and the pages are numbered (see [ordering keys](#ordering-keys)).
+
+Issue: LDES 1.0 also described an unordered mode for streams without ordering path. That mode required a client to remember every page and/or member it had ever seen. This draft proposes that all LDESs are ordered, so that every client needs only a small state: either by `ldes:timestampPath` and/or `ldes:sequencePath`, or implicitly by the order of the log, using page numbers in the relations. Alternatives that were considered are bounds on the position of the member in the log (which changes when members are removed by a retention policy) and an `rdf:List` of pages or `next` links (which introduce a second pagination construct next to `ldes:relation`, and need a state of page IRIs). Open points: producers must never renumber pages, and must only remove whole pages when applying a retention policy.
 
 A client SHOULD check whether an `ldes:pollingInterval` was set on the LDES. If it is, the client SHOULD use this amount of seconds (`xsd:integer`) to set the time to keep between synchronization runs.
 
-Note: Unordered will be straightforward to implement, while ordered modes will be more challenging due to the need for a more precise interpretation of relations and paths. Nevertheless, this comes with more functionality. It is up to a client developer to decide which functionalities to offer.
-
 A client MUST have a way to indicate to further processors in a consumption pipeline that a synchronization run has been finalized.
-In order to prevent inconsistencies when reusing the result of the pipeline when not in ordered ascending mode, a consumer pipeline SHOULD wait for this finalization flag before committing those members at once into their system. 
-In ordered ascending mode, a consumer can fully process each member as it comes in, except for when the member is part of a transaction.
+Since members are emitted in ascending order, a consumer can fully process each member as it comes in, except for when the member is part of a transaction.
 
 A client MUST take an IRI `I` as the only required argument.
-`I` can denote the event stream itself, the root node, a redirect to the root node, or an overview page with exactly one `tree:view` property in the page.
+`I` can denote the LDES or the root page, or a redirect to either.
 In case there is no state yet, a client MUST perform an initialization run.
 
 ## Initialization run ## {#initialization}
 
-The client MUST dereference `I` (see [HTTP requests and responses](#http-requests-responses)). 
-After dereferencing the IRI, the client MUST look for the patterns `?s tree:view <>` with `<>` the base IRI (after redirect). If this pattern was matched exactly once, `<>` is to be considered the root node, and  `?s` is to be considered the `ldes:EventStream` IRI. In case it was matched multiple times, an error MUST be returned. If this pattern is not found, then it MUST look for the pattern `I tree:view ?o` instead. If this pattern matches exactly once, then `I` is to be considered the `ldes:EventStream` IRI and `?o` the root node. In this case, the IRI bound to `?o` MUST be dereferenced. In case multiple or no matches were found, an error SHOULD be returned. 
+The client MUST dereference `I` (see [HTTP requests and responses](#http-requests-responses)) and read the description message of the page it arrives at. This page, with `<>` as its IRI after following redirects, is to be considered the root page, as the IRI of the LDES always dereferences to the root page.
+
+The client MUST look for the pattern `?s rdf:type ldes:EventStream` in this description message. If it is matched exactly once, `?s` is to be considered the LDES IRI. If it is not matched, or matched multiple times, an error MUST be returned.
+
+Note: The LDES IRI and the IRI of the root page are different. A hash-identifier (e.g., `https://example.org/observations/#EventStream` for the LDES, and `https://example.org/observations/` for the root page) or a `303 See Other` redirect from the LDES IRI to the root page keeps them apart. Because the LDES IRI always dereferences to the root page, no extra property is needed to point from the LDES to the root page, and a page without a description of the LDES is not a root page: this is how a client is certain it is reading the root page.
 
 The client’s aforementioned IRI dereferencing step MAY be extended with a source selection mechanism.
 
-After processing the root node, the client MUST initiate a state object (see [state management](#state-management)) with the context information (see [context information](#context-information)) as found in the root node.
+After reading the description message of the root page, the client MUST initiate a state object (see [state management](#state-management)) with the context information (see [context information](#context-information)) as found in this message, in which the LDES is a different entity than the root page `<>`.
 
-The client MUST proceed processing the root node as any other node: i.e. processing the members, traversing the relations, and doing the state management.
+The client MUST proceed processing the root page as any other page, i.e., by executing the [traversal](#traversal) below with an empty bookmark.
 
 For every subsequent run, a client MUST consult the state and continue from there.
 
+## Supporting LDES 1.0 and LDES 2.0 ## {#compatibility}
+
+LDES 2.0 uses the same namespace and the same class `ldes:EventStream` as LDES 1.0, and it has no explicit version marker. A client that wants to support both versions MAY use the following signals to decide which version it is reading, in this order:
+ 1. **Media type and syntax:** a response that announces the LDES `profile` or a message media type, or that uses message delimiters (such as `MESSAGE` in TriG, or NDJSON-LD), is an LDES 2.0 page. LDES 1.0 has no such syntax.
+ 2. **Content of the first statements:**
+    * when they contain `tree:view`, `tree:member`, `tree:relation` or `tree:viewDescription`, it is an LDES 1.0 page;
+    * when they contain `ldes:relation`, `ldes:page` or `ldes:member`, and none of the properties above, it is an LDES 2.0 page.
+ 3. **Neither:** a page that only has context information about the LDES, without relations or members, is an empty LDES in both versions. The client MAY process it as either.
+
+A client that only supports LDES 2.0 SHOULD return an error when the first message contains `tree:view`, `tree:member`, `tree:relation` or `tree:viewDescription`. A document without message delimiters is read as one message, and the client would otherwise conclude that an LDES 1.0 is empty.
+
+Note: As an LDES 2.0 is a distribution and not the dataset, it has its own IRI. The same members can thus be published as an LDES 1.0 and as an LDES 2.0 under different IRIs, which a dataset can link using `dcat:distribution`.
+
 ## State management ## {#state-management}
 
-Note: In this section we do not mandate how exactly state management needs to be done, but provide some functionalities that must be implemented.
+Note: In this section we do not mandate how exactly state management needs to be done, but provide the functionalities that must be implemented. The state is designed to stay small, no matter how long the event stream becomes.
 
 A client MUST ensure a member is only emitted once.
 
-Note: Keeping a list of all emitted members forever will become problematic for large `ldes:EventStream` instances and slow down emitting the members. Instead, a client in unordered mode can assume that members found on immutable pages can safely be removed from the state after the run is finished. A client in ordered ascending mode can simply use the timestamp and/or sequence number of the last emitted member for that purpose. Mind that still the members that have exactly this timestamp and/or sequence number will still need to be kept in the state.
+A client MUST keep a **bookmark** in its state, consisting of:
+ * `bookmarkKey`: the [ordering key](#ordering-keys) of the last emitted member, or *none* if no member was emitted yet;
+ * `bookmarkMembers`: the set of member identifiers of all emitted members whose ordering key is equal to `bookmarkKey`. In implicit order every key is unique, and this set is empty.
 
-For every `tree:Node`, a client SHOULD check whether it is immutable by first checking whether
- 1. the triple `<> ldes:immutable true .` is set; then whether
- 2. the `Cache-Control` HTTP response header is set to `immutable`; and finally
- 3. a client MAY check whether the `tree:Relation` with a `tree:path` equal to the `ldes:timestampPath` that pointed us to the `tree:Node` had an upper bound that is earlier than the time of the latest processed member.
+Because members are emitted in ascending order of their key, every member with a key smaller than `bookmarkKey` has already been emitted. The `bookmarkMembers` set only needs to hold the members that share exactly the last key, and is therefore typically a handful of identifiers.
+A client MUST NOT need to keep a list of all emitted members or all visited pages.
 
-A client SHOULD ensure an immutable `tree:Node` is not fetched more than once.
+A client MUST ensure it can resume from a previous run by saving the bookmark, and MUST NOT emit members that are before the bookmark, or that are in `bookmarkMembers`.
 
-Note: Keeping a list of all immutable pages forever will become problematic for large `ldes:EventStream` instances.
-
-A client MUST ensure it can resume from a previous run.
-It SHOULD do so by keeping a frontier of pages that are not (yet) immutable.
-In ordered mode, it MAY also use the timestamp and/or sequence path of the last member as a bookmark.
-
-A client MUST keep context information such as the identifier of the event stream and the root node, the SHACL shape of the event stream, or the retention policy of the root node, cf. the chapter on [Context Information](#context-information).
+A client MUST keep context information such as the identifier of the event stream and the root page, the paths, the SHACL shape of the event stream, the `ldes:defaultTimezone`, or the retention policy of the LDES, cf. the chapter on [Context Information](#context-information).
 
 A client SHOULD keep statistics such as the number of members emitted and the date-time of the last run.
 
 A client MUST have a mechanism to communicate this context information and statistics to other processors in the pipeline.
 
-When a `tree:Node` is not immutable, the `ETag` SHOULD be kept if this is set in the response.
+A client MAY keep the `ETag` of a page, by IRI, when this is set in the response, for pages that were not immutable. These are the only pages that can be re-fetched in the next run.
+
+A page can be skipped without fetching it when its relation has an upper bound that is smaller than or equal to the `bookmarkKey` (see [traversal](#traversal)). In implicit order, this means that every page with a number before the page of the bookmark is skipped. This replaces the visited-pages list of earlier versions, and is why pages do not need to be remembered.
+A client MAY additionally use the triple `<> ldes:immutable true`, a triple `<P> ldes:immutable true` in the description message of a page that has a relation to `<P>`, or the `Cache-Control: immutable` HTTP response header, to avoid revalidating a page in the same run. A page that is marked immutable by the page that links to it does not need to be re-fetched once the client has processed it.
 
 ## HTTP requests and responses ## {#http-requests-responses}
 
-A client MUST support HTTP responses in at least [[!n-quads]], [[!n-triples]], [[!trig]], [[!turtle]], and [[!json-ld]]. For JSON-LD external contexts, the client SHOULD implement HTTP caching.
+A client MUST support HTTP responses in at least the message serializations of [[!rdf-messages]] for [[!n-quads]] and [[!trig]]. It SHOULD support [[!json-ld]] as NDJSON-LD messages and [Jelly](https://jelly-rdf.github.io). For JSON-LD external contexts, the client SHOULD implement HTTP caching.
+
+A client that receives a page in a serialization that has no notion of messages, such as plain [[!turtle]], MUST interpret the response as an RDF Message log with exactly one message: the description message. Such a page cannot contain member messages.
 
 An `Accept` request header MUST be set.
 
@@ -202,33 +386,21 @@ A client MUST abort and throw an error on any other 4xx or 5xx status codes.
 
 ## Emitting members ## {#members}
 
-In unordered mode, the client SHOULD emit a member as soon as it is extracted.
+A client MUST process the response body as a stream of messages, and MUST NOT wait for the page to be completely received before processing the messages that were already received.
 
-In ordered mode, the client MUST ensure no other member can still be discovered that could precede the member that is to be emitted. 
-Extra conditions as documented in the next section MUST be checked before emitting it.
+For each member message, a client MUST determine the member identifier (see [members and membership](#membership)), and the [ordering key](#ordering-keys), after which the client MUST ensure the [traversal](#traversal) conditions hold before emitting the member.
 
-A client MAY implement support for more specialized content types and profiles.
-For example, the [TREE profile](https://w3id.org/tree/specification/profile) specification promises to a parser that the member quads are going to be grouped together, and delimited by the `tree:member` quad.
-In addition to this specification, an LDES client can assume the members will be in chronological ascending order and does not need to sort them anymore.
-
-Without a specialized profile or content type that can indicate a “grouping of quads”/a “message”/a “frame”, a client MUST extract a description of the members as follows:
- 
-Once the `tree:Node` has been fully parsed, a client MUST make a list of all member IRIs matching `<ES> tree:member ?m` with `ES` being the IRI of the LDES.
-Each match of this pattern is called a focus node.
-For each focus node, a client MUST look up the subject-based star pattern (`<m> ?p ?o`) in the default graph, and all quads in the named graph `m` (`?s ?p ?o <m>`).
-For each match where `o` is a blank node, the algorithm is to be repeated recursively with `o` being the new focus node.
-A client MUST ensure a blank node is not processed twice.
-
-A client in ordered mode that reads data from a `tree:Node` without a specialized profile or content type MUST order the members according to the `ldes:timestampPath` and/or `ldes:sequencePath`.
+A client emits a member as the member identifier and the set of quads of the message, in which the default timezone has been added to the `xsd:dateTime` literals that had no timezone, when there is a default timezone (see [timestamps without a timezone](#no-timezone)).
+The client MUST NOT emit the description message as a member.
 
 <div class="example" highlight="turtle">
-An example member that will be fully extracted thanks to the algorithm:
+An example member message that is fully emitted as is, including the blank nodes and the named graph, without any recursive extraction:
 ```turtle
 ex:EventStream a ldes:EventStream ;
     ldes:timestampPath dcterms:created ;
-    tree:member ex:Member1 .
+    ldes:memberType ex:Record .
 
-## Member1 quads
+MESSAGE
 ex:Member1 a ex:Record ;
         dcterms:created "2027-01-01T00:00:00Z"^^xsd:dateTime ;
         ex:hasDetail _:bDetail ;
@@ -246,92 +418,196 @@ _:bSignature {
 ```
 </div>
 
+## Ordering keys ## {#ordering-keys}
 
-## Traversing the search tree ## {#traversing-search-tree}
+The **ordering key** of a member is obtained as follows:
+ * When `ldes:timestampPath` is set, the **timestamp** is the single `xsd:dateTime` literal that is found by evaluating the path with the member identifier as the focus node. If there is no such literal, or more than one, the client MUST return an error. The literal has a timezone. A client MUST nevertheless handle a literal without a timezone, see [timestamps without a timezone](#no-timezone).
+ * When `ldes:sequencePath` is set, the **sequence** is the single `xsd`-typed literal found by evaluating this path with the member identifier as the focus node. If there is no such literal, or more than one, the client MUST return an error.
+ * The key is the pair (timestamp, sequence) when both paths are set, the timestamp when only the `ldes:timestampPath` is set, and the sequence when only the `ldes:sequencePath` is set.
+ * When neither path is set, the order is implicit, and the key is the pair (page number, index). The **page number** is the number of the page in which the member message was found: the `ldes:pageNumber` of the relation that led to the page or, for the root page, the `ldes:pageNumber` stated about `<>` in its description message, and 0 when that is absent. The **index** is the 0-based index of the message among the member messages of the page. If the number of a page that has member messages cannot be determined, the client MUST return an error.
 
-### Unordered ### {#unordered-traversal}
+In implicit order, two keys are compared by comparing the page numbers, and, when equal, the indexes, as integers. Otherwise, two keys are compared by first comparing timestamps as points on the time line, and, when equal, by comparing the sequences using the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare).
+### Timestamps without a timezone ### {#no-timezone}
 
-The relations `R` MUST be discovered using this pattern: `<> tree:relation ?r` with `<>` being the current page and `R` the set of matches of `r`.
-For each `r` in `R` the pattern `?r tree:node ?n` MUST be matched.
-Each distinct `n` MUST be further dereferenced and processed.
+A producer is required to publish a timezone with every `xsd:dateTime` (see the server primer), but a client MUST still handle an `xsd:dateTime` literal without a timezone, in a member timestamp as well as in a relation bound:
+ * When the LDES in the entry page has an `ldes:defaultTimezone`, that is the **default timezone**: the timezone of every `xsd:dateTime` literal without a timezone, in the members as well as in the relations. It has priority over a configured default timezone.
+ * Otherwise, a client MAY accept a default timezone as configuration, and when it is configured, that is the default timezone.
+ * When there is a default timezone, a literal without a timezone is interpreted as if it had the default timezone, and there is no uncertainty. When a client emits a member, it MUST then add the default timezone to every `xsd:dateTime` literal of the member message that has no timezone, so that processors further in the pipeline do not need to know the default timezone to interpret the member. The timezone is added to the literal itself, e.g., `"2027-01-01T00:00:00"^^xsd:dateTime` is emitted as `"2027-01-01T00:00:00+01:00"^^xsd:dateTime`.
+ * When there is no default timezone, all literals without a timezone within the same LDES are assumed to be in the same, unknown, timezone. Two of them are therefore compared with each other as local date-times, exactly as if they had the same timezone.
+ * When there is no default timezone, a literal without a timezone that is compared with a literal that does have a timezone is interpreted as a period instead of an instant. Timezones range from -14:00 to +14:00, so a local time `T` without timezone is any instant between `T` − 14 hours (read with timezone +14:00) and `T` + 14 hours (read with timezone -14:00). The **earliest** instant of the literal is the first of the two, and its **latest** instant is the second.
 
-### Ordered ### {#ordered-traversal}
+Keys are then compared using the worst case:
+ * a key is **certainly smaller** than another key when its timestamp is earlier than the timestamp of the other under every interpretation, and **certainly larger** when it is later under every interpretation. For two timestamps without a timezone, or two with a timezone, this is the ordinary comparison. When one of the two has no timezone, a key is certainly smaller when its latest instant is earlier than the earliest instant of the other, and certainly larger when its earliest instant is later than the latest instant of the other. Keys that are neither are **indeterminate**. When timestamps are equal, or indeterminate, the sequences are compared as above, when they are set;
+ * when the client has to order sources (see [traversal](#traversal)), it compares a timestamp without a timezone to one with a timezone using the earliest instant of the former;
+ * when the client has to decide that a member or a relation can be skipped, or that a page is not ordered correctly, it only does so when the comparison is certain.
 
-A client in ordered mode MUST be able to evaluate [SHACL property paths](https://www.w3.org/TR/shacl/#property-paths) to find the matching objects, as this functionality is required for interpreting the paths in the TREE/LDES and SHACL specifications.
+Note: An LDES in which no literal has a timezone is thus handled exactly as one in which all literals have the same timezone. Only mixing literals with and without a timezone gives uncertainty, and then a literal without a timezone never causes a member to be skipped that was not emitted yet. The price is that members can be emitted in a slightly different order within the margin of 28 hours, and that some members can be emitted again in a later run, which is the best a client can do without knowing the timezone.
 
-The client in ordered mode MUST check, during the initialization phase, whether `ldes:timestampPath` and/or `ldes:sequencePath` is set. If not, it MUST return an error, as order cannot be guaranteed.
+A client in the ascending mode MUST be able to evaluate [SHACL property paths](https://www.w3.org/TR/shacl/#property-paths) to find the matching objects, as this functionality is required for interpreting the paths in the LDES and SHACL specifications.
 
-A client SHOULD implement a priority queue of next links to follow by interpreting these `tree:Relation` subclasses related to time literals:
- * `tree:GreaterThanRelation`: later in time
- * `tree:GreaterThanOrEqualToRelation`: later in or at the same time
- * `tree:LessThanRelation`: earlier in time
- * `tree:LessThanOrEqualToRelation`: earlier in or at the same time
+## Relations ## {#relations}
+
+A page links to other pages using `ldes:relation`.
+A **relation** is a resource with exactly one `ldes:page`, whose object is the IRI of the page to follow, and with zero or more of the following **bounds**:
+
+ * [`ldes:timeFrom`](https://w3id.org/ldes#timeFrom): an `xsd:dateTime` **with timezone**. The members found by following this relation have a timestamp that is later than or equal to this value.
+ * [`ldes:timeUntil`](https://w3id.org/ldes#timeUntil): an `xsd:dateTime` **with timezone**. The members found by following this relation have a timestamp that is earlier than this value.
+ * [`ldes:sequenceFrom`](https://w3id.org/ldes#sequenceFrom): an `xsd`-typed literal. The members found by following this relation have a sequence that is greater than or equal to this value. When the `ldes:timestampPath` is also set, this property is always accompanied by an `ldes:timeFrom`.
+ * [`ldes:pageNumber`](https://w3id.org/ldes#pageNumber): an `xsd:nonNegativeInteger`, only used when neither `ldes:timestampPath` nor `ldes:sequencePath` is set. It is the number of the page that the relation points to, and the lower bound of the numbers of all pages that can be reached from there.
+ * [`ldes:pageNumberUntil`](https://w3id.org/ldes#pageNumberUntil): an optional `xsd:nonNegativeInteger`, exclusive upper bound of the numbers of the pages that can be reached from there. When absent, it is the `ldes:pageNumber` plus one: only this page.
+ * [`ldes:sequenceUntil`](https://w3id.org/ldes#sequenceUntil): an `xsd`-typed literal. The members found by following this relation have a sequence that is smaller than this value. When the `ldes:timestampPath` is also set, this property is always accompanied by an `ldes:timeUntil`. A client MUST return an error when a sequence bound is not accompanied by the timestamp bound on the same side while the `ldes:timestampPath` is set.
+
+The interval is thus closed at the lower end and open at the upper end: `[from, until)`.
+The **lower key** of a relation is its lower bound, and its **upper key** its upper bound. An absent bound means the lowest, respectively highest, possible key; an absent sequence bound in combination with a timestamp bound means the lowest possible sequence.
+An absent lower bound means “from the very first member”, and an absent upper bound means “until the latest member that will ever be published”.
+In implicit order, `(ldes:pageNumber, 0)` is the lower bound, and `(ldes:pageNumberUntil, 0)` the upper bound; for a relation without `ldes:pageNumberUntil`, the upper bound is `(ldes:pageNumber + 1, 0)`. Page numbers are ascending in the order of the log. A page keeps its number when pages before it are removed: a number is not a position.
+When both a timestamp and sequence bound are given, they together form a key that is compared as described in [ordering keys](#ordering-keys): `(timeFrom, sequenceFrom)` is the lower bound, and `(timeUntil, sequenceUntil)` the upper bound.
+
+The interval holds for all members in the referred page, and in all pages that can be reached from it.
+Different relations of the same page can refer to overlapping intervals, and a relation to the same page can occur multiple times. A client MUST treat each distinct relation independently.
 
 <div class="example" highlight="turtle">
-An example of a link to a node for 2026, denoted by 2 relations.
+A description message with a link to the page of 2026, a link to a page for the first half of 2027 with a sequence bound (the page is split in the middle of a timestamp), and an open-ended link to the latest page:
 ```turtle
-<> tree:relation _:b0,_:b1 .
-_:b0 a tree:GreaterThanOrEqualToRelation ;
-     tree:node <2026> ;
-     tree:path sosa:resultTime ;
-     tree:value "2026-01-01T00:00:00Z"^^xsd:dateTime .
-_:b1 a tree:LessThanRelation ;
-     tree:node <2026> ;
-     tree:path sosa:resultTime ;
-     tree:value "2027-01-01T00:00:00Z"^^xsd:dateTime .
+<> ldes:relation
+     [ ldes:page <2026> ;
+       ldes:timeFrom "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+       ldes:timeUntil "2027-01-01T00:00:00+01:00"^^xsd:dateTime ] ,
+     [ ldes:page <2027-a> ;
+       ldes:timeFrom "2027-01-01T00:00:00+01:00"^^xsd:dateTime ;
+       ldes:sequenceFrom 0 ;
+       ldes:timeUntil "2027-02-01T00:00:00+01:00"^^xsd:dateTime ;
+       ldes:sequenceUntil 1000 ] ,
+     [ ldes:page <latest> ;
+       ldes:timeFrom "2027-02-01T00:00:00+01:00"^^xsd:dateTime ] .
 ```
 </div>
 
-A client MUST combine multiple relations to the same node using a logical AND.
+Note: Compared to LDES 1.0, the bounds replace the relation types such as `tree:GreaterThanRelation`, together with `tree:path` and `tree:value`: two relations ANDed to the same page become one relation with two bounds.
 
-A client MUST check whether the `tree:path` matches the `ldes:timestampPath` and/or `ldes:sequencePath`.
-Only relations whose `tree:path` matches one of these ordering paths can be used for ordering.
+Issue: Should `ldes:timeFrom`/`ldes:timeUntil` and `ldes:sequenceFrom`/`ldes:sequenceUntil` be merged into one pair `ldes:from`/`ldes:until` whose datatype determines which path is meant? Shorter, but ambiguous when the sequence is also an `xsd:dateTime`. Also, the ordering key (timestamp, sequence) as a pair is a draft decision.
 
-Note: A link to a `tree:Node` with only a relation that is not supported (e.g., a `tree:GeospatiallyContainsRelation`) will have to be prioritized right away, as following this link may result in members that are earlier than any other member found elsewhere.
+<div class="example" highlight="turtle">
+An LDES in implicit order, with a root page that links to page 0, page 1 and the latest page 2. The root page itself has no members (page number 0 by default), and the latest page is the only page that can still grow:
+```turtle
+<> ldes:relation
+     [ ldes:page <page-0> ; ldes:pageNumber 0 ] ,
+     [ ldes:page <page-1> ; ldes:pageNumber 1 ] ,
+     [ ldes:page <page-2> ; ldes:pageNumber 2 ] .
+```
+A page that covers pages 0 to 99 uses `ldes:pageNumber 0 ; ldes:pageNumberUntil 100`.
+</div>
 
-In addition to the transactions text in the next chapter, the client in ordered ascending mode MUST ensure that the member that finalizes the transaction is emitted as the last member when there are multiple members with the same `ldes:timestampPath` and/or `ldes:sequencePath`.
+### Other kinds of relations ### {#other-relations}
+
+A relation can have additional types and properties, for example the relation types of the [TREE specification](https://w3id.org/tree/specification) such as `tree:GeospatiallyContainsRelation` or `tree:PrefixRelation`, with their `tree:path` and `tree:value`. The relation still has exactly one `ldes:page`.
+
+A client is not required to understand these additional types and properties. A client that encounters a relation that it does not understand MUST follow its `ldes:page`. It does so as for any relation: using the bounds of this specification when there are any, and otherwise as a relation without bounds, whose lower key is the lowest possible key and whose upper key is the highest. The link then has to be dereferenced before a member of a later key can be emitted, as members that precede any other member might be found there.
+
+Additional properties can only narrow what can be found by following the relation. A client that ignores them therefore never misses a member, and can still use the bounds.
+
+A client MAY implement additional kinds of relations, and use them to skip a link, as long as it does not skip a link that can still lead to members that have not been emitted.
+
+Note: The LDES vocabulary aligns `ldes:Page`, `ldes:relation` and `ldes:page` with their TREE counterparts using subclass and subproperty axioms. After OWL 2 RL reasoning, a TREE client can thus traverse the pages of an LDES, see the [vocabulary](vocabulary.html#tree-alignment).
+
+Issue: Should a client be allowed to treat the interval bounds as one more kind of relation that is “understood”, so that an unknown relation type together with bounds is handled consistently with a relation with only bounds? This draft says it is, as additional properties only narrow the result.
+
+## Traversal ## {#traversal}
+
+A synchronization run reads the pages as one merge of sorted logs: every page is already ordered, and the relations tell where the members of other pages can be found in the order. The client does not need to sort, nor to remember which pages it has visited.
+
+During a run, a client keeps a set of **sources**. A source is one of:
+ * an **unopened relation**, which has not been dereferenced yet. Its lower key is the lower key of the relation (see [relations](#relations));
+ * an **open page**, from which the client has read the description message, and of which it knows the next member message not yet processed. Its **lower key** is the ordering key of this next member message. An open page without a next member message is closed, and is removed from the set.
+
+A client MUST execute the following steps:
+
+ 1. Dereference `I` as described in [initialization](#initialization), or, when a state exists, dereference the IRI of the root page. Make this page an open page by reading its description message, if any, and by adding its relations as unopened relations (see step 4).
+ 2. While there are sources, take the source with the smallest lower key. When there is a tie, an open page MUST be chosen over an unopened relation.
+ 3. If the source is an **open page**, take its next member message (which was already read to know the lower key of the page). Determine its member identifier and ordering key. Then:
+     * if the key is (certainly) smaller than `bookmarkKey`, or equal to `bookmarkKey` (or indeterminate, see [timestamps without a timezone](#no-timezone)) and either the order is implicit or the member identifier is in `bookmarkMembers`, skip the member;
+     * otherwise, emit the member, and update the bookmark: if the key is larger than `bookmarkKey`, set `bookmarkKey` to the key and `bookmarkMembers` to `{identifier}`; if it is equal, add the identifier to `bookmarkMembers`; if it is indeterminate, add the identifier to `bookmarkMembers` and set `bookmarkKey` to the key of the two that has the latest earliest instant.
+ 4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, if any, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller; when only one of the two timestamps has no timezone, the latest instant of the upper key is not later than the earliest instant of `bookmarkKey`): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
+ 5. When there are no sources left, the synchronization run is finished. The client MUST signal this to the processors further in the pipeline.
+
+Because every source in the set has a lower key that is at least the key of the member that is emitted, and because every page is ordered, no member that is still to be discovered can precede the emitted member.
+This makes the emission order correct without buffering members: the client only needs the next unprocessed message of each open page.
+
+A client MAY prefetch pages in parallel. It MUST NOT change the order of emission.
+
+When a member message is found that has a smaller key than the previous member message in the same page, the page does not respect this specification. The client MUST return an error, as emission order can no longer be guaranteed.
+
+Note: In a typical stream, the root page has a relation to a handful of pages, of which only the last (still mutable) page has an upper bound that is larger than the bookmark. A client therefore dereferences the root page, and the one or few pages that are at or after the bookmark. All other pages are skipped without a request.
+
+A client MUST combine the ordering with the transactions rules: in addition to the transactions text in the chapter on [versions and transactions](#versions-transactions), the client in ascending mode MUST ensure that the member that finalizes the transaction is emitted as the last member when there are multiple members with the same ordering key.
 
 # Context information # {#context-information}
 
-A client MUST extract the context information from the **root node** and have a way to communicate the context information to processors further in the consumer pipeline.
+A client MUST extract the context information from the description message of the **root page** and have a way to communicate the context information to processors further in the consumer pipeline.
 
-The client MUST extract context about the LDES, as well as about the service that is publishing the LDES. The former is attached to the LDES entity; the latter through the current page (`<>`) or from the entities linked using `tree:viewDescription`.
+The client MUST extract context about the LDES, which is attached to the LDES entity (`ldes:EventStream`), as well as context about the current page (`<>`). Since the LDES is one specific view, there is no further view entity: everything that is relevant for how the members are published, such as the retention policy, is described on the LDES.
 
 <div class="example" highlight="turtle">
-A client must be able to handle context information on the LDES, on the root node, or in a view description:
+A client must be able to handle context information on the LDES, and on the root page, in the description message:
 ```turtle
 # event stream level context information
 <ES> a ldes:EventStream ;
     ldes:timestampPath dcterms:created ;
-    tree:view <> .
-# Using a view description is optional for producers
-<> tree:viewDescription <#LatestView> .
-# view-level context information
-<#LatestView> ldes:retentionPolicy  [
-    # ... see example of retention policies below
-] .
+    ldes:memberType ex:Record ;
+    ldes:retentionPolicy  [
+       # ... see example of retention policies below
+    ] .
 # page-level context information
 <> ldes:immutable true .
+# the same can be stated by a page that links to another page
+<page-1> ldes:immutable true .
 ```
 </div>
 
+Note: The properties `tree:view` and `tree:viewDescription`, and the class `ldes:EventSource` of LDES 1.0 are no longer needed. The LDES is the view, and the entry point is the IRI that is given to the client.
+
+## The LDES as a DCAT distribution ## {#dcat}
+
+An `ldes:EventStream` is a `dcat:Distribution` of a `dcat:Dataset`. This way, a data portal that harvests DCAT can list an LDES as it lists any other distribution, without special knowledge about LDES.
+In the catalog of a DCAT-AP data portal, the `dcat:accessURL` of the distribution is the entry point `I` that a client is given: the IRI of the LDES, or of its root page. The properties `dcat:accessURL` and the other DCAT properties, such as `dct:title`, `dct:license`, `dct:format` or `dcat:mediaType`, are only used in this catalog description, and not within the pages of the LDES, as the IRI of the LDES already dereferences to the root page, see [initialization](#initialization).
+The dataset can have multiple distributions, for example multiple LDESs with different retention policies or paginations, next to a non-LDES distribution such as a CSV file.
+
+<div class="example" highlight="turtle">
+A dataset with one LDES distribution, as it can be found in the catalog of a data portal:
+```turtle
+ex:ObservationsDataset a dcat:Dataset ;
+    dct:title "Observations"@en ;
+    dcat:distribution ex:Observations .
+
+ex:Observations a ldes:EventStream ;
+    dct:title "Observations, full history"@en ;
+    dcat:accessURL <https://example.org/observations/> .
+```
+The LDES description in the root page at `https://example.org/observations/` then only uses LDES terms, such as `ldes:timestampPath`.
+</div>
+
+Issue: The consequences of this proposal need to be discussed: (1) the dataset is no longer an `ldes:EventStream`, so data that was described on the LDES in LDES 1.0, such as the `tree:shape`, is now described on the distribution; (2) a producer that publishes the same members using two paginations publishes two LDESs, and consumers must not assume these are the same stream; (3) a dataset-level IRI can be used to relate those distributions.
+
 ## The chronological order of the stream ## {#chronological-order}
 
-When a consumer, such as the client in chronological mode, wants to establish the chronological order, it MUST derive this from the following two properties on the LDES (if set):
- * `ldes:timestampPath`: this is a SHACL property path that sets the chronological time with an `xsd:dateTime` literal within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
+When a consumer, such as the client in ascending mode, wants to establish the chronological order, it MUST derive this from the following two properties on the LDES (if set):
+ * `ldes:timestampPath`: this is a SHACL property path that sets the chronological time with an `xsd:dateTime` literal with timezone within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), which XSD literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
+ * When neither is set, the order of the log is the order in which the members were published: the page number of the page, followed by the index in the page.
+
+The LDES can additionally have an `ldes:defaultTimezone`: the timezone, as a literal such as `"+01:00"` or `"Z"`, that applies to `xsd:dateTime` literals in the members or in the relations of this LDES that have no timezone, see [timestamps without a timezone](#no-timezone). Clients add it to such literals when they emit a member, and it has priority over a timezone that the client is configured with. It is only a fallback for the cases in which a producer could not add a timezone to its data.
 
 ## The member’s SHACL shape ## {#shape}
 
-Using the property `tree:shape` on the LDES, a [[!SHACL]] `sh:NodeShape` can be linked that communicates an intention of the data provider to respect the shape for every member in the LDES.
+Using the property `ldes:shape` on the LDES, a [[!SHACL]] `sh:NodeShape` can be linked that communicates an intention of the data provider to respect the shape for every member in the LDES.
 
 Note: This can be used by a client looking for specific members across multiple `ldes:EventStream` instances that wants to extend the initialization phase with a discovery or source selection phase.
 
-When building a processor to validate the members of an LDES, the processor MUST pass each `tree:member` object as the target for the given `sh:NodeShape` to the SHACL validator that is being used.
+When building a processor to validate the members of an LDES, the processor MUST pass each member identifier as the target for the given `sh:NodeShape` to the SHACL validator that is being used, with the quads of the member message as the data graph.
 
 Note: Multiple NodeShapes can be provided using [SHACL logical constraint components](https://www.w3.org/TR/shacl/#core-components-logical).
 
-Providing multiple `tree:shape` statements MUST be interpreted as a `sh:and` logical constraint component.
+Providing multiple `ldes:shape` statements MUST be interpreted as a `sh:and` logical constraint component.
 
 ## Versions and transactions ## {#versions-transactions}
 
@@ -382,13 +658,15 @@ ex:LDES a ldes:EventStream ;
     ldes:transactionPath ex:transactionId ;
     ldes:transactionFinalizedPath ex:transactionEnded ;
     ldes:transactionFinalizedObject true ;
-    tree:view <> .
+    ldes:memberType sosa:Observation .
 
+MESSAGE
 ex:Observation1 a sosa:Observation ;
     as:updated "2026-01-01T00:00:00Z"^^xsd:dateTime ;
     ex:transactionId "txn-123" ;
     ex:transactionEnded false .
 
+MESSAGE
 ex:Observation2 a sosa:Observation ;
     as:updated "2026-01-01T01:00:00Z"^^xsd:dateTime ;
     ex:transactionId "txn-123" ;
@@ -396,15 +674,15 @@ ex:Observation2 a sosa:Observation ;
 ```
 </div>
 
-When the IRI in the object of the `tree:member` triple is also used as a named graph, an LDES consumer MAY assume the payload of the upsert is in the named graph.
-A consumer MUST implement a way to find this group of triples again in case an update or deletion comes in.
+The payload of an upsert is the member message: all quads of the message in which the member was found, which is delimited by the RDF Message boundary.
+A consumer MUST implement a way to find this group of quads again in case an update or deletion comes in, for which it can use the member identifier of the [membership](#membership) chapter.
 
 ## Retention policies ## {#retention}
 
-The goal of a retention policy is to indicate in what way a specific view will not be able to provide a complete history of the event stream to the consumer.
-This can help a consumer in the discovery phase to pick a specific LDES view, or help the consumer detect non-viable synchronization setups.
+The goal of a retention policy is to indicate in what way a specific LDES will not be able to provide a complete history of the event stream to the consumer.
+This can help a consumer in the discovery phase to pick a specific LDES, or help the consumer detect non-viable synchronization setups.
 
-When no retention policy is provided in the root node, the consumer MUST assume that all members that have been added to the `ldes:EventStream` are still available from this root node.
+When no retention policy is provided on the LDES, the consumer MUST assume that all members that have been added to the `ldes:EventStream` are still available from this LDES.
 When a retention policy is provided, however, a consumer MUST assume it will not be able to find members outside of the retention policy.
 
 <img width="800" src="retentionpolicies.svg" alt="An overview of the existing retention policies in LDES">
@@ -418,25 +696,23 @@ ex:LDES a ldes:EventStream ;
         ldes:versionDeleteObject as:Delete ;
         ldes:versionCreateObject as:Create ;
         ldes:versionUpdateObject as:Update ;
-        tree:view <> .
-
-<> a ldes:EventSource ;
-     ldes:retentionPolicy [
-         ldes:fullLogDuration "P1Y"^^xsd:duration ;
-         ldes:versionAmount 1 ;
-         ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
-     ] .
+        ldes:memberType as:Activity ;
+        ldes:retentionPolicy [
+            ldes:fullLogDuration "P1Y"^^xsd:duration ;
+            ldes:versionAmount 1 ;
+            ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
+        ] .
 ```
 </div>
 
-A retention policy will be described on the root node.
-The root node itself can contain this information using the property `ldes:retentionPolicy`, or the root node can refer through the property `tree:viewDescription` to an entity on which the retention policy is described using the property `ldes:retentionPolicy`.
-When the client is processing the root node, it MUST look for a retention policy in both ways.
+A retention policy will be described on the LDES (`ldes:EventStream`), in the description message of the root page, using the property `ldes:retentionPolicy`.
 
-In the example above, the retention policy has been set on the root node (double typed as the `ldes:EventSource`).
-When the [`ldes:retentionPolicy`](https://w3id.org/ldes#retentionPolicy) would refer to an entity without further statements in the current page, the client MUST assume this view keeps no members at all.
+Issue: This is a change compared to LDES 1.0, in which the retention policy was described on the root node or on the entity linked by `tree:viewDescription`. See the issue in the [overview](#overview).
+
+In the example above, the retention policy has been set on the LDES.
+When the [`ldes:retentionPolicy`](https://w3id.org/ldes#retentionPolicy) would refer to an entity without further statements in the description message, the client MUST assume this LDES keeps no members at all.
 Multiple properties can then be added to make the scope of members that are kept larger:
- * [`ldes:startingFrom`](https://w3id.org/ldes#startingFrom): this view only retains members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
+ * [`ldes:startingFrom`](https://w3id.org/ldes#startingFrom): this LDES only retains members starting from this `xsd:dateTime` with timezone. In combination with other retention policies, this property only enforces the period before the timestamp for which the view will not retain any member. 
  * [`ldes:fullLogDuration`](https://w3id.org/ldes#fullLogDuration): the duration, from the current time, for which all members are retained. Only in combination with `ldes:startingFrom`, and when the `ldes:startingFrom` timestamp is within this window, not all members within the window are retained. No other properties can influence this property.
  * [`ldes:versionAmount`](https://w3id.org/ldes#versionAmount): the number of versions to keep. 
  * [`ldes:versionDuration`](https://w3id.org/ldes#versionDuration): the duration, from the current time, for which a number of versions are kept, to be used together with `ldes:versionAmount`. Defaults to the duration of the full event stream.
@@ -445,12 +721,3 @@ Multiple properties can then be added to make the scope of members that are kept
 When using the current time in calculations, the consumer MUST take into account a safe buffer to mitigate clock inaccuracies.
 The `ldes:timestampPath` points to the timestamp in the member that can be compared with the current time minus the durations.
 When the `ldes:versionTimestampPath` has been set, the two version durations must be compared with this timestamp.
-
-Historically, there are more specific types of retention policies that MUST remain supported, although their use is discouraged in favour of the retention policy design just introduced.
-These retention policy types are:
- 1. `ldes:DurationAgoPolicy`: a time-based retention policy in which data generated before a specified duration is not retained.
- 2. `ldes:LatestVersionSubset`: a version subset based on the latest versions of an entity in the stream.
- 3. `ldes:PointInTimePolicy`: a point-in-time retention policy in which data generated before a specific time is not retained.
-
-An `ldes:LatestVersionSubset` uses the property `ldes:amount` with range `xsd:integer`, indicating the number of versions to keep. By default, this value is set to 1.
-An `ldes:PointInTimePolicy` uses the property `ldes:pointInTime` with an `xsd:dateTime`-typed literal to indicate the point in time on or after which data is kept when compared to a member’s timestamp.
