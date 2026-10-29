@@ -18,6 +18,8 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix hydra: <http://www.w3.org/ns/hydra/core#>.
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 ldes: a foaf:Document ;
       foaf:primaryTopic ldes:Vocabulary ;
@@ -28,16 +30,14 @@ ldes: a foaf:Document ;
 
 ldes:Vocabulary a owl:Ontology ;
                 rdfs:label "The Linked Data Event Streams specification"@en;
-                rdfs:comment "A hypermedia specification for maintaining a collection with immutable members."@en.
+                rdfs:comment "A specification for maintaining an append-only log of immutable members, each published as an RDF Message."@en;
+                owl:versionInfo "2.0.0-draft" .
 
 ldes:EventStream a rdfs:Class ;
-                 rdfs:subClassOf tree:Collection ;
+                 rdfs:subClassOf dcat:Distribution ;
                  rdfs:label "Event Stream"@en;
-                 rdfs:comment "An Event Stream is a tree:Collection containing immutable members."@en .
-
-ldes:EventSource a rdfs:Class;
-                 rdfs:label "Event Source"@en ;
-                 rdfs:comment "A data service that provides the source other views should synchronize with"@en .
+                 rdfs:comment "An Event Stream is an ordered log of immutable members, each an RDF Message, published as one specific view. It is a distribution of a dcat:Dataset, and its IRI dereferences to its root page. Loosely aligned with tree:Collection."@en ;
+                 skos:closeMatch tree:Collection .
 
 ldes:RetentionPolicy a rdfs:Class ;
                      rdfs:label "Retention Policy"@en ;
@@ -45,18 +45,19 @@ ldes:RetentionPolicy a rdfs:Class ;
 
 ldes:retentionPolicy a rdf:Property ;
                      rdfs:label "has retention policy"@en;
-                     rdfs:comment "Links to a retention policy."@en ;
+                     rdfs:comment "Links an event stream to a retention policy."@en ;
+                     rdfs:domain ldes:EventStream ;
                      rdfs:range ldes:RetentionPolicy .
 
 ldes:startingFrom a rdf:Property ;
                      rdfs:label "Starting from"@en;
-                     rdfs:comment "The search tree only keeps members starting a certain timestamp."@en ;
+                     rdfs:comment "The view only keeps members starting a certain timestamp."@en ;
                      rdfs:range xsd:dateTime ;
                      rdfs:domain ldes:RetentionPolicy .
 
 ldes:versionDuration a rdf:Property ;
                      rdfs:label "Version duration"@en;
-                     rdfs:comment "The search tree only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. "@en ;
+                     rdfs:comment "The view only keeps its versions, for which an `ldes:versionAmount` MUST have been set, only during a specific window. "@en ;
                      rdfs:range xsd:duration ;
                      rdfs:domain ldes:RetentionPolicy .
 
@@ -68,13 +69,13 @@ ldes:versionAmount a rdf:Property ;
 
 ldes:versionDeleteDuration a rdf:Property ;
                      rdfs:label "Version Delete Duration"@en;
-                     rdfs:comment "The search tree only keeps its deletions for a certain duration."@en;
+                     rdfs:comment "The view only keeps its deletions for a certain duration."@en;
 		     rdfs:range xsd:duration ;
 		     rdfs:domain ldes:RetentionPolicy .
 
 ldes:fullLogDuration a rdf:Property ;
                      rdfs:label "Full Log Duration"@en ;
-                     rdfs:comment "The search tree keeps its full log for a certain duration."@en ;
+                     rdfs:comment "The view keeps its full log for a certain duration."@en ;
 		     rdfs:range xsd:duration ;
 		     rdfs:domain ldes:RetentionPolicy .
 
@@ -108,13 +109,13 @@ ldes:versionMaterializationOf a rdf:Property ;
                    rdfs:label "Version Materialization Of"@en;
                    rdfs:comment "Links to the original LDES"@en ;
                    rdfs:range ldes:EventStream ;
-                   rdfs:domain tree:Collection .
+                   rdfs:domain ldes:EventStream .
 
 ldes:versionMaterializationUntil a rdf:Property ;
                                  rdfs:label "Version Materialization Until"@en;
                                  rdfs:comment "Timestamp until versions were processed"@en ;
                                  rdfs:range xsd:dateTime ;
-                                 rdfs:domain tree:Collection .
+                                 rdfs:domain ldes:EventStream .
 
 ldes:versionCreatePath a rdf:Property ;
                        rdfs:label "Version Create Path"@en ;
@@ -163,8 +164,8 @@ ldes:transactionFinalizedObject a rdf:Property ;
 
 ldes:immutable a rdf:Property ;
             rdfs:label "Immutable"@en ;
-            rdfs:comment "Re-fetching this tree:Node will not result in new members."@en ;
-            rdfs:domain tree:Node ;
+            rdfs:comment "Re-fetching this page will not result in new members."@en ;
+            rdfs:domain ldes:Page ;
             rdfs:range xsd:boolean .
 
 ldes:pollingInterval a rdf:Property ;
@@ -172,3 +173,84 @@ ldes:pollingInterval a rdf:Property ;
             rdfs:comment "The number of seconds the client should keep between synchronization run calls."@en ;
             rdfs:domain ldes:EventStream ;
             rdfs:range xsd:integer .
+
+# --- Pages, views and relations (LDES 2.0) ---
+
+ldes:Page a rdfs:Class ;
+          rdfs:label "Page"@en ;
+          rdfs:comment "A page of an LDES view, published as an RDF Message log when it contains members. The description message contains a triple stating `<> a ldes:Page`."@en ;
+          skos:closeMatch tree:Node .
+
+ldes:shape a rdf:Property ;
+           rdfs:label "shape"@en ;
+           rdfs:comment "Links the event stream to a sh:NodeShape that every member is intended to conform to."@en ;
+           rdfs:domain ldes:EventStream ;
+           rdfs:range sh:NodeShape ;
+           skos:closeMatch tree:shape .
+
+ldes:Relation a rdfs:Class ;
+              rdfs:label "Relation"@en ;
+              rdfs:comment "A link from a page to another page, annotated with the interval of the ordering key of the members that can be found by following it."@en ;
+              skos:closeMatch tree:Relation .
+
+ldes:relation a rdf:Property ;
+              rdfs:label "relation"@en ;
+              rdfs:comment "Links a page to a relation."@en ;
+              rdfs:domain ldes:Page ;
+              rdfs:range ldes:Relation ;
+              skos:closeMatch tree:relation .
+
+ldes:page a rdf:Property ;
+          rdfs:label "page"@en ;
+          rdfs:comment "The page to be dereferenced when following this relation."@en ;
+          rdfs:domain ldes:Relation ;
+          rdfs:range ldes:Page ;
+          skos:closeMatch tree:node .
+
+ldes:timeFrom a rdf:Property ;
+              rdfs:label "time from"@en ;
+              rdfs:comment "Inclusive lower bound of the timestamp (ldes:timestampPath) of the members that can be found by following the relation. MUST have a timezone."@en ;
+              rdfs:domain ldes:Relation ;
+              rdfs:range xsd:dateTime .
+
+ldes:timeUntil a rdf:Property ;
+               rdfs:label "time until"@en ;
+               rdfs:comment "Exclusive upper bound of the timestamp (ldes:timestampPath) of the members that can be found by following the relation. MUST have a timezone."@en ;
+               rdfs:domain ldes:Relation ;
+               rdfs:range xsd:dateTime .
+
+ldes:sequenceFrom a rdf:Property ;
+                  rdfs:label "sequence from"@en ;
+                  rdfs:comment "Inclusive lower bound of the sequence (ldes:sequencePath) of the members that can be found by following the relation."@en ;
+                  rdfs:domain ldes:Relation .
+
+ldes:sequenceUntil a rdf:Property ;
+                   rdfs:label "sequence until"@en ;
+                   rdfs:comment "Exclusive upper bound of the sequence (ldes:sequencePath) of the members that can be found by following the relation."@en ;
+                   rdfs:domain ldes:Relation .
+
+# --- Membership (LDES 2.0) ---
+
+ldes:member a rdf:Property ;
+            rdfs:label "member"@en ;
+            rdfs:comment "Direct membership: states in the member message which entity is the member of the event stream."@en ;
+            rdfs:domain ldes:EventStream ;
+            rdfs:range rdfs:Resource ;
+            skos:closeMatch tree:member .
+
+ldes:memberGraph a rdf:Property ;
+                 rdfs:label "member graph"@en ;
+                 rdfs:comment "Indirect membership: when true, the member identifier is the name of the only named graph in each member message."@en ;
+                 rdfs:domain ldes:EventStream ;
+                 rdfs:range xsd:boolean .
+
+ldes:memberType a rdf:Property ;
+                rdfs:label "member type"@en ;
+                rdfs:comment "Indirect membership: the member identifier is the only subject in each member message that has this rdf:type."@en ;
+                rdfs:domain ldes:EventStream ;
+                rdfs:range rdfs:Class .
+
+ldes:memberPath a rdf:Property ;
+                rdfs:label "member path"@en ;
+                rdfs:comment "Indirect membership: SHACL property path. The member identifier is the only subject in each member message from which this path leads to a value."@en ;
+                rdfs:domain ldes:EventStream .
