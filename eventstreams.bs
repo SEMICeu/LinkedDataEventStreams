@@ -344,7 +344,7 @@ A client MUST NOT need to keep a list of all emitted members or all visited page
 
 A client MUST ensure it can resume from a previous run by saving the bookmark, and MUST NOT emit members that are before the bookmark, or that are in `bookmarkMembers`.
 
-A client MUST keep context information such as the identifier of the event stream and the root page, the paths, the SHACL shape of the event stream, or the retention policy of the LDES, cf. the chapter on [Context Information](#context-information).
+A client MUST keep context information such as the identifier of the event stream and the root page, the paths, the SHACL shape of the event stream, the `ldes:defaultTimezone`, or the retention policy of the LDES, cf. the chapter on [Context Information](#context-information).
 
 A client SHOULD keep statistics such as the number of members emitted and the date-time of the last run.
 
@@ -390,7 +390,7 @@ A client MUST process the response body as a stream of messages, and MUST NOT wa
 
 For each member message, a client MUST determine the member identifier (see [members and membership](#membership)), and the [ordering key](#ordering-keys), after which the client MUST ensure the [traversal](#traversal) conditions hold before emitting the member.
 
-A client emits a member as the member identifier and the set of quads of the message.
+A client emits a member as the member identifier and the set of quads of the message, in which the default timezone has been added to the `xsd:dateTime` literals that had no timezone, when there is a default timezone (see [timestamps without a timezone](#no-timezone)).
 The client MUST NOT emit the description message as a member.
 
 <div class="example" highlight="turtle">
@@ -430,10 +430,11 @@ In implicit order, two keys are compared by comparing the page numbers, and, whe
 ### Timestamps without a timezone ### {#no-timezone}
 
 A producer is required to publish a timezone with every `xsd:dateTime` (see the server primer), but a client MUST still handle an `xsd:dateTime` literal without a timezone, in a member timestamp as well as in a relation bound:
- * A client MAY accept a **default timezone** as configuration. When it is configured, it is the timezone of every literal without a timezone.
- * Otherwise, when the LDES has an `ldes:defaultTimezone`, that is the timezone of every literal without a timezone.
- * Otherwise, all literals without a timezone within the same LDES are assumed to be in the same, unknown, timezone. Two of them are therefore compared with each other as local date-times, exactly as if they had the same timezone.
- * A literal without a timezone that is compared with a literal that does have a timezone is interpreted as a period instead of an instant. Timezones range from -14:00 to +14:00, so a local time `T` without timezone is any instant between `T` − 14 hours (read with timezone +14:00) and `T` + 14 hours (read with timezone -14:00). The **earliest** instant of the literal is the first of the two, and its **latest** instant is the second.
+ * When the LDES in the entry page has an `ldes:defaultTimezone`, that is the **default timezone**: the timezone of every `xsd:dateTime` literal without a timezone, in the members as well as in the relations. It has priority over a configured default timezone.
+ * Otherwise, a client MAY accept a default timezone as configuration, and when it is configured, that is the default timezone.
+ * When there is a default timezone, a literal without a timezone is interpreted as if it had the default timezone, and there is no uncertainty. When a client emits a member, it MUST then add the default timezone to every `xsd:dateTime` literal of the member message that has no timezone, so that processors further in the pipeline do not need to know the default timezone to interpret the member. The timezone is added to the literal itself, e.g., `"2027-01-01T00:00:00"^^xsd:dateTime` is emitted as `"2027-01-01T00:00:00+01:00"^^xsd:dateTime`.
+ * When there is no default timezone, all literals without a timezone within the same LDES are assumed to be in the same, unknown, timezone. Two of them are therefore compared with each other as local date-times, exactly as if they had the same timezone.
+ * When there is no default timezone, a literal without a timezone that is compared with a literal that does have a timezone is interpreted as a period instead of an instant. Timezones range from -14:00 to +14:00, so a local time `T` without timezone is any instant between `T` − 14 hours (read with timezone +14:00) and `T` + 14 hours (read with timezone -14:00). The **earliest** instant of the literal is the first of the two, and its **latest** instant is the second.
 
 Keys are then compared using the worst case:
  * a key is **certainly smaller** than another key when its timestamp is earlier than the timestamp of the other under every interpretation, and **certainly larger** when it is later under every interpretation. For two timestamps without a timezone, or two with a timezone, this is the ordinary comparison. When one of the two has no timezone, a key is certainly smaller when its latest instant is earlier than the earliest instant of the other, and certainly larger when its earliest instant is later than the latest instant of the other. Keys that are neither are **indeterminate**. When timestamps are equal, or indeterminate, the sequences are compared as above, when they are set;
@@ -594,7 +595,7 @@ When a consumer, such as the client in ascending mode, wants to establish the ch
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), which XSD literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * When neither is set, the order of the log is the order in which the members were published: the page number of the page, followed by the index in the page.
 
-The LDES can additionally have an `ldes:defaultTimezone`: the timezone, as a literal such as `"+01:00"` or `"Z"`, that applies to `xsd:dateTime` literals in the members or in the relations of this LDES that have no timezone, see [timestamps without a timezone](#no-timezone). It is only a fallback for the cases in which a producer could not add a timezone to its data.
+The LDES can additionally have an `ldes:defaultTimezone`: the timezone, as a literal such as `"+01:00"` or `"Z"`, that applies to `xsd:dateTime` literals in the members or in the relations of this LDES that have no timezone, see [timestamps without a timezone](#no-timezone). Clients add it to such literals when they emit a member, and it has priority over a timezone that the client is configured with. It is only a fallback for the cases in which a producer could not add a timezone to its data.
 
 ## The member’s SHACL shape ## {#shape}
 

@@ -105,7 +105,7 @@ The path to the `xsd:dateTime` literal in each member that defines the order of 
 
 ## ldes:defaultTimezone ## {#defaultTimezone}
 
-The timezone to use for the `xsd:dateTime` literals of the event stream, in the members and in the relations, that do not have a timezone.
+The timezone to use for the `xsd:dateTime` literals of the event stream, in the members and in the relations, that do not have a timezone. A client adds it to these literals in the members it emits, and it has priority over a timezone that the client is configured with.
 
 **Domain:** `ldes:EventStream`
 
