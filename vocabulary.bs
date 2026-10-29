@@ -103,6 +103,14 @@ The path to the `xsd:dateTime` literal in each member that defines the order of 
 
 **Range:** a [SHACL property path](https://www.w3.org/TR/shacl/#property-paths)
 
+## ldes:defaultTimezone ## {#defaultTimezone}
+
+The timezone to use for the `xsd:dateTime` literals of the event stream, in the members and in the relations, that do not have a timezone.
+
+**Domain:** `ldes:EventStream`
+
+**Range:** `xsd:string`, in the lexical form of a timezone of `xsd:dateTime`: `Z`, or `+hh:mm` or `-hh:mm` between `-14:00` and `+14:00`
+
 ## ldes:sequencePath ## {#sequencePath}
 
 The path to an `xsd`-typed literal in each member that defines the order of the event stream in addition to the `ldes:timestampPath`.
@@ -148,7 +156,7 @@ The number of seconds the client should keep between synchronization run calls.
 
 ## ldes:immutable ## {#immutable}
 
-If the node is not going to contain new relations leading to new members, or new members itself, it can be set to immutable.
+If the page is not going to contain new relations leading to new members, or new members itself, it can be set to immutable. This can be stated in the description message of the page itself (`<> ldes:immutable true`), or in the description message of a page that has a relation to it (`<P2> ldes:immutable true` in `P1`).
 
 **Domain:** `ldes:Page`
 **Range:** `xsd:boolean`

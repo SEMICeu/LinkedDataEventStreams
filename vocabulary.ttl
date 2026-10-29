@@ -89,6 +89,12 @@ ldes:timestampPath a rdf:Property ;
                    rdfs:comment "SHACL property path to the xsd:dateTime literal in each member that defines the order of the event stream."@en ;
                    rdfs:domain ldes:EventStream .
 
+ldes:defaultTimezone a rdf:Property ;
+                     rdfs:label "Default Timezone"@en ;
+                     rdfs:comment "The timezone, in the lexical form of an xsd:dateTime timezone (such as Z or +01:00), of the xsd:dateTime literals in the members and relations of the event stream that have no timezone."@en ;
+                     rdfs:domain ldes:EventStream ;
+                     rdfs:range xsd:string .
+
 ldes:sequencePath a rdf:Property ;
                   rdfs:label "Sequence Path"@en;
                   rdfs:comment "SHACL property path to an xsd literal in each member that defines the order of the event stream in addition to the timestampPath."@en ;
@@ -164,7 +170,7 @@ ldes:transactionFinalizedObject a rdf:Property ;
 
 ldes:immutable a rdf:Property ;
             rdfs:label "Immutable"@en ;
-            rdfs:comment "Re-fetching this page will not result in new members."@en ;
+            rdfs:comment "Re-fetching this page will not result in new members. It can be stated in the description message of the page itself, or in that of a page that has a relation to it."@en ;
             rdfs:domain ldes:Page ;
             rdfs:range xsd:boolean .
 

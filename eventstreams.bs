@@ -176,7 +176,7 @@ A page without member messages can be in any RDF serialization: a client interpr
 
 A page has at most one **description message**, which is the first message of the page (see the issue below). A client recognises the first message as the description message when it has the page IRI `<>` (after following redirects) as the subject of a triple, or when it describes the LDES using a subject with `rdf:type ldes:EventStream`. No explicit triple stating that `<>` is an `ldes:Page` is needed: this follows from the use of `ldes:relation`, of which the domain is `ldes:Page`. The description message contains:
  * the relations of the page using `ldes:relation` (see [relations](#relations));
- * optionally, `ldes:immutable true` (see [state management](#state-management));
+ * optionally, `ldes:immutable true` (see [state management](#state-management)), either about the page itself (`<> ldes:immutable true`), or about a page that it has a relation to (`<P2> ldes:immutable true`), so that a page can be marked immutable by the page that links to it, even before it is fetched;
  * in the root page, the [context information](#context-information), which is described on the LDES (`<ES>`), and not on the page. The IRI of the LDES always dereferences to the root page.
 
 If the first message is not a description message, the page has no description message, and thus no relations: every message is a member message.
@@ -353,7 +353,7 @@ A client MUST have a mechanism to communicate this context information and stati
 A client MAY keep the `ETag` of a page, by IRI, when this is set in the response, for pages that were not immutable. These are the only pages that can be re-fetched in the next run.
 
 A page can be skipped without fetching it when its relation has an upper bound that is smaller than or equal to the `bookmarkKey` (see [traversal](#traversal)). In implicit order, this means that every page with a number before the page of the bookmark is skipped. This replaces the visited-pages list of earlier versions, and is why pages do not need to be remembered.
-A client MAY additionally use the triple `<> ldes:immutable true`, or the `Cache-Control: immutable` HTTP response header, to avoid revalidating a page in the same run.
+A client MAY additionally use the triple `<> ldes:immutable true`, a triple `<P> ldes:immutable true` in the description message of a page that has a relation to `<P>`, or the `Cache-Control: immutable` HTTP response header, to avoid revalidating a page in the same run. A page that is marked immutable by the page that links to it does not need to be re-fetched once the client has processed it.
 
 ## HTTP requests and responses ## {#http-requests-responses}
 
@@ -421,12 +421,27 @@ _:bSignature {
 ## Ordering keys ## {#ordering-keys}
 
 The **ordering key** of a member is obtained as follows:
- * When `ldes:timestampPath` is set, the **timestamp** is the single `xsd:dateTime` literal that is found by evaluating the path with the member identifier as the focus node. The literal has a timezone. If there is no such literal, or more than one, or if it has no timezone, the client MUST return an error.
+ * When `ldes:timestampPath` is set, the **timestamp** is the single `xsd:dateTime` literal that is found by evaluating the path with the member identifier as the focus node. If there is no such literal, or more than one, the client MUST return an error. The literal has a timezone. A client MUST nevertheless handle a literal without a timezone, see [timestamps without a timezone](#no-timezone).
  * When `ldes:sequencePath` is set, the **sequence** is the single `xsd`-typed literal found by evaluating this path with the member identifier as the focus node. If there is no such literal, or more than one, the client MUST return an error.
  * The key is the pair (timestamp, sequence) when both paths are set, the timestamp when only the `ldes:timestampPath` is set, and the sequence when only the `ldes:sequencePath` is set.
  * When neither path is set, the order is implicit, and the key is the pair (page number, index). The **page number** is the number of the page in which the member message was found: the `ldes:pageNumber` of the relation that led to the page or, for the root page, the `ldes:pageNumber` stated about `<>` in its description message, and 0 when that is absent. The **index** is the 0-based index of the message among the member messages of the page. If the number of a page that has member messages cannot be determined, the client MUST return an error.
 
 In implicit order, two keys are compared by comparing the page numbers, and, when equal, the indexes, as integers. Otherwise, two keys are compared by first comparing timestamps as points on the time line, and, when equal, by comparing the sequences using the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare).
+### Timestamps without a timezone ### {#no-timezone}
+
+A producer is required to publish a timezone with every `xsd:dateTime` (see the server primer), but a client MUST still handle an `xsd:dateTime` literal without a timezone, in a member timestamp as well as in a relation bound:
+ * A client MAY accept a **default timezone** as configuration. When it is configured, it is the timezone of every literal without a timezone.
+ * Otherwise, when the LDES has an `ldes:defaultTimezone`, that is the timezone of every literal without a timezone.
+ * Otherwise, all literals without a timezone within the same LDES are assumed to be in the same, unknown, timezone. Two of them are therefore compared with each other as local date-times, exactly as if they had the same timezone.
+ * A literal without a timezone that is compared with a literal that does have a timezone is interpreted as a period instead of an instant. Timezones range from -14:00 to +14:00, so a local time `T` without timezone is any instant between `T` − 14 hours (read with timezone +14:00) and `T` + 14 hours (read with timezone -14:00). The **earliest** instant of the literal is the first of the two, and its **latest** instant is the second.
+
+Keys are then compared using the worst case:
+ * a key is **certainly smaller** than another key when its timestamp is earlier than the timestamp of the other under every interpretation, and **certainly larger** when it is later under every interpretation. For two timestamps without a timezone, or two with a timezone, this is the ordinary comparison. When one of the two has no timezone, a key is certainly smaller when its latest instant is earlier than the earliest instant of the other, and certainly larger when its earliest instant is later than the latest instant of the other. Keys that are neither are **indeterminate**. When timestamps are equal, or indeterminate, the sequences are compared as above, when they are set;
+ * when the client has to order sources (see [traversal](#traversal)), it compares a timestamp without a timezone to one with a timezone using the earliest instant of the former;
+ * when the client has to decide that a member or a relation can be skipped, or that a page is not ordered correctly, it only does so when the comparison is certain.
+
+Note: An LDES in which no literal has a timezone is thus handled exactly as one in which all literals have the same timezone. Only mixing literals with and without a timezone gives uncertainty, and then a literal without a timezone never causes a member to be skipped that was not emitted yet. The price is that members can be emitted in a slightly different order within the margin of 28 hours, and that some members can be emitted again in a later run, which is the best a client can do without knowing the timezone.
+
 A client in the ascending mode MUST be able to evaluate [SHACL property paths](https://www.w3.org/TR/shacl/#property-paths) to find the matching objects, as this functionality is required for interpreting the paths in the LDES and SHACL specifications.
 
 ## Relations ## {#relations}
@@ -509,9 +524,9 @@ A client MUST execute the following steps:
  1. Dereference `I` as described in [initialization](#initialization), or, when a state exists, dereference the IRI of the root page. Make this page an open page by reading its description message, if any, and by adding its relations as unopened relations (see step 4).
  2. While there are sources, take the source with the smallest lower key. When there is a tie, an open page MUST be chosen over an unopened relation.
  3. If the source is an **open page**, take its next member message (which was already read to know the lower key of the page). Determine its member identifier and ordering key. Then:
-     * if the key is smaller than `bookmarkKey`, or equal to `bookmarkKey` and either the order is implicit or the member identifier is in `bookmarkMembers`, skip the member;
-     * otherwise, emit the member, and update the bookmark: if the key is larger than `bookmarkKey`, set `bookmarkKey` to the key and `bookmarkMembers` to `{identifier}`; if it is equal, add the identifier to `bookmarkMembers`.
- 4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, if any, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
+     * if the key is (certainly) smaller than `bookmarkKey`, or equal to `bookmarkKey` (or indeterminate, see [timestamps without a timezone](#no-timezone)) and either the order is implicit or the member identifier is in `bookmarkMembers`, skip the member;
+     * otherwise, emit the member, and update the bookmark: if the key is larger than `bookmarkKey`, set `bookmarkKey` to the key and `bookmarkMembers` to `{identifier}`; if it is equal, add the identifier to `bookmarkMembers`; if it is indeterminate, add the identifier to `bookmarkMembers` and set `bookmarkKey` to the key of the two that has the latest earliest instant.
+ 4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, if any, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller; when only one of the two timestamps has no timezone, the latest instant of the upper key is not later than the earliest instant of `bookmarkKey`): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
  5. When there are no sources left, the synchronization run is finished. The client MUST signal this to the processors further in the pipeline.
 
 Because every source in the set has a lower key that is at least the key of the member that is emitted, and because every page is ordered, no member that is still to be discovered can precede the emitted member.
@@ -543,6 +558,8 @@ A client must be able to handle context information on the LDES, and on the root
     ] .
 # page-level context information
 <> ldes:immutable true .
+# the same can be stated by a page that links to another page
+<page-1> ldes:immutable true .
 ```
 </div>
 
@@ -576,6 +593,8 @@ When a consumer, such as the client in ascending mode, wants to establish the ch
  * `ldes:timestampPath`: this is a SHACL property path that sets the chronological time with an `xsd:dateTime` literal with timezone within each member. This timestamp determines the chronological order in which members of the event stream are added. When `ldes:timestampPath` is set, no member can be added to the LDES with a timestamp earlier than the latest published member.
  * `ldes:sequencePath`: when the LDES producer wants to make clear what the ordering is within members with the same timestamp for the `ldes:timestampPath`, this property defines, based on the [[!xpath-functions-31]] [comparison operator](https://www.w3.org/TR/xpath-functions-31/#func-compare), which XSD literals define the order of processing. When no `ldes:timestampPath` has been set, the `ldes:sequencePath` defines the sequence for all members in the LDES.
  * When neither is set, the order of the log is the order in which the members were published: the page number of the page, followed by the index in the page.
+
+The LDES can additionally have an `ldes:defaultTimezone`: the timezone, as a literal such as `"+01:00"` or `"Z"`, that applies to `xsd:dateTime` literals in the members or in the relations of this LDES that have no timezone, see [timestamps without a timezone](#no-timezone). It is only a fallback for the cases in which a producer could not add a timezone to its data.
 
 ## The member’s SHACL shape ## {#shape}
 

@@ -23,6 +23,7 @@
       "sequencePath": {"@id":"ldes:sequencePath", "@type":"@id", "@container":"@list"},
       "immutable": {"@id": "ldes:immutable"},
       "timestampPath": {"@id":"ldes:timestampPath", "@type":"@id", "@container":"@list"},
+      "defaultTimezone": {"@id":"ldes:defaultTimezone"},
       "versionOfPath": {"@id":"ldes:versionOfPath", "@type":"@id", "@container":"@list"},
       "retentionPolicies": {"@id":"ldes:retentionPolicy", "@type": "@id", "@container":"@list"},
       "pollingInterval": {"@id":"ldes:pollingInterval", "@type":"xsd:integer"},

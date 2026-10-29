@@ -80,7 +80,7 @@ A page MUST contain at least one message.
 
 A page MUST have a description message when it has relations or other statements about the page, and the root page MUST always have one. The description message is the first message of the page in this draft, and has the page IRI `<>` (after following redirects) as the subject of its triples, or describes the LDES. You do not need to state `<> rdf:type ldes:Page`. The description message contains:
 - the relations of the page (see [relations](#nodes));
-- optionally `ldes:immutable true`;
+- optionally `ldes:immutable true`, about the page itself or about a page it has a relation to;
 - in the root page, the context information about the LDES.
 
 Every other message is a member message, and MUST be exactly one member of the `ldes:EventStream`. A member message MUST NOT describe the page or the LDES.
@@ -108,6 +108,7 @@ Recommended context properties on the `ldes:EventStream`:
 - `ldes:timestampPath`:chronological order
 - `ldes:sequencePath`: tie-breaking or alternative order
 - `ldes:pollingInterval`: expected seconds between new members
+- `ldes:defaultTimezone`: only when you cannot avoid publishing `xsd:dateTime` literals without a timezone (see below): the timezone that a client can assume for them
 - `ldes:shape`: SHACL node shape for members. If the `sh:NodeShape` changes, it should remain backwards compatible to avoid breaking existing consumers. If a backwards-incompatible change is needed (such as changing your dataset to a different vocabulary), it should be published as a new event stream, ensuring older streams continue to function as expected.
 - Membership: when you use indirect membership, `ldes:memberGraph`, `ldes:memberType`, or `ldes:memberPath` (at most one)
 - Versioning: `ldes:versionOfPath`, optional create/update/delete paths and objects
@@ -119,7 +120,7 @@ Recommended context properties on the `ldes:EventStream`:
 Instead of a one- or two-dimensional pagination scheme, LDES lets you describe the pages you want and build the structure you need, using relations that point to intervals of the ordering key. We recommend the following:
  * You SHOULD set the chronological order of your event stream using `ldes:timestampPath` and/or `ldes:sequencePath`. When you set neither, the order is the order of the log, and you MUST number your pages: see below.
  * Every relation MUST point to one page using `ldes:page`, and SHOULD state the interval of the members that can be found there using `ldes:timeFrom` and `ldes:timeUntil` (or `ldes:sequenceFrom` and `ldes:sequenceUntil`). The lower bound is inclusive and the upper bound is exclusive.
- * All `xsd:dateTime` literals you publish MUST come with a timezone.
+ * All `xsd:dateTime` literals you publish MUST come with a timezone. A client will still try to handle a literal without a timezone: using a timezone it is configured with, or the `ldes:defaultTimezone` that you can add to the LDES, or otherwise using worst-case assumptions of up to 28 hours when it compares them to literals with a timezone, in which case it might emit members again or out of order.
  * Give a relation to a page that is full and will not receive new members both bounds. This allows a client that has already seen these members to skip the page without a request.
  * Start with 1 root page that contains links to member pages. If that gets too large, you can introduce another level.
  * You SHOULD use relative IRIs when referring to other pages.
@@ -334,7 +335,7 @@ A current page `<>` has 0 or more `ldes:relation` properties to relations.
 
 Every other message is a member message, in which the member identifier is found by direct or indirect membership. A message MUST NOT be empty (contain no quads). The member messages are ordered ascending by their ordering key.
 
-This page MAY also have `ldes:immutable true` attached to it.
+This page MAY also have `ldes:immutable true` attached to it. A page MAY also be marked immutable by a page that has a relation to it: in `P1`, which has a relation to `P2`, you can already add the triple `<P2> ldes:immutable true`, as soon as `P2` is full and will not receive new relations or members. This is useful as `P2` itself does not have to be touched or re-fetched. A server MUST NOT state this about a page that can still change; once stated it MUST NOT be revoked.
 The default value is false. If it is not immutable, this SHOULD NOT be made explicit using a `false` value.
 
 ## Relations ## {#relations}
