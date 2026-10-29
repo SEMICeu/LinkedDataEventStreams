@@ -178,7 +178,7 @@ ldes:pollingInterval a rdf:Property ;
 
 ldes:Page a rdfs:Class ;
           rdfs:label "Page"@en ;
-          rdfs:comment "A page of an LDES view, published as an RDF Message log when it contains members. The description message contains a triple stating `<> a ldes:Page`."@en ;
+          rdfs:comment "A page of an LDES view, published as an RDF Message log when it contains members. It does not have to be stated explicitly: it follows from using ldes:relation."@en ;
           rdfs:subClassOf tree:Node .
 
 ldes:shape a rdf:Property ;

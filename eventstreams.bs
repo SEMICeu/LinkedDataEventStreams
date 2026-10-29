@@ -84,7 +84,7 @@ Every page other than the root page is called a **subsequent page**.
 The IRI of the LDES (`<ES>`) and the IRI of the page that is currently being read (`<>`) denote different things: the former identifies the complete log, the latter one page of it. The IRI of the LDES always dereferences to the root page. A hash-identifier or a `303 See Other` redirect is used to keep both IRIs apart.
 The relations of a page point to other pages and describe, as an **interval** of the order of the stream, which members can be found when following the relation.
 
-Every page has a **description message** (in this draft, its first message): it describes the page, its relations, and, in the root page, also the [context information](#context-information).
+A page can start with a **description message**: it describes the page, its relations, and, in the root page, also the [context information](#context-information). A page without relations or other statements about the page itself has no description message.
 Every other message in a page is a **member message**.
 
 A **synchronization run** is one complete invocation of the client’s traversal logic, visiting all pages that are relevant given the current state. During this synchronization run, the client emits the newly found members.
@@ -113,8 +113,7 @@ ex:Observations a ldes:EventStream ;
                 # the member is the subject of the only triple with the timestampPath
                 ldes:memberPath sosa:resultTime .
 
-<> a ldes:Page ;
-   ldes:relation [
+<> ldes:relation [
        ldes:page <2025> ;
        ldes:timeUntil "2026-01-01T00:00:00Z"^^xsd:dateTime
    ] .
@@ -137,8 +136,6 @@ ex:AddressRecords a ldes:EventStream ;
                   ldes:versionOfPath dcterms:isVersionOf ;
                   ldes:shape ex:shape2.shacl ;
                   ldes:memberGraph true .
-
-<> a ldes:Page .
 
 MESSAGE
 # Message 2: a member message with the named graph as the member identifier
@@ -177,15 +174,17 @@ Issue: Do we want to define the notification over a streaming protocol in this s
 A page of an LDES that contains member messages is an RDF Message log as defined by [[!rdf-messages]].
 A page without member messages can be in any RDF serialization: a client interprets it as an RDF Message log with exactly one message, the description message.
 
-A page has a **description message**, which contains the triple `<> a ldes:Page`, with `<>` the IRI of the page after following redirects. A client identifies the description message by this triple. In this draft, the description message is the first message of the page (see the issue below). The description message contains:
+A page has at most one **description message**, which is the first message of the page (see the issue below). A client recognises the first message as the description message when it has the page IRI `<>` (after following redirects) as the subject of a triple, or when it describes the LDES using a subject with `rdf:type ldes:EventStream`. No explicit triple stating that `<>` is an `ldes:Page` is needed: this follows from the use of `ldes:relation`, of which the domain is `ldes:Page`. The description message contains:
  * the relations of the page using `ldes:relation` (see [relations](#relations));
  * optionally, `ldes:immutable true` (see [state management](#state-management));
  * in the root page, the [context information](#context-information), which is described on the LDES (`<ES>`), and not on the page. The IRI of the LDES always dereferences to the root page.
 
+If the first message is not a description message, the page has no description message, and thus no relations: every message is a member message.
+
 The description message thus describes two different entities: the LDES, which has an IRI that is different from the IRI of the page, and the current page `<>`.
 
-Every other message is a **member message**: a client MUST interpret it as exactly one member of the `ldes:EventStream`, see [members and membership](#membership).
-A member message does not contain the triple `<> a ldes:Page`.
+Every message that is not the description message is a **member message**: a client MUST interpret it as exactly one member of the `ldes:EventStream`, see [members and membership](#membership).
+A member message does not describe the page or the LDES.
 
 An LDES does not allow empty messages (i.e., messages without quads), which [[!rdf-messages]] would allow. A client MUST return an error when it encounters an empty message.
 
@@ -200,7 +199,7 @@ Note: The rules a server follows to produce these pages are listed in the [serve
 
 Issue: The structure of the pages of an LDES needs to be decided. This draft takes inspiration from the [TREE profile](https://treecg.github.io/specification/profile): the leading “hypermedia block” that precedes the members becomes the description message, the order of the original document is retained, and members are emitted from the moment they have been extracted. The difference is that RDF Messages have an explicit delimiter, so that no `tree:member` triple is needed to start a new bundle of quads, and the hypermedia does not have to wait until the end of the file.
 
-Issue: It is still open whether the description message has to be the first message of a page, or whether there will be a way to flag any message as context information (the description message) rather than a member, so that it can occur anywhere in the page. The draft algorithm assumes the first, so that a client knows all relations before it has to decide to emit a member (see [synchronization algorithm](#synchronization-algorithm)). With a flag, relations (e.g., a link to the next page) can be appended at the end of a growing page, but a client cannot emit members of a page before it has read the full page, or has to track the relations found so far.
+Issue: It is still open whether the description message has to be the first message of a page, or whether there will be a way to flag any message as context information (the description message) rather than a member, so that it can occur anywhere in the page. A message is now recognised as the description message by its content, but a client then cannot know there is no description message before it has read the full page. The draft algorithm assumes the first, so that a client knows all relations before it has to decide to emit a member (see [synchronization algorithm](#synchronization-algorithm)). With a flag, relations (e.g., a link to the next page) can be appended at the end of a growing page, but a client cannot emit members of a page before it has read the full page, or has to track the relations found so far.
 
 ### Discovering the LDES profile ### {#profile-discovery}
 
@@ -208,9 +207,9 @@ Also following the TREE profile, a response can announce that it is an LDES page
  * using the `profile` parameter of the media type of the response, for example `Content-Type: application/n-quads;profile="https://w3id.org/ldes/specification"`;
  * or using an `.ldes` infix in the suffix of the file, for example `https://example.org/2026-01.ldes.nq`.
 
-A client MAY set this `profile` parameter in the `Accept` request header. A client MUST NOT require that the profile is announced, as it can also be derived from the `ldes:Page` triple in the description message. The server primer describes when a server announces it.
+A client MAY set this `profile` parameter in the `Accept` request header. A client MUST NOT require that the profile is announced, as it can also be derived from the content of the first message. The server primer describes when a server announces it.
 
-Issue: [[!rdf-messages]] does not yet define Media Types and does not yet define the profile mechanism (section 3 is still a TODO). Until it does, a client and server must rely on content negotiation for the message serializations listed under [HTTP requests and responses](#http-requests-responses), and the profile is announced using the `ldes:Page` and `ldes:EventStream` types in the description message.
+Issue: [[!rdf-messages]] does not yet define Media Types and does not yet define the profile mechanism (section 3 is still a TODO). Until it does, a client and server must rely on content negotiation for the message serializations listed under [HTTP requests and responses](#http-requests-responses), and the profile is recognised using the `ldes:EventStream` type, and the relations, in the description message.
 
 # Members and membership # {#membership}
 
@@ -437,8 +436,7 @@ Different relations of the same page can refer to overlapping intervals, and a r
 <div class="example" highlight="turtle">
 A description message with a link to the page of 2026, a link to a page for the first half of 2027 with a sequence bound (the page is split in the middle of a timestamp), and an open-ended link to the latest page:
 ```turtle
-<> a ldes:Page ;
-   ldes:relation
+<> ldes:relation
      [ ldes:page <2026> ;
        ldes:timeFrom "2026-01-01T00:00:00Z"^^xsd:dateTime ;
        ldes:timeUntil "2027-01-01T00:00:00+01:00"^^xsd:dateTime ] ,
@@ -480,12 +478,12 @@ During a run, a client keeps a set of **sources**. A source is one of:
 
 A client MUST execute the following steps:
 
- 1. Dereference `I` as described in [initialization](#initialization), or, when a state exists, dereference the IRI of the root page. Make this page an open page by reading its description message, and by adding its relations as unopened relations (see step 4).
+ 1. Dereference `I` as described in [initialization](#initialization), or, when a state exists, dereference the IRI of the root page. Make this page an open page by reading its description message, if any, and by adding its relations as unopened relations (see step 4).
  2. While there are sources, take the source with the smallest lower key. When there is a tie, an open page MUST be chosen over an unopened relation.
  3. If the source is an **open page**, take its next member message (which was already read to know the lower key of the page). Determine its member identifier and ordering key. Then:
      * if the key is smaller than `bookmarkKey`, or equal to `bookmarkKey` and the member identifier is in `bookmarkMembers`, skip the member;
      * otherwise, emit the member, and update the bookmark: if the key is larger than `bookmarkKey`, set `bookmarkKey` to the key and `bookmarkMembers` to `{identifier}`; if it is equal, add the identifier to `bookmarkMembers`.
- 4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
+ 4. If the source is an **unopened relation**, remove it from the set, and dereference the IRI in `ldes:page`. Read the description message of the page, if any, and open the page. For each relation `r` in the description message, the client adds `r` as an unopened relation, unless the upper key of `r` is smaller than or equal to `bookmarkKey` (an absent upper bound is never smaller): such a relation can only lead to members that have already been emitted, and MUST NOT be dereferenced.
  5. When there are no sources left, the synchronization run is finished. The client MUST signal this to the processors further in the pipeline.
 
 Because every source in the set has a lower key that is at least the key of the member that is emitted, and because every page is ordered, no member that is still to be discovered can precede the emitted member.
@@ -516,8 +514,7 @@ A client must be able to handle context information on the LDES, and on the root
        # ... see example of retention policies below
     ] .
 # page-level context information
-<> a ldes:Page ;
-   ldes:immutable true .
+<> ldes:immutable true .
 ```
 </div>
 
@@ -656,8 +653,6 @@ ex:LDES a ldes:EventStream ;
             ldes:versionAmount 1 ;
             ldes:versionDeleteDuration "P1Y"^^xsd:duration ;
         ] .
-
-<> a ldes:Page .
 ```
 </div>
 

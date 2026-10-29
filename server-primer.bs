@@ -78,12 +78,12 @@ A page that contains member messages MUST be an RDF Message log as defined by [[
 
 A page MUST contain at least one message.
 
-Every page MUST have a description message, which MUST contain the triple `<> rdf:type ldes:Page`, with `<>` the IRI of the page after following redirects. In this draft, the description message is the first message of the page. The description message contains:
+A page MUST have a description message when it has relations or other statements about the page, and the root page MUST always have one. The description message is the first message of the page in this draft, and has the page IRI `<>` (after following redirects) as the subject of its triples, or describes the LDES. You do not need to state `<> rdf:type ldes:Page`. The description message contains:
 - the relations of the page (see [relations](#nodes));
 - optionally `ldes:immutable true`;
 - in the root page, the context information about the LDES.
 
-Every other message is a member message, and MUST be exactly one member of the `ldes:EventStream`. A member message MUST NOT contain the triple `<> rdf:type ldes:Page`.
+Every other message is a member message, and MUST be exactly one member of the `ldes:EventStream`. A member message MUST NOT describe the page or the LDES.
 
 A message MUST NOT be empty (i.e., contain no quads), even though [[!rdf-messages]] allows this.
 
@@ -126,7 +126,7 @@ Instead of a one- or two-dimensional pagination scheme, LDES lets you describe t
 
 Issue: we should still add examples of how to paginate here.
 
-Every `ldes:Page` MAY contain zero or more member messages and MAY contain zero or more relations. Every page has a description message.
+Every `ldes:Page` MAY contain zero or more member messages and MAY contain zero or more relations. A page without relations or other statements about the page does not need a description message.
 
 ## Entry Points and Discovery ## {#entry-points}
 
@@ -160,8 +160,6 @@ ex:eventstream a ldes:EventStream ;
     ldes:timestampPath ex:createdAt ;
     ldes:versionOfPath ex:versionOf ;
     ldes:memberType ex:Observation .
-
-<> a ldes:Page .
 
 MESSAGE
 ex:member1 a ex:Observation ;
@@ -326,7 +324,7 @@ A retention policy description MAY contain the following properties, each with c
 
 ## Root Page and Subsequent Pages ## {#nodes}
 
-Every page is an RDF Message log, or an RDF document in another serialization when it has no members. Its description message MUST contain the triple `<> rdf:type ldes:Page`. In the current draft, the description message is the first message of the page.
+Every page is an RDF Message log, or an RDF document in another serialization when it has no members. Its description message, when present, is the first message of the page in the current draft, and does not have to state `<> rdf:type ldes:Page`.
 
 In the description message of the root page, the `ldes:EventStream` is described. 
 

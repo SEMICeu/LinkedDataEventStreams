@@ -155,7 +155,7 @@ If the node is not going to contain new relations leading to new members, or new
 
 ## ldes:Page ## {#Page}
 
-A page of a view, published as an RDF Message log when it contains members. The description message of a page contains `<> rdf:type ldes:Page`. A subclass of `tree:Node`.
+A page of a view, published as an RDF Message log when it contains members. It does not have to be stated explicitly: it follows from the domain of `ldes:relation`. A subclass of `tree:Node`.
 
 ## Relations between pages ## {#relations}
 
